@@ -16,9 +16,9 @@ public class MacAddressDao implements UniversalDao{
         return HibernateSessionFactoryUtil.getSessionFactory().openSession().get(MacAddress.class, id);
     }
 	
-    public List<MacAddress> findAll() {
+    public List findAll() {
 		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
-		List<MacAddress> macList = session.createSQLQuery("SELECT * FROM macaddress").addEntity(MacAddress.class).list(); 
+		List macList = session.createSQLQuery("SELECT * FROM macaddress").addEntity(MacAddress.class).list();
 		session.close();
         return macList;
     }

@@ -12,18 +12,18 @@ public class ArticleHeadersDao implements UniversalDao {
         return HibernateSessionFactoryUtil.getSessionFactory().openSession().get(ArticleHeaders.class, id);
     }
 	
-	public List<ArticleHeaders> findArticleHeadersByName(String name){
+	public List findArticleHeadersByName(String name){
 		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
-		List<ArticleHeaders> articleHeadersList = session.createSQLQuery("SELECT * FROM articleHeaders WHERE article LIKE :name")
+		List articleHeadersList = session.createSQLQuery("SELECT * FROM articleHeaders WHERE article LIKE :name")
 				.addEntity(ArticleHeaders.class)
 				.setParameter("name", "%"+name+"%").list();
 		session.close();
 		return articleHeadersList;
 	}
 	
-    public List<ArticleHeaders> findAll() {
+    public List findAll() {
 		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
-		List<ArticleHeaders> articleHeadersList = session.createSQLQuery("SELECT * FROM articleHeaders").addEntity(ArticleHeaders.class).list(); 
+		List articleHeadersList = session.createSQLQuery("SELECT * FROM articleHeaders").addEntity(ArticleHeaders.class).list();
 		session.close();
         return articleHeadersList;
     }

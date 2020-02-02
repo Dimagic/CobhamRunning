@@ -28,36 +28,33 @@ public class LabelTemplateDao implements UniversalDao{
 				transaction.rollback();
 			}
 		} finally {
-			session.close();
+			if (session != null) {
+				session.close();
+			}
 		}
-		return labelTemplate;		
-//		return HibernateSessionFactoryUtil.getSessionFactory().openSession().get(LabelTemplate.class, id);
+		return labelTemplate;
 	}
 	
-	public List<LabelTemplate> findAllByArticle(ArticleHeaders articleHeaders) {
+	public List findAllByArticle(ArticleHeaders articleHeaders) {
 		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
 		String query = String.format("SELECT * FROM public.articleheaders_labeltemplate WHERE articleheaders_id = %s", articleHeaders.getId());
-		List<LabelTemplate> labelTemplates = session.createSQLQuery(query).addEntity(ArticleHeaders.class).list(); 
+		List labelTemplates = session.createSQLQuery(query).addEntity(ArticleHeaders.class).list();
 		session.close();
         return labelTemplates;
     }
 	
-	public List<LabelTemplate> findAllWithoutMac() {
+	public List findAllWithoutMac() {
 		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
 		String query = "SELECT * FROM public.labeltemplate WHERE template NOT LIKE '%<MAC>%'";
-		List<LabelTemplate> labelTemplates = session.createSQLQuery(query).addEntity(LabelTemplate.class).list(); 
+		List labelTemplates = session.createSQLQuery(query).addEntity(LabelTemplate.class).list();
 		session.close();
         return labelTemplates;
     }
 	
-	public List<LabelTemplate> findAll() {
+	public List findAll() {
 		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
-		List<LabelTemplate> labelTemplates = session.createQuery("From LabelTemplate").list();
+		List labelTemplates = session.createQuery("From LabelTemplate").list();
 		session.close();
-		
-//		List<LabelTemplate> labelTemplates = (List<LabelTemplate>) HibernateSessionFactoryUtil.getSessionFactory().openSession()
-//				.createQuery("From LabelTemplate").list();
-
 		return labelTemplates;
 	}
 	

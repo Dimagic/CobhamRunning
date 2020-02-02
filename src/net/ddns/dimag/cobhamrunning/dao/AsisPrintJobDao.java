@@ -26,16 +26,16 @@ public class AsisPrintJobDao implements UniversalDao {
 		return count;
 	}
 	
-	public List<AsisPrintJob> findAllUnprinted() {
+	public List findAllUnprinted() {
 		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
-		List<AsisPrintJob> printJobList = session.createSQLQuery("SELECT * FROM public.asisprintjob WHERE dateprint IS NULL").addEntity(AsisPrintJob.class).list(); 
+		List printJobList = session.createSQLQuery("SELECT * FROM public.asisprintjob WHERE dateprint IS NULL").addEntity(AsisPrintJob.class).list();
 		session.close();
         return printJobList;
     }
 	
-    public List<AsisPrintJob> findAll() {
+    public List findAll() {
 		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
-		List<AsisPrintJob> printJobList = session.createSQLQuery("SELECT * FROM public.asisprintjob").addEntity(AsisPrintJob.class).list(); 
+		List printJobList = session.createSQLQuery("SELECT * FROM public.asisprintjob").addEntity(AsisPrintJob.class).list();
 		session.close();
         return printJobList;
     }

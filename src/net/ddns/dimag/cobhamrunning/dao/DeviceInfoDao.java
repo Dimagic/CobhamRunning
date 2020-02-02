@@ -12,8 +12,7 @@ public class DeviceInfoDao implements UniversalDao {
 	}
 
 	public List<DeviceInfo> findAll() {
-		List<DeviceInfo> devicesInfo = (List<DeviceInfo>) HibernateSessionFactoryUtil.getSessionFactory().openSession()
+		return (List<DeviceInfo>) HibernateSessionFactoryUtil.getSessionFactory().openSession()
 				.createQuery("From DeviceInfo").list();
-		return devicesInfo;
 	}
 }
