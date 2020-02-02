@@ -1,0 +1,309 @@
+package net.ddns.dimag.cobhamrunning.utils;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javafx.application.Platform;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
+import javafx.scene.image.Image;
+import javafx.scene.control.ButtonType;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.GridPane;
+import javafx.scene.layout.Priority;
+import javafx.stage.Stage;
+
+public interface MsgBox {
+	Image favicon = new Image("file:resources/images/cobham_C_64x64.png");
+
+	static final String IPADDRESS_PATTERN_INNER = "(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.){3}(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d))";
+	static final String IPADDRESS_PATTERN = String.format("^%s$", IPADDRESS_PATTERN_INNER);
+	static final String NETWORK_PATTERN = "(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.){3}";
+
+	static final String MACADDRESS_PATTERN = "^([0-9a-fA-F]{2}[:.-]?){5}[0-9a-fA-F]{2}$";
+	static final String MACADDRESS_PATTERN_INNER = "([0-9a-fA-F]{2}[:.-]?){5}[0-9a-fA-F]{2}";
+
+	public static Pattern patternArt = Pattern.compile("([a-zA-Z0-9]+)", Pattern.CASE_INSENSITIVE);
+	public static Pattern patternMac = Pattern.compile(MACADDRESS_PATTERN, Pattern.CASE_INSENSITIVE);
+	public static Pattern patternMacInner = Pattern.compile(MACADDRESS_PATTERN_INNER, Pattern.CASE_INSENSITIVE);
+	public static Pattern patternIp = Pattern.compile(IPADDRESS_PATTERN, Pattern.CASE_INSENSITIVE);
+	public static Pattern patternIpInner = Pattern.compile(IPADDRESS_PATTERN_INNER, Pattern.CASE_INSENSITIVE);
+	public static Pattern patternNetwork = Pattern.compile(NETWORK_PATTERN, Pattern.CASE_INSENSITIVE);
+	public static Pattern patternSn = Pattern.compile("^[\\d]{8,8}$");
+
+	public static void msgInfo(String title, String header, String content) {
+		Platform.runLater(new Runnable() {
+			public void run() {
+				Alert alert = new Alert(AlertType.INFORMATION);
+				alert.setTitle(title);
+				Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+				stage.getIcons().add(favicon);
+				alert.setHeaderText(header);
+				alert.setContentText(content);
+				alert.showAndWait();
+			}
+		});
+	}
+
+	public static void msgInfo(String title, String content) {
+		Platform.runLater(new Runnable() {
+			public void run() {
+				Alert alert = new Alert(AlertType.INFORMATION);
+				alert.setTitle(title);
+				Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+				stage.getIcons().add(favicon);
+				alert.setHeaderText(null);
+				alert.setContentText(content);
+				alert.showAndWait();
+			}
+		});
+	}
+
+	public static void msgWarning(String title, String content) {
+		Platform.runLater(new Runnable() {
+			public void run() {
+				Alert alert = new Alert(AlertType.WARNING);
+				alert.setTitle(title);
+				Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+				stage.getIcons().add(favicon);
+				alert.setHeaderText(null);
+				alert.setContentText(content);
+				alert.showAndWait();
+			}
+		});
+	}
+
+	public static boolean msgConfirm(String title, String content) {
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle(title);
+		Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+		stage.getIcons().add(favicon);
+		alert.setHeaderText(null);
+		alert.setContentText(content);
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.get() == ButtonType.OK) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+
+	public static void msgError(String title, String content) {
+		Platform.runLater(new Runnable() {
+			public void run() {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle(title);
+				Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+				stage.getIcons().add(favicon);
+				alert.setHeaderText(null);
+				alert.setContentText(content);
+				alert.showAndWait();
+			}
+		});
+	}
+
+	public static void msgError(String title, String header, String content) {
+		Platform.runLater(new Runnable() {
+			public void run() {
+				Alert alert = new Alert(AlertType.ERROR);
+				alert.setTitle(title);
+				Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+				stage.getIcons().add(favicon);
+				alert.setHeaderText(header);
+				alert.setContentText(content);
+				alert.showAndWait();
+			}
+		});
+	}
+
+	public static void msgException(Exception e) {
+		Platform.runLater(new Runnable() {
+			public void run() {
+				Alert alert = new Alert(AlertType.ERROR);
+				System.out.println(e.getLocalizedMessage());
+				alert.setTitle("Exception");
+				Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+				stage.getIcons().add(favicon);
+				alert.setHeaderText(e.getMessage());
+				alert.setContentText(e.toString());
+
+				// Create expandable Exception.
+				StringWriter sw = new StringWriter();
+				PrintWriter pw = new PrintWriter(sw);
+				e.printStackTrace(pw);
+				String exceptionText = sw.toString();
+
+				Label label = new Label("The exception stacktrace was:");
+
+				TextArea textArea = new TextArea(exceptionText);
+				textArea.setEditable(false);
+				textArea.setWrapText(true);
+
+				textArea.setMaxWidth(Double.MAX_VALUE);
+				textArea.setMaxHeight(Double.MAX_VALUE);
+				GridPane.setVgrow(textArea, Priority.ALWAYS);
+				GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+				GridPane expContent = new GridPane();
+				expContent.setMaxWidth(Double.MAX_VALUE);
+				expContent.add(label, 0, 0);
+				expContent.add(textArea, 0, 1);
+
+				// Set expandable Exception into the dialog pane.
+				alert.getDialogPane().setExpandableContent(expContent);
+
+				alert.showAndWait();
+			}
+		});
+	}
+
+	public static void msgException(Throwable e) {
+		Platform.runLater(new Runnable() {
+			public void run() {
+				Alert alert = new Alert(AlertType.ERROR);
+				System.out.println(e.getLocalizedMessage());
+				alert.setTitle("Exception");
+				Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+				stage.getIcons().add(favicon);
+				alert.setHeaderText(e.getMessage());
+				alert.setContentText(e.toString());
+
+				// Create expandable Exception.
+				StringWriter sw = new StringWriter();
+				PrintWriter pw = new PrintWriter(sw);
+				e.printStackTrace(pw);
+				String exceptionText = sw.toString();
+
+				Label label = new Label("The exception stacktrace was:");
+
+				TextArea textArea = new TextArea(exceptionText);
+				textArea.setEditable(false);
+				textArea.setWrapText(true);
+
+				textArea.setMaxWidth(Double.MAX_VALUE);
+				textArea.setMaxHeight(Double.MAX_VALUE);
+				GridPane.setVgrow(textArea, Priority.ALWAYS);
+				GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+				GridPane expContent = new GridPane();
+				expContent.setMaxWidth(Double.MAX_VALUE);
+				expContent.add(label, 0, 0);
+				expContent.add(textArea, 0, 1);
+
+				// Set expandable Exception into the dialog pane.
+				alert.getDialogPane().setExpandableContent(expContent);
+
+				alert.showAndWait();
+			}
+		});
+	}
+
+	public static Integer msgInputInt(String content) {
+		TextInputDialog dialog = new TextInputDialog();
+		dialog.setTitle("Input");
+		Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+		stage.getIcons().add(favicon);
+		dialog.setHeaderText(null);
+		dialog.setContentText(content);
+
+		Optional<String> result = dialog.showAndWait();
+		if (result.isPresent()) {
+			try {
+				return Integer.parseInt(result.get());
+			} catch (Exception e) {
+				msgWarning("Input warning", "Incorrect number");
+				return null;
+			}
+		}
+		return null;
+	}
+
+	public static String msgInputString(String content) {
+		TextInputDialog dialog = new TextInputDialog();
+		dialog.setTitle("Input");
+		Stage stage = (Stage) dialog.getDialogPane().getScene().getWindow();
+		stage.getIcons().add(favicon);
+		dialog.setHeaderText(null);
+		dialog.setContentText(content);
+
+		Optional<String> result = dialog.showAndWait();
+		if (result.isPresent()) {
+			return result.get();
+		}
+		return null;
+	}
+
+	public static String msgIntutText(String content) {
+
+		Alert alert = new Alert(AlertType.CONFIRMATION);
+		alert.setTitle("Input text");
+		Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+		stage.getIcons().add(favicon);
+		alert.setHeaderText(content);
+		// alert.setContentText(e.toString());
+
+		TextArea textArea = new TextArea();
+		textArea.setEditable(true);
+		textArea.setWrapText(true);
+
+		textArea.setMaxWidth(Double.MAX_VALUE);
+		textArea.setMaxHeight(Double.MAX_VALUE);
+		GridPane.setVgrow(textArea, Priority.ALWAYS);
+		GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+		GridPane expContent = new GridPane();
+		expContent.setMaxWidth(Double.MAX_VALUE);
+		// expContent.add(label, 0, 0);
+		expContent.add(textArea, 0, 1);
+		alert.getDialogPane().setContent(expContent);
+
+		// Set expandable Exception into the dialog pane.
+		// alert.getDialogPane().setExpandableContent(expContent);
+
+		Optional<ButtonType> result = alert.showAndWait();
+		if (result.isPresent()) {
+			return textArea.getText();
+		}
+		return null;
+	}
+
+	public static String msgInputSN() {
+		String sn = msgInputString("Enter serial number");
+		if (!Pattern.matches("^[\\d]{8,8}$", sn)) {
+			msgError("Input error", "Incorrect serial number");
+			return msgInputSN();
+		}
+		return sn;
+	}
+
+	public static List<String> msgScanSystemBarcode() {
+		String val = msgInputString("Scan system barcode:");
+		Matcher matcherArt = patternArt.matcher(val);
+		List<String> tmp = new ArrayList<>();
+		while (matcherArt.find())
+			tmp.add(val.substring(matcherArt.start(), matcherArt.end()));
+		if (tmp.size() != 2) {
+			msgError("Scan barcode", String.format("Incorrect barcode: %s", val));
+			msgScanSystemBarcode();
+		}
+		return tmp;
+	}
+
+	public static String msgScanMac() {
+		String val = msgInputString("Scan system mac address:");
+		Matcher matcherMac = patternMac.matcher(val);
+		if (!matcherMac.find()) {
+			msgError("Scan mac address", String.format("Incorrect mac address: %s", val));
+			msgScanMac();
+		}
+		return val;
+	}
+
+}

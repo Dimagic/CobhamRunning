@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="300.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8.0.231" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.ddns.dimag.cobhamrunning.view.LabelTemplatesViewController">
+   <children>
+      <TableView fx:id="tTemplates" layoutX="14.0" layoutY="20.0" prefHeight="345.0" prefWidth="287.0" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="308.0" AnchorPane.topAnchor="5.0">
+        <columns>
+          <TableColumn fx:id="nameColumn" prefWidth="75.0" text="Name" />
+        </columns>
+      </TableView>
+      <TextArea fx:id="template" layoutX="197.0" layoutY="6.0" prefHeight="150.0" prefWidth="298.0" AnchorPane.bottomAnchor="100.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="40.0" />
+      <Button layoutX="434.0" layoutY="261.0" mnemonicParsing="false" onAction="#addTemplate" prefHeight="25.0" prefWidth="100.0" text="Add" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="120.0" />
+      <Button fx:id="saveBtn" layoutX="434.0" layoutY="231.0" mnemonicParsing="false" onAction="#saveTemplate" prefHeight="25.0" prefWidth="100.0" text="Save" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+      <TextField fx:id="templateName" layoutX="197.0" layoutY="14.0" AnchorPane.rightAnchor="154.0" AnchorPane.topAnchor="10.0" />
+   </children>
+</AnchorPane>

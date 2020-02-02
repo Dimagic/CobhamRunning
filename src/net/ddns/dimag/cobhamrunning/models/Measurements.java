@@ -1,0 +1,111 @@
+package net.ddns.dimag.cobhamrunning.models;
+
+import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
+import javax.persistence.Table;
+import javax.persistence.Temporal;
+import javax.persistence.TemporalType;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
+@Entity
+@Table(name = "measurements")
+public class Measurements {
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
+
+	@Column(nullable = false, length = 128)
+	private String measName;
+
+	@Temporal(TemporalType.TIMESTAMP)
+	@Column(nullable = false)
+	private Date measDate;
+
+	@Column(length = 128)
+	private String measMin;
+
+	@Column(columnDefinition = "TEXT")
+	private String measVal;
+
+	@Column(length = 128)
+	private String measMax;
+
+	@ManyToOne(fetch = FetchType.LAZY, optional = false)
+	@JoinColumn(name = "test_id", nullable = false)
+	@OnDelete(action = OnDeleteAction.CASCADE)
+	private Tests test;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getMeasName() {
+		return measName;
+	}
+
+	public void setMeasName(String measName) {
+		setDateMeas(new Date());
+		this.measName = measName;
+	}
+
+	public java.util.Date getDateMeas() {
+		return measDate;
+	}
+
+	public void setDateMeas(Date measDate) {
+		this.measDate = measDate;
+	}
+
+	public String getMeasVal() {
+		return measVal;
+	}
+
+	public void setMeasVal(String measVal) {
+		this.measVal = measVal;
+	}
+
+	public String getMeasMin() {
+		return measMin;
+	}
+
+	public void setMeasMin(String measMin) {
+		this.measMin = measMin;
+	}
+
+	public String getMeasMax() {
+		return measMax;
+	}
+
+	public void setMeasMax(String measMax) {
+		this.measMax = measMax;
+	}
+
+	public Tests getTest() {
+		return this.test;
+	}
+
+	public void setTest(Tests test) {
+		this.test = test;
+	}
+
+	@Override
+	public String toString() {
+		return "Measurements [id=" + id + ", measName=" + measName + ", measMin=" + measMin + ", measVal=" + measVal
+				+ ", measMax=" + measMax + ", test=" + test + "]";
+	}
+
+}

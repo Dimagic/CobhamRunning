@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.RowConstraints?>
+
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.231" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.ddns.dimag.cobhamrunning.view.PrintAsisViewController">
+   <children>
+      <TableView fx:id="tPrintJob" layoutX="14.0" layoutY="14.0" prefHeight="344.0" prefWidth="590.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
+        <columns>
+            <TableColumn fx:id="articleColumn" prefWidth="75.0" text="Article" />
+            <TableColumn fx:id="descriptionColumn" prefWidth="75.0" text="Description" />
+            <TableColumn fx:id="macColumn" prefWidth="75.0" text="MAC" />
+          <TableColumn fx:id="startColumn" prefWidth="75.0" text="Start" />
+          <TableColumn fx:id="stopColumn" prefWidth="75.0" text="Stop" />
+            <TableColumn fx:id="countColumn" prefWidth="75.0" text="Count" />
+            <TableColumn fx:id="dateCreateColumn" prefWidth="75.0" text="Date create" />
+            <TableColumn fx:id="datePrintColumn" prefWidth="75.0" text="Date print" />
+        </columns>
+      </TableView>
+      <Button fx:id="printSelectedBtn" layoutX="499.0" layoutY="175.0" mnemonicParsing="false" onAction="#printSelected" prefHeight="25.0" prefWidth="100.0" text="Print selected" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+      <CheckBox fx:id="showAll" layoutX="694.0" layoutY="262.0" mnemonicParsing="false" text="Show printed" AnchorPane.bottomAnchor="121.0" AnchorPane.rightAnchor="14.0" />
+      <GridPane layoutX="14.0" layoutY="270.0" prefHeight="94.0" prefWidth="221.0" AnchorPane.bottomAnchor="36.0" AnchorPane.leftAnchor="14.0">
+        <columnConstraints>
+          <ColumnConstraints halignment="RIGHT" hgrow="SOMETIMES" maxWidth="72.0" minWidth="10.0" prefWidth="70.0" />
+            <ColumnConstraints hgrow="SOMETIMES" maxWidth="87.0" minWidth="10.0" prefWidth="75.0" />
+          <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" maxWidth="90.0" minWidth="77.0" prefWidth="78.0" />
+        </columnConstraints>
+        <rowConstraints>
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+          <RowConstraints fillHeight="false" minHeight="10.0" prefHeight="30.0" valignment="CENTER" vgrow="NEVER" />
+          <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+        </rowConstraints>
+         <children>
+            <TextField fx:id="singleField" maxHeight="25.0" maxWidth="65.0" minHeight="25.0" minWidth="65.0" GridPane.columnIndex="1">
+               <GridPane.margin>
+                  <Insets left="5.0" right="5.0" />
+               </GridPane.margin>
+            </TextField>
+            <TextField fx:id="rangeStartField" maxHeight="25.0" maxWidth="65.0" minHeight="25.0" minWidth="65.0" GridPane.columnIndex="1" GridPane.rowIndex="1">
+               <GridPane.margin>
+                  <Insets left="5.0" right="5.0" />
+               </GridPane.margin>
+            </TextField>
+            <TextField fx:id="rangeStopField" maxHeight="25.0" maxWidth="70.0" prefHeight="25.0" prefWidth="70.0" GridPane.columnIndex="2" GridPane.rowIndex="1">
+               <GridPane.margin>
+                  <Insets left="5.0" right="5.0" />
+               </GridPane.margin>
+            </TextField>
+            <Label text="ASIS:" />
+            <Label text="Range from:" GridPane.rowIndex="1" />
+            <Button minHeight="25.0" minWidth="70.0" mnemonicParsing="false" text="Search" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+         </children>
+      </GridPane>
+   </children>
+</AnchorPane>

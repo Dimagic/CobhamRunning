@@ -1,0 +1,24 @@
+# IntellijIdea files
+*.iml
+.idea/
+.out/
+
+# target
+.target/
+
+# bin
+.bin/
+
+# exe
+.exe/
+
+# lib
+./lib
+
+# logs
+./logs
+
+settings.xml
+hibernate.cfg.xml
+
+
