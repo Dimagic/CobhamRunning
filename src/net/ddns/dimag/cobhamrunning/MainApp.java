@@ -42,6 +42,7 @@ public class MainApp extends Application implements MsgBox {
 	private TestsViewController testsViewController;
 	private ArticlesViewController articlesViewController;
     private AsisCreatorController asisCreatorController;
+    private SettingsViewController settingsViewController;
 	private static final Logger LOGGER = LogManager.getLogger(MainApp.class.getName());
 	private ObservableList<CobhamSystem> systemData = FXCollections.observableArrayList();
 	private Image favicon = new Image("file:src/resources/images/cobham_C_64x64.png");
@@ -51,10 +52,9 @@ public class MainApp extends Application implements MsgBox {
     }
        
     @Override
-    public void start(Stage primaryStage) {    
-    	this.currentSettings = Settings.loadSettings();	
+    public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        String VERSION = "0.0.8";
+        String VERSION = "0.0.9";
         this.primaryStage.setTitle(String.format("CobhamRunning %s", VERSION));
         this.primaryStage.getIcons().add(favicon);
         try {	
@@ -73,6 +73,7 @@ public class MainApp extends Application implements MsgBox {
             e.printStackTrace();
         }
         showTestsView();
+        loadSettings();
         HibernateSessionFactoryUtil.getSessionFactory();
 	        
     }
@@ -341,14 +342,14 @@ public class MainApp extends Application implements MsgBox {
             Scene scene = new Scene(page);
             settingsStage.setScene(scene);
             settingsStage.setResizable(false);
-            SettingsViewController controller = loader.getController();
-            controller.setMainApp(this);
-            controller.fillSettings();
-            controller.setDialogStage(settingsStage);
+            settingsViewController = loader.getController();
+            settingsViewController.setMainApp(this);
+            settingsViewController.fillSettings();
+            settingsViewController.setDialogStage(settingsStage);
             
             settingsStage.showAndWait();
 
-            return controller.isSaveClicked();
+            return settingsViewController.isSaveClicked();
         } catch (IOException e) {
             e.printStackTrace();
             return false;
@@ -392,16 +393,24 @@ public class MainApp extends Application implements MsgBox {
 		return primaryStage;
 	}
 	
-	public Settings loadSettings() {
+	public void loadSettings() {
 		File file = new File("./settings.xml");
+		if (!file.exists()){
+		    MsgBox.msgWarning("Load settings", "Settings file not found.\nWill create a new settings file.\nPlease fill settings form.");
+            if (!showSettingsDialog()){
+                return;
+            }
+        }
+
 	    try {    	
 	        JAXBContext context = JAXBContext.newInstance(Settings.class);
 	        Unmarshaller um = context.createUnmarshaller();
-	        return  (Settings) um.unmarshal(file);
+//	        return  (Settings) um.unmarshal(file);
+            setCurrentSettings((Settings) um.unmarshal(file));
 	    } catch (Exception e) { 
 	    	MsgBox.msgException(e);
 	    }
-		return null;
+
 	}
 	
 	public void setCurrentSettings(Settings currentSettings) {
