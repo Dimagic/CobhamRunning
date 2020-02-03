@@ -270,7 +270,7 @@ public class MainApp extends Application implements MsgBox {
     	try {
     		currentSettings.getIp_ssh();
 		} catch (NullPointerException e) {
-			MsgBox.msgWarning("Settings earning", "The network interface is not specified in the settings");
+			MsgBox.msgWarning("Settings warning", "The network interface is not specified in the settings");
 			return;
 		}
     	if (!NetworkUtils.isIpInSystem(currentSettings.getIp_ssh())) {
