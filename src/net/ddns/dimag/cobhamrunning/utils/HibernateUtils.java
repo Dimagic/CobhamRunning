@@ -20,11 +20,12 @@ public class HibernateUtils implements MsgBox {
 
 	static{
 		try {
-			Configuration configuration=new Configuration().configure();
-		 	sessionFactory=configuration.buildSessionFactory();
-		} catch (Throwable ex) { 
+//			Configuration configuration=new Configuration().configure();
+//		 	sessionFactory=configuration.buildSessionFactory();
+			sessionFactory = HibernateSessionFactoryUtil.getSessionFactory();
+		} catch (Throwable ex) {
 			throw new ExceptionInInitializerError(ex);
-		} 
+		}
 	}
 
 	public static SessionFactory getSessionFactory() {

@@ -9,9 +9,22 @@ import net.ddns.dimag.cobhamrunning.models.Asis;
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 
 public class AsisDao implements UniversalDao{
+
 	public Asis findById(int id) {
         return HibernateSessionFactoryUtil.getSessionFactory().openSession().get(Asis.class, id);
     }
+
+    public Asis findByName(String name){
+		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+		List asisList = session.createSQLQuery("SELECT * FROM public.asis WHERE asis = :name")
+				.addEntity(Asis.class)
+				.setParameter("name", name).list();
+		session.close();
+		if (asisList.isEmpty()){
+			return null;
+		}
+		return (Asis) asisList.get(0);
+	}
 	
 	public List getAvaliableAsisRange(int count) {
 		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();

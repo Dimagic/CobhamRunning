@@ -30,6 +30,7 @@ import net.ddns.dimag.cobhamrunning.utils.NetworkUtils;
 import net.ddns.dimag.cobhamrunning.utils.PyVisaClient;
 
 public class SettingsViewController implements MsgBox {
+	boolean saveClicked = false;
 	@FXML
 	private TitledPane telnet_pane;
 	@FXML
@@ -64,7 +65,9 @@ public class SettingsViewController implements MsgBox {
 	@FXML
 	private TextField login_ssh;
 	@FXML
-	private TextField path_db;
+	private TextField addr_db;
+	@FXML
+	private TextField port_db;
 	@FXML
 	private TextField name_db;
 	@FXML
@@ -84,6 +87,7 @@ public class SettingsViewController implements MsgBox {
 	private MainApp mainApp;
 	private Stage dialogStage;
 	private PyVisaClient pvc;
+	private Settings currSettings;
 	
 	public SettingsViewController(){
 
@@ -111,32 +115,35 @@ public class SettingsViewController implements MsgBox {
     @FXML
     private void saveBtnClick(){
     	if (saveSettings()){
-    		dialogStage.close();
+    		mainApp.loadSettings();
+//    		dialogStage.close();
     	}	
     }
     
     @FXML
     private void testDBconn(){
 		try {
+			saveSettings();
+			mainApp.loadSettings();
 			HibernateUtils.getSession();
-			MsgBox.msgInfo("DB connection", "Connection established");
-		} catch (Throwable e) {
-			while (e.getCause() != null){
-				String exName;
-				e = (Exception) e.getCause();
-				exName = e.getCause().getClass().getName();
-				if (exName.endsWith("org.postgresql.util.PSQLException")){
-					MsgBox.msgError("DB connection", "Connection error", e.getCause().getMessage());
-				}
-			}		
-			MsgBox.msgException(e);
-		} 
+		} catch (Exception e) {
+//			while (e.getCause() != null){
+//				String exName;
+//				e = (Exception) e.getCause();
+//				exName = e.getCause().getClass().getName();
+//				if (exName.endsWith("org.postgresql.util.PSQLException")){
+//					MsgBox.msgError("DB connection", "Connection error", e.getCause().getMessage());
+//				}
+//			}
+			MsgBox.msgError("DB connection fail", e.getMessage());
+			return;
+		}
+		MsgBox.msgInfo("DB connection", "Connection established");
     }
           
     public void fillSettings() {
     	try {
-    		Settings currSet = mainApp.getCurrentSettings();	
-
+    		Settings currSet = mainApp.getCurrentSettings();
     		com_combo.setValue(currSet.getCom_combo());
     		baud_combo.setValue(currSet.getBaud_combo());
     		ip_telnet_combo.setValue(currSet.getIp_telnet());
@@ -145,7 +152,8 @@ public class SettingsViewController implements MsgBox {
     		login_ssh.setText(currSet.getLogin_ssh());
     		pass_telnet.setText(currSet.getPass_telnet());
     		pass_ssh.setText(currSet.getPass_ssh());
-    		path_db.setText(currSet.getPath_db());
+    		addr_db.setText(currSet.getAddr_db());
+    		port_db.setText(currSet.getPort_db());
     		name_db.setText(currSet.getName_db());
     		user_db.setText(currSet.getUser_db());
     		pass_db.setText(currSet.getPass_db());
@@ -157,7 +165,7 @@ public class SettingsViewController implements MsgBox {
     }
 	
 	public boolean isSaveClicked() {
-		return false;
+		return saveClicked;
 	}
 	
 	private void fillBaudCombo(){
@@ -187,7 +195,15 @@ public class SettingsViewController implements MsgBox {
 		}
 		prnt_combo.setItems(FXCollections.observableArrayList(prntList));
 	}
-		
+
+	public Settings getCurrSettings() {
+		return currSettings;
+	}
+
+	public void setCurrSettings(Settings currSettings) {
+		this.currSettings = currSettings;
+	}
+
 	public boolean saveSettings() {
 //		SettingsService settingsService = new SettingsService();
     	
@@ -219,7 +235,9 @@ public class SettingsViewController implements MsgBox {
 				/**
 				 * Write settings to the currentSettings in MainApp.
 				 */
-				mainApp.setCurrentSettings(new Settings(sett));
+//				mainApp.setCurrentSettings(new Settings(sett));
+				setCurrSettings(new Settings(sett));
+				saveClicked = true;
 			} catch (NullPointerException e) {
 				System.out.printf("Field %s not found\n", field.getName());
 				continue;
@@ -239,7 +257,7 @@ public class SettingsViewController implements MsgBox {
 	        Settings wrapper = new Settings(sett);
 	        System.out.println(wrapper);
 	        m.marshal(wrapper, file);
-	        dialogStage.close();
+//	        dialogStage.close();
 	        MsgBox.msgInfo("Save settings", "Save settings successfully complete.");
 	        return true;
 	    } catch (Exception e) { 

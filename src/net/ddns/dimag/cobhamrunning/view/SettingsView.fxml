@@ -188,11 +188,11 @@
                                     <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                                 </rowConstraints>
                                  <children>
-                                    <Label prefHeight="20.0" text="Path:" />
+                                    <Label prefHeight="20.0" text="DB addr:" />
                                     <Label prefHeight="20.0" text="DB name:" GridPane.rowIndex="2" />
                                     <Label prefHeight="20.0" text="User:" GridPane.rowIndex="3" />
                                     <Label prefHeight="20.0" text="Password:" GridPane.rowIndex="4" />
-                                    <TextField fx:id="path_db" prefWidth="150.0" GridPane.columnIndex="1">
+                                    <TextField fx:id="addr_db" prefWidth="150.0" GridPane.columnIndex="1">
                                        <GridPane.margin>
                                           <Insets bottom="3.0" />
                                        </GridPane.margin></TextField>
@@ -213,11 +213,12 @@
                                           <Insets bottom="3.0" />
                                        </GridPane.margin>
                                     </Button>
-                                    <TextField GridPane.columnIndex="1" GridPane.rowIndex="1">
+                                    <TextField fx:id="port_db" GridPane.columnIndex="1" GridPane.rowIndex="1">
                                        <GridPane.margin>
                                           <Insets bottom="3.0" />
                                        </GridPane.margin>
                                     </TextField>
+                                    <Label text="DB port:" GridPane.rowIndex="1" />
                                  </children>
                               </GridPane>
                            </content>

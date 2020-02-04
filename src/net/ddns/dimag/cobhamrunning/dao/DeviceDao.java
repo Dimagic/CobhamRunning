@@ -13,7 +13,8 @@ public class DeviceDao implements UniversalDao {
 
 	public List findDeviceByAsis(String asis) {
 		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
-		return session.createSQLQuery("SELECT * FROM device WHERE asis = :asis ")
+
+		return session.createSQLQuery("SELECT * FROM public.device WHERE asis_id = (SELECT id FROM public.asis WHERE asis = :asis)")
 				.addEntity(Device.class).setParameter("asis", asis).list();
 	}
 

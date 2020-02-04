@@ -1,17 +1,6 @@
 package net.ddns.dimag.cobhamrunning.models;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.MapsId;
-import javax.persistence.OneToOne;
-import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
@@ -41,11 +30,7 @@ public class DeviceInfo {
 	@Column(name = "targetVer")
 	private String targetVer;
 
-	
-
-	@OneToOne(fetch = FetchType.LAZY, optional = false)
-	@JoinColumn(name = "device_id", nullable = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
+	@OneToOne(mappedBy = "deviceInfo", cascade = CascadeType.ALL, orphanRemoval = true)
 	private Device device;
 
 	public Device getDevice() {

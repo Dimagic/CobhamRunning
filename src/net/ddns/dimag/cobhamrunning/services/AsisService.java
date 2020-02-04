@@ -26,6 +26,10 @@ public class AsisService {
 	public List<Asis> getAvaliableAsisRange(int count){
 		return asisDao.getAvaliableAsisRange(count);
 	}
+
+	public Asis findByName(String name) {
+		return asisDao.findByName(name);
+	}
 	
 	public void saveAsis(Asis asis) {
 		asisDao.save(asis);

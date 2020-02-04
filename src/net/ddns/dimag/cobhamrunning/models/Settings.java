@@ -24,7 +24,8 @@ public class Settings extends SettingsViewController{
 	private String login_ssh;
 	private String pass_telnet;
 	private String pass_ssh;
-	private String path_db;
+	private String addr_db;
+	private String port_db;
 	private String name_db;
 	private String user_db;
 	private String pass_db;
@@ -146,12 +147,20 @@ public class Settings extends SettingsViewController{
 		this.pass_ssh = pass_ssh;
 	}
 	
-	public String getPath_db() {
-		return path_db;
+	public String getAddr_db() {
+		return addr_db;
 	}
 
-	public void setPath_db(String path_db) {
-		this.path_db = path_db;
+	public void setAddr_db(String addr_db) {
+		this.addr_db = addr_db;
+	}
+
+	public String getPort_db() {
+		return port_db;
+	}
+
+	public void setPort_db(String port_db) {
+		this.port_db = port_db;
 	}
 
 	public String getName_db() {
@@ -203,8 +212,8 @@ public class Settings extends SettingsViewController{
 		builder.append(pass_telnet);
 		builder.append(", pass_ssh=");
 		builder.append(pass_ssh);
-		builder.append(", path_db=");
-		builder.append(path_db);
+		builder.append(", addr_db=");
+		builder.append(addr_db);
 		builder.append(", name_db=");
 		builder.append(name_db);
 		builder.append(", user_db=");

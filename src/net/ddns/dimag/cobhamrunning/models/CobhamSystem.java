@@ -112,11 +112,11 @@ public class CobhamSystem extends Task<Void> implements SystemCommands {
 //	}
 
 	public StringProperty asisProperty() {
-		return new SimpleStringProperty(device.getAsis());
+		return new SimpleStringProperty(device.getAsis().getAsis());
 	}
 
 	public StringProperty macProperty() {
-		return new SimpleStringProperty(device.getMac());
+		return new SimpleStringProperty(device.getAsis().getAsis());
 	}
 
 	public StringProperty ipProperty() {

@@ -16,8 +16,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import com.microsoft.sqlserver.jdbc.SQLServerException;
-
 import java.util.regex.Matcher;
 
 import net.ddns.dimag.cobhamrunning.models.Device;
@@ -38,6 +36,12 @@ public class RmvUtils {
 			rows.add(measResult);
 		}
 		return rows;
+	}
+
+	public static List<HashMap<String, Object>> checkRmvByAsis(String asis) throws SQLException, ClassNotFoundException {
+		String q = String
+				.format("select count(*) as rec_count from RMV.dbo.tbl_RMV_Header where Serial = '%s'", asis);
+		return sendQuery(q);
 	}
 
 	private static Collection<Object> getHeaderTest(String asis)
@@ -134,7 +138,7 @@ public class RmvUtils {
 		Pattern pTargetVer = Pattern.compile("(target([a-zA-Z ])+version)");
 		try {
 	
-			List<HashMap<String, Object>> testList = new ArrayList(getHeaderTest(dev.getAsis()));
+			List<HashMap<String, Object>> testList = new ArrayList(getHeaderTest(dev.getAsis().getAsis()));
 			for (HashMap<String, Object> test : testList) {
 				System.out.println(String.format("Test: %s Date: %s", test.get("Configuration"), test.get("TestDate")));
 				List<HashMap<String, Object>> testRes = getMeasuresById(test.get("HeaderID"));

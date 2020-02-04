@@ -5,13 +5,23 @@
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.231" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.ddns.dimag.cobhamrunning.view.ShippingViewController">
    <children>
-      <TableView fx:id="tSysToShip" prefHeight="300.0" prefWidth="600.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0" />
+      <TableView fx:id="tSysToShip" prefHeight="300.0" prefWidth="600.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+         <columns>
+            <TableColumn fx:id="dateShipColumn" prefWidth="75.0" text="Date" />
+            <TableColumn fx:id="articleColumn" prefWidth="75.0" text="Article" />
+            <TableColumn fx:id="asisColumn" prefWidth="75.0" text="ASIS" />
+            <TableColumn fx:id="snColumn" prefWidth="75.0" text="SN" />
+            <TableColumn fx:id="commonVerColumn" prefWidth="75.0" text="Common ver." />
+            <TableColumn fx:id="systemVerColumn" prefWidth="75.0" text="System ver." />
+            <TableColumn fx:id="targetVerColumn" prefWidth="75.0" text="Target ver." />
+         </columns></TableView>
       <ButtonBar fx:id="bar" prefHeight="40.0" prefWidth="200.0" AnchorPane.bottomAnchor="5.0" AnchorPane.rightAnchor="5.0">
         <buttons>
             <Button fx:id="addBtn" mnemonicParsing="false" onAction="#handeleAddBtn" text="Add " />

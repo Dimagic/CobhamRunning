@@ -1,5 +1,6 @@
 package net.ddns.dimag.cobhamrunning.models;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Set;
 
@@ -19,11 +20,12 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.UniqueConstraint;
 
+import javafx.beans.property.SimpleStringProperty;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
-@Table(name = "shippingJournal")
+@Table(name = "shippingJournal", uniqueConstraints = { @UniqueConstraint(columnNames = "device_id")})
 public class ShippingSystem {
 	@Id
     @Column(name = "id")
@@ -67,6 +69,13 @@ public class ShippingSystem {
 
 	public void setDateShip(Date dateShip) {
 		this.dateShip = dateShip;
+	}
+
+	public SimpleStringProperty dateShipProperty() {
+		try {
+			return new SimpleStringProperty(new SimpleDateFormat("yyyy-MM-DD HH:mm:ss").format(getDateShip()));
+		} catch (NullPointerException e) {}
+		return new SimpleStringProperty("");
 	}
 	
 	

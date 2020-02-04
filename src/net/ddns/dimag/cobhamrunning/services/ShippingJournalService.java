@@ -1,5 +1,6 @@
 package net.ddns.dimag.cobhamrunning.services;
 
+import java.util.Date;
 import java.util.List;
 
 import net.ddns.dimag.cobhamrunning.dao.ShippingJournalDao;
@@ -26,6 +27,10 @@ private ShippingJournalDao shippingJournalDao = new ShippingJournalDao();
 
     public void updateShippingJournal(Device shippingJournal) {
     	shippingJournalDao.update(shippingJournal);
+    }
+
+    public List<ShippingSystem> getJournalByDate(Date dateFrom, Date dateTo){
+	    return shippingJournalDao.getJournalByDate(dateFrom, dateTo);
     }
 
     public List<ShippingSystem> findAllDevice() {

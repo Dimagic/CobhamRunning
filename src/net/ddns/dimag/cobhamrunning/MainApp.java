@@ -1,8 +1,6 @@
 package net.ddns.dimag.cobhamrunning;
 
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -13,10 +11,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import net.ddns.dimag.cobhamrunning.models.ArticleHeaders;
-import net.ddns.dimag.cobhamrunning.models.CobhamSystem;
-import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.Settings;
-import net.ddns.dimag.cobhamrunning.services.DeviceService;
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import net.ddns.dimag.cobhamrunning.utils.NetworkUtils;
@@ -42,9 +37,8 @@ public class MainApp extends Application implements MsgBox {
 	private TestsViewController testsViewController;
 	private ArticlesViewController articlesViewController;
     private AsisCreatorController asisCreatorController;
-    private SettingsViewController settingsViewController;
-	private static final Logger LOGGER = LogManager.getLogger(MainApp.class.getName());
-	private ObservableList<CobhamSystem> systemData = FXCollections.observableArrayList();
+    private static final Logger LOGGER = LogManager.getLogger(MainApp.class.getName());
+
 	private Image favicon = new Image("file:src/resources/images/cobham_C_64x64.png");
     
     public MainApp(){
@@ -54,7 +48,7 @@ public class MainApp extends Application implements MsgBox {
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        String VERSION = "0.0.9";
+        String VERSION = "0.0.10";
         this.primaryStage.setTitle(String.format("CobhamRunning %s", VERSION));
         this.primaryStage.getIcons().add(favicon);
         try {	
@@ -74,29 +68,8 @@ public class MainApp extends Application implements MsgBox {
         }
         showTestsView();
         loadSettings();
+
         HibernateSessionFactoryUtil.getSessionFactory();
-	        
-    }
-    
-    public ObservableList<CobhamSystem> getSystemData() {
-        return systemData;
-    }
-    
-    public void setSystemData(CobhamSystem tmp){
-    	DeviceService devServ = new DeviceService();
-    	List<Device> deviceList = new ArrayList<Device>();
-    	for (CobhamSystem item: systemData){
-    		if (item.equals(tmp)){
-//    			MsgBox.msgInfo("Append system to running", String.format("System: %s with ASIS: %s already present in table", item.articleProperty().get(), item.asisProperty().get()));
-    			return;
-    		}
-//    		devServ.saveDevice(item.getDevice());
-//    		deviceList = devServ.findDeviceByAsis(item.asisProperty().getValue());
-//    		for (Device dev: deviceList){
-//    			System.out.println(dev.toString());
-//    		}
-    	}
-	    systemData.add(tmp);
     }
       
     public void showTestsView() {
@@ -307,7 +280,7 @@ public class MainApp extends Application implements MsgBox {
             	controller.stopTestFlag = true;
             	Set<Thread> threads = Thread.getAllStackTraces().keySet();  
             	List<String> items = new ArrayList<String>();
-            	systemData.forEach(item -> items.add(item.getDevice().getAsis()));
+//            	systemData.forEach(item -> items.add(item.getDevice().getAsis().getAsis()));
             	for (Thread t : threads) {
             		if (items.contains(t.getName())){
             			if (t.isAlive()){
@@ -315,14 +288,9 @@ public class MainApp extends Application implements MsgBox {
             			}
             			System.out.println(String.format("Thread %d _. Status: %s", t.getName(), t.getState()));
             		}
-            		
             	}
-                systemData.clear();
             });
-            
             runningTestStage.showAndWait();
-            
-            
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -342,7 +310,7 @@ public class MainApp extends Application implements MsgBox {
             Scene scene = new Scene(page);
             settingsStage.setScene(scene);
             settingsStage.setResizable(false);
-            settingsViewController = loader.getController();
+            SettingsViewController settingsViewController = loader.getController();
             settingsViewController.setMainApp(this);
             settingsViewController.fillSettings();
             settingsViewController.setDialogStage(settingsStage);

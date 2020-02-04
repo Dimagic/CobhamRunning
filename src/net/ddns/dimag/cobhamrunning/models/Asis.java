@@ -17,6 +17,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.validation.constraints.Size;
 
+import javafx.beans.property.SimpleStringProperty;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.hibernate.annotations.Type;
@@ -51,12 +52,15 @@ public class Asis {
 		this.articleHeaders = articleHeaders;
 	}
 
-	@Size(max = 4)
-	@Column(name = "asis", nullable = false, unique = true)
+	@Column(name = "asis", length = 4, nullable = false, unique = true)
 	private String asis;
 
 	public String getAsis() {
 		return asis;
+	}
+
+	public SimpleStringProperty asisProperty() {
+		return new SimpleStringProperty(getAsis());
 	}
 
 	@Temporal(TemporalType.TIMESTAMP)
@@ -74,6 +78,14 @@ public class Asis {
 	@Type(type = "org.hibernate.type.NumericBooleanType")
 	@Column(name = "is_imported")
 	private Boolean isImported;
+
+	public Boolean getImported() {
+		return isImported;
+	}
+
+	public void setImported(Boolean imported) {
+		isImported = imported;
+	}
 
 	public Boolean getNeedmac() {
 		return isImported;
@@ -120,4 +132,30 @@ public class Asis {
 		this.macAddress = macAddress;
 	}
 
+	@OneToOne(mappedBy = "asis", cascade = CascadeType.ALL,
+			fetch = FetchType.LAZY, optional = true)
+	private Device device;
+
+	public Device getDevice() {
+		return device;
+	}
+
+	public void setDevice(Device device) {
+		this.device = device;
+	}
+
+	@Override
+	public String toString() {
+		final StringBuffer sb = new StringBuffer("Asis{");
+		sb.append("id=").append(id);
+		sb.append(", asis='").append(asis).append('\'');
+		sb.append(", dateCreate=").append(dateCreate);
+		sb.append(", isImported=").append(isImported);
+		sb.append(", articleHeaders=").append(articleHeaders.getArticle());
+		sb.append(", printJob=").append(printJob.getId());
+		sb.append(", macAddress=").append(macAddress.getMac());
+		sb.append(", device=").append(device.getDeviceInfo());
+		sb.append('}');
+		return sb.toString();
+	}
 }
