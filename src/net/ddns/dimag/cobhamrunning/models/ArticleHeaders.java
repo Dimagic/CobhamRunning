@@ -46,6 +46,14 @@ public class ArticleHeaders {
 		this.labelTemplates = labelTemplates;
 	}
 
+	public ArticleHeaders(ArticleHeaders another){
+        this.article = another.getArticle();
+        this.shortDescript = another.getShortDescript();
+        this.longDescript = another.getLongDescript();
+        this.labelTemplates = another.getTemplates();
+        this.needmac = another.getNeedmac();
+    }
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -182,51 +190,16 @@ public class ArticleHeaders {
 		return new SimpleBooleanProperty(getNeedmac());
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("ArticleHeaders [");
-		if (id != null) {
-			builder.append("id=");
-			builder.append(id);
-			builder.append(", ");
-		}
-		if (name != null) {
-			builder.append("name=");
-			builder.append(name);
-			builder.append(", ");
-		}
-		if (article != null) {
-			builder.append("article=");
-			builder.append(article);
-			builder.append(", ");
-		}
-		if (shortDescript != null) {
-			builder.append("short_descript=");
-			builder.append(shortDescript);
-			builder.append(", ");
-		}
-		if (longDescript != null) {
-			builder.append("long_descript=");
-			builder.append(longDescript);
-			builder.append(", ");
-		}
-		if (revision != null) {
-			builder.append("revision=");
-			builder.append(revision);
-			builder.append(", ");
-		}
-		if (needmac != null) {
-			builder.append("needmac=");
-			builder.append(needmac);
-			builder.append(", ");
-		}
-		if (asisset != null) {
-			builder.append("asisset=");
-			builder.append(asisset);
-		}
-		builder.append("]");
-		return builder.toString();
-	}
-
+    @Override
+    public String toString() {
+        return "ArticleHeaders{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", article='" + article + '\'' +
+                ", shortDescript='" + shortDescript + '\'' +
+                ", longDescript='" + longDescript + '\'' +
+                ", revision='" + revision + '\'' +
+                ", needmac=" + needmac +
+                '}';
+    }
 }

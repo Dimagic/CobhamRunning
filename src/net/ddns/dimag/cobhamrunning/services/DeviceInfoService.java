@@ -28,13 +28,7 @@ public class DeviceInfoService {
     }
     
     public void saveOrUpdateDeviceInfo(DeviceInfo deviceInfo){
-    	try {
-    		saveDeviceInfo(deviceInfo);
-    	} catch (Exception e) {
-    		
-    		deviceInfoDao.update(deviceInfo);
-
-		}
+    	deviceInfoDao.saveOrUpdate(deviceInfo);
     }
 
     public List<DeviceInfo> findAllDevice() {

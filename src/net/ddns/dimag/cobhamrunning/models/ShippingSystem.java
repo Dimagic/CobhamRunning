@@ -73,11 +73,8 @@ public class ShippingSystem {
 
 	public SimpleStringProperty dateShipProperty() {
 		try {
-			return new SimpleStringProperty(new SimpleDateFormat("yyyy-MM-DD HH:mm:ss").format(getDateShip()));
+			return new SimpleStringProperty(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(getDateShip()));
 		} catch (NullPointerException e) {}
 		return new SimpleStringProperty("");
 	}
-	
-	
-	
 }

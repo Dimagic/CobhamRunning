@@ -5,6 +5,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javafx.scene.control.*;
+import org.hibernate.TransientObjectException;
 import org.hibernate.exception.ConstraintViolationException;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -12,13 +14,6 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.ArticleHeaders;
@@ -48,6 +43,8 @@ public class ArticleEditViewController implements MsgBox{
 	@FXML
 	private ChoiceBox<String> labelTemplBox;
 	@FXML
+	private Button addTemplateBtn;
+	@FXML
 	private TableView<LabelTemplate> tTemplates;
 	@FXML
 	private TableColumn<LabelTemplate, String> nameColumn;
@@ -66,21 +63,39 @@ public class ArticleEditViewController implements MsgBox{
 		revisionField.textProperty().addListener(new ChangeListener<String>() {
 	        @Override
 	        public void changed(final ObservableValue<? extends String> ov, final String oldValue, final String newValue) {
-	            if (revisionField.getText().length() > 1) {
-	                String s = revisionField.getText().substring(0, 1);
-	                revisionField.setText(s);
-	            }
+	        	try {
+					if (revisionField.getText().length() > 1) {
+						String s = revisionField.getText().substring(0, 1);
+						revisionField.setText(s);
+					}
+				} catch (NullPointerException e) {
+					isCopy();
+				}
+
 	        }
 	    });
 		articleField.textProperty().addListener(new ChangeListener<String>() {
 	        @Override
 	        public void changed(final ObservableValue<? extends String> ov, final String oldValue, final String newValue) {
-	            if (articleField.getText().length() > 7) {
-	                String s = articleField.getText().substring(0, 7);
-	                articleField.setText(s);
-	            }
+	        	try {
+					if (articleField.getText().length() > 7) {
+						String s = articleField.getText().substring(0, 7);
+						articleField.setText(s);
+					}
+				} catch (NullPointerException e){
+	        		e.getMessage();
+				}
+
 	        }
 	    });
+		labelTemplBox.getSelectionModel().selectedItemProperty().addListener((o, oldVal, newVal) -> {
+			if (newVal == null) {
+				addTemplateBtn.setDisable(true);
+			} else {
+				addTemplateBtn.setDisable(false);
+			}
+		});
+
 		LabelTemplateService labelTemplateService = new LabelTemplateService();
 		templList = new ArrayList<LabelTemplate>();
 		labelTemplateService.findAllLabelTemplate().forEach(item->templList.add(item));
@@ -115,8 +130,13 @@ public class ArticleEditViewController implements MsgBox{
 			if (this.articleHeaders == null){
 				articleHeadersService.saveArticle(articleHeaders);
 			} else {
-				articleHeaders.setId(this.articleHeaders.getId());
-				articleHeadersService.updateArticle(articleHeaders);		
+				try {
+					articleHeaders.setId(this.articleHeaders.getId());
+					articleHeadersService.updateArticle(articleHeaders);
+				} catch (TransientObjectException e) {
+					articleHeadersService.saveArticle(articleHeaders);
+				}
+
 			}
 			saveClicked = true;
 			dialogStage.close();
@@ -161,7 +181,11 @@ public class ArticleEditViewController implements MsgBox{
 			longDescriptField.setText(articleHeaders.getLongDescript());
 			isNeedMac.setSelected(articleHeaders.isNeedMacProperty().get());
 			articleField.setEditable(false);
-			revisionField.setEditable(false);
+			if (articleHeaders.getRevision() == null) {
+				isCopy();
+			} else {
+				revisionField.setEditable(false);
+			}
 			tTemplates.setItems(tableList);
 		}	
 	
@@ -181,6 +205,15 @@ public class ArticleEditViewController implements MsgBox{
 	public boolean isSaveClicked() {
         return saveClicked;
     }
+
+    private void isCopy(){
+		articleField.setEditable(false);
+		revisionField.setEditable(true);
+		shortDescriptField.setEditable(false);
+		longDescriptField.setEditable(false);
+		isNeedMac.setDisable(true);
+		labelTemplBox.setDisable(true);
+	}
 	
 	public void setDialogStage(Stage dialogStage) {
 		this.dialogStage = dialogStage;

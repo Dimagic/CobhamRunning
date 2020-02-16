@@ -131,7 +131,7 @@ public class AsisCreatorController implements MsgBox {
 
 	private void fillTable() {
 		ObservableList<ArticleHeaders> articleList = FXCollections
-				.observableArrayList(getArticleHeadersService().findArticleByName(searchField.getText().toUpperCase()));
+				.observableArrayList(getArticleHeadersService().findArticleHeadersListByName(searchField.getText().toUpperCase()));
 		tArticle.setItems(articleList);
 	}
 

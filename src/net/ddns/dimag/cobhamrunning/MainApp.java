@@ -1,5 +1,6 @@
 package net.ddns.dimag.cobhamrunning;
 
+import com.sun.javafx.application.LauncherImpl;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
@@ -10,8 +11,10 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
+import jdk.nashorn.internal.objects.Global;
 import net.ddns.dimag.cobhamrunning.models.ArticleHeaders;
 import net.ddns.dimag.cobhamrunning.models.Settings;
+import net.ddns.dimag.cobhamrunning.utils.CobhamPreloader;
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import net.ddns.dimag.cobhamrunning.utils.NetworkUtils;
@@ -40,28 +43,37 @@ public class MainApp extends Application implements MsgBox {
     private static final Logger LOGGER = LogManager.getLogger(MainApp.class.getName());
 
 	private Image favicon = new Image("file:src/resources/images/cobham_C_64x64.png");
-    
+
     public MainApp(){
-    	
+
     }
-       
+
+    @Override
+    public void init() throws IOException {
+        System.out.println("Start init");
+        /** test DB connection*/
+        HibernateSessionFactoryUtil.getSessionFactory();
+        System.out.println("Finish init");
+    }
+
+    @Override
+    public void stop() throws Exception {
+        System.out.println("stop");
+    }
+
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        String VERSION = "0.0.10";
+        String VERSION = "0.0.16";
         this.primaryStage.setTitle(String.format("CobhamRunning %s", VERSION));
         this.primaryStage.getIcons().add(favicon);
-        try {	
-        	// Load the root layout from the fxml file
-           	FXMLLoader loader = new FXMLLoader(getClass().getResource("view/RootLayout.fxml"));
+        try {
+           	FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("RootLayout.fxml"));
 			rootLayout = loader.load();
-
 			Scene scene = new Scene(rootLayout);
 			primaryStage.setScene(scene);
-			
 			RootLayoutController controller = loader.getController();
             controller.setMainApp(this);
-		
 			primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -69,12 +81,11 @@ public class MainApp extends Application implements MsgBox {
         showTestsView();
         loadSettings();
 
-        HibernateSessionFactoryUtil.getSessionFactory();
     }
       
     public void showTestsView() {
         try {
-			FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("view/TestsView.fxml"));
+			FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("TestsView.fxml"));
 			AnchorPane overviewPage = loader.load();
 			rootLayout.setCenter(overviewPage);
 
@@ -89,7 +100,7 @@ public class MainApp extends Application implements MsgBox {
     public void showShippingView() {
     	try {
     		FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/ShippingView.fxml"));
+            loader.setLocation(getClass().getClassLoader().getResource("ShippingView.fxml"));
             AnchorPane page = loader.load();
             Stage shippingStage = new Stage();
             shippingStage.setTitle("Shipping journal");
@@ -110,7 +121,7 @@ public class MainApp extends Application implements MsgBox {
     public void showArticleCreatorView(){
     	try {
     		FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/AsisCreatorView.fxml"));
+            loader.setLocation(getClass().getClassLoader().getResource("AsisCreatorView.fxml"));
             BorderPane page = loader.load();
             asisCreatorStage = new Stage();
             asisCreatorStage.setTitle("ASIS creator");
@@ -133,7 +144,7 @@ public class MainApp extends Application implements MsgBox {
     public void showArticlesView(){
     	try {
     		FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/ArticlesView.fxml"));
+            loader.setLocation(getClass().getClassLoader().getResource("ArticlesView.fxml"));
             AnchorPane page = loader.load();
             articlesStage = new Stage();
             articlesStage.setTitle("Articles");
@@ -156,13 +167,18 @@ public class MainApp extends Application implements MsgBox {
     public boolean showArticleEditView(ArticleHeaders articleHeaders){
     	try {
     		FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/ArticleEditView.fxml"));
+            loader.setLocation(getClass().getClassLoader().getResource("ArticleEditView.fxml"));
+            System.out.println(loader.getLocation());
             AnchorPane page = loader.load();
             Stage articleEditStage = new Stage();
             if (articleHeaders == null){
-            	articleEditStage.setTitle("New article");
+                articleEditStage.setTitle("New article");
             } else {
-            	articleEditStage.setTitle(articleHeaders.getArticle());
+                if (articleHeaders.getArticle() != null && articleHeaders.getRevision() == null){
+                    articleEditStage.setTitle(String.format("New revision for %s", articleHeaders.getArticle()));
+                } else {
+                    articleEditStage.setTitle(articleHeaders.getArticle());
+                }
             }
             articleEditStage.getIcons().add(favicon);
             articleEditStage.initModality(Modality.WINDOW_MODAL);
@@ -182,7 +198,7 @@ public class MainApp extends Application implements MsgBox {
             }); 
             articleEditStage.showAndWait();
             return controller.isSaveClicked();
-        } catch (IOException e) {
+        } catch (IOException | IllegalStateException e) {
         	e.printStackTrace();
             MsgBox.msgException(e);
         }
@@ -192,7 +208,7 @@ public class MainApp extends Application implements MsgBox {
     public void showPrintAsisView(){
     	try {
     		FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/PrintAsisView.fxml"));
+            loader.setLocation(getClass().getClassLoader().getResource("PrintAsisView.fxml"));
             AnchorPane page = loader.load();
             Stage printAsisStage = new Stage();
             printAsisStage.setTitle("Print ASIS");
@@ -220,7 +236,7 @@ public class MainApp extends Application implements MsgBox {
     public void showLabelTemplatesView(){
     	try {
     		FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/LabelTemplatesView.fxml"));
+            loader.setLocation(getClass().getClassLoader().getResource("LabelTemplatesView.fxml"));
             AnchorPane page = loader.load();
             Stage labelTemplatesStage = new Stage();
             labelTemplatesStage.setTitle("Label templates");
@@ -257,7 +273,7 @@ public class MainApp extends Application implements MsgBox {
     	}
     	try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/RunningTest.fxml"));
+            loader.setLocation(getClass().getClassLoader().getResource("RunningTest.fxml"));
             AnchorPane page = loader.load();
 
             runningTestStage = new Stage();
@@ -299,7 +315,7 @@ public class MainApp extends Application implements MsgBox {
     public boolean showSettingsDialog() {
     	try {
             FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(MainApp.class.getResource("view/SettingsView.fxml"));
+            loader.setLocation(getClass().getClassLoader().getResource("SettingsView.fxml"));
             AnchorPane page = loader.load();
 
             Stage settingsStage = new Stage();
@@ -326,7 +342,7 @@ public class MainApp extends Application implements MsgBox {
     
     public boolean showCalibrationView() {
     	try {
-			FXMLLoader loader = new FXMLLoader(MainApp.class.getResource("view/CalibrationView.fxml"));
+			FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("CalibrationView.fxml"));
 			AnchorPane page = loader.load();
 			Stage calibrationStage = new Stage();
 			calibrationStage.setTitle("Calibration");
@@ -388,9 +404,10 @@ public class MainApp extends Application implements MsgBox {
 	public Settings getCurrentSettings() {
 		return currentSettings;
 	}
-	
+
     public static void main(String[] args) {
-        launch(args);
+//        launch(args);
+        LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
     }
     
     public TestsViewController getController(){

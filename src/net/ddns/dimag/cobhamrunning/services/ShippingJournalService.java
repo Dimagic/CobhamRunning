@@ -33,6 +33,10 @@ private ShippingJournalDao shippingJournalDao = new ShippingJournalDao();
 	    return shippingJournalDao.getJournalByDate(dateFrom, dateTo);
     }
 
+    public boolean isDeviceInJournal(Device device){
+	    return shippingJournalDao.isDeviceInJournal(device);
+    }
+
     public List<ShippingSystem> findAllDevice() {
         return shippingJournalDao.findAll();
     }

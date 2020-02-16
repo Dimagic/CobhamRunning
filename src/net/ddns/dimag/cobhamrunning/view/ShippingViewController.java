@@ -1,34 +1,45 @@
 package net.ddns.dimag.cobhamrunning.view;
 
+import com.sun.javafx.binding.StringFormatter;
+import javafx.application.Platform;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.*;
 import net.ddns.dimag.cobhamrunning.services.*;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import net.ddns.dimag.cobhamrunning.utils.RmvUtils;
+import net.ddns.dimag.cobhamrunning.utils.ShippingJournalData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.postgresql.util.PSQLException;
 
+import javax.persistence.NoResultException;
+import java.sql.SQLException;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.Executor;
 
 public class ShippingViewController implements MsgBox {
     private static final Logger LOGGER = LogManager.getLogger(ShippingViewController.class.getName());
     private ObservableList<ShippingSystem> shippingSystems = FXCollections.observableArrayList();
+    private Image procImage = new Image("file:src/resources/images/process.gif");
+    private Thread getDataThread;
     private MainApp mainApp;
     private Stage dialogStage;
 
-    @FXML
-    private ChoiceBox<String> tableTypeBox;
     @FXML
     private TableView<ShippingSystem> tSysToShip;
     @FXML
@@ -45,6 +56,8 @@ public class ShippingViewController implements MsgBox {
     private Button saveBtn;
     @FXML
     private Button closeBtn;
+    @FXML
+    private TextArea console;
 
     @FXML
     private TableColumn<ShippingSystem, String> dateShipColumn;
@@ -67,6 +80,10 @@ public class ShippingViewController implements MsgBox {
 
     @FXML
     private void initialize() {
+        initItemMenu();
+        initDate();
+
+        console.setEditable(false);
         dateShipColumn.prefWidthProperty().bind(tSysToShip.widthProperty().divide(7));
         articleColumn.prefWidthProperty().bind(tSysToShip.widthProperty().divide(7));
         asisColumn.prefWidthProperty().bind(tSysToShip.widthProperty().divide(7));
@@ -84,6 +101,15 @@ public class ShippingViewController implements MsgBox {
         systemVerColumn.setCellValueFactory(cellData -> cellData.getValue().getDevice().systemVerProperty());
         targetVerColumn.setCellValueFactory(cellData -> cellData.getValue().getDevice().targetVerProperty());
 
+
+
+//        console.textProperty().addListener(new ChangeListener<Object>() {
+//            @Override
+//            public void changed(ObservableValue<?> observable, Object oldValue,
+//                                Object newValue) {
+//                console.setScrollTop(Double.MAX_VALUE);
+//            }
+//        });
 
 //		tableTypeBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
 //			@Override
@@ -104,72 +130,51 @@ public class ShippingViewController implements MsgBox {
 //		ObservableList<String> tableTypes = FXCollections.observableArrayList("Journal", "Shipping");
 //		tableTypeBox.setItems(tableTypes);
 //		tableTypeBox.getSelectionModel().select(0);
-        initDate();
 
+    }
+
+    private void initItemMenu() {
+        ContextMenu menu = new ContextMenu();
+        MenuItem mDel = new MenuItem("Delete");
+        menu.getItems().add(mDel);
+        tSysToShip.setContextMenu(menu);
+
+        mDel.setOnAction((ActionEvent event) -> {
+            ShippingSystem shippingSystem = tSysToShip.getSelectionModel().getSelectedItem();
+            new DeviceService().deleteDevice(shippingSystem.getDevice());
+            shippingSystems.remove(shippingSystem);
+            tSysToShip.refresh();
+        });
     }
 
     @FXML
     private void handeleAddBtn() {
-        Device device;
-        DeviceService devServ = new DeviceService();
         List<String> currSys = MsgBox.msgScanSystemBarcode();
         String articleString = currSys.get(0);
         String asisString = currSys.get(1);
+        String snString = MsgBox.msgInputSN();
+        console.clear();
+//        Caller caller = new Caller();
+//        new GetData(caller, this, asisString, articleString, snString).start();
+        Thread thread = new ShippingJournalData(this, asisString, articleString, snString);
+        thread.start();
 
-        try {
-            device = devServ.findDeviceByAsis(asisString).get(0);
-        } catch (IndexOutOfBoundsException e) {
-            AsisService asisService = new AsisService();
-            Asis asis = getAsis(asisString, articleString);
-            if (asis == null) {
-                return;
-            }
-            String snString = MsgBox.msgInputSN();
-            device = new Device(asis, snString);
-            try {
-                devServ.saveDevice(device);
-            } catch (Throwable ex){
-                MsgBox.msgWarning("Doublecate data", ex.toString());
-                return;
-            }
-            asis.setDevice(device);
-        }
-        try{
-            int recCount = Integer.valueOf(String.valueOf(RmvUtils.checkRmvByAsis(asisString).get(0).get("rec_count")));
-            if (recCount < 1){
-                MsgBox.msgWarning("RMV data", String.format("Test data for ASIS: %s not found in RMV data base", asisString));
-                new DeviceService().deleteDevice(device);
-                return;
-            }
 
-            DeviceInfo deviceInfo = RmvUtils.getDeviceInfo(device);
-            DeviceInfoService deviceInfoService = new DeviceInfoService();
-            deviceInfoService.saveDeviceInfo(deviceInfo);
-            device.setDeviceInfo(deviceInfo);
-        } catch (Exception e){
-            LOGGER.error(e);
-            e.printStackTrace();
-            MsgBox.msgError("Error", e.getMessage());
-            return;
-        }
-
-        ShippingSystem shippingSystem = new ShippingSystem();
-        shippingSystem.setDevice(device);
-        shippingSystem.setDateShip(new Date());
-        ShippingJournalService shippingJournalService = new ShippingJournalService();
-        shippingJournalService.saveShippingJournal(shippingSystem);
-
-        setSystemData(shippingSystem);
     }
 
-    private void setSystemData(ShippingSystem system) {
+    public void setShippingSystems(ShippingSystem system) {
         for (ShippingSystem item : shippingSystems) {
             if (item.equals(system)) {
                 return;
             }
         }
         shippingSystems.add(system);
-        tSysToShip.setItems(shippingSystems);
+        tSysToShip.setItems(getDeviceData());
+        tSysToShip.refresh();
+    }
+
+    public ObservableList<ShippingSystem> getShippingSystems(){
+        return shippingSystems;
     }
 
     private void initDate() {
@@ -186,81 +191,50 @@ public class ShippingViewController implements MsgBox {
         dateTo.setValue(stop);
     }
 
-    private void setShippingSystems(ShippingSystem tmp) {
-//        DeviceService devServ = new DeviceService();
-//        List<Device> deviceList = new ArrayList<Device>();
-//        for (ShippingSystem item : shippingSystems) {
-//            if (item.equals(tmp)) {
-////				MsgBox.msgInfo("Append system to running",
-////						String.format("System: %s with ASIS: %s already present in table", item.articleProperty().get(),
-////								item.asisProperty().get()));
-//                return;
-//            }
-//            // devServ.saveDevice(item.getDevice());
-//            // deviceList =
-//            // devServ.findDeviceByAsis(item.asisProperty().getValue());
-//            // for (Device dev: deviceList){
-//            // System.out.println(dev.toString());
-//            // }
-//        }
-//        shippingSystems.add(tmp);
-    }
-
     @FXML
     private void handleSaveBtn() {
 
     }
 
-    private Asis getAsis(String name, String article) {
-        Asis asis;
-        MacAddress macAddress;
-        ArticleHeaders articleHeaders;
-        AsisService asisService = new AsisService();
 
-        asis = asisService.findByName(name);
-        if (asis == null) {
-            articleHeaders = getArticle(article);
-            if (articleHeaders == null) {
-                return null;
-            }
-            asis = new Asis(name, articleHeaders);
-            asis.setImported(true);
-            asisService.saveAsis(asis);
-            if (articleHeaders.getNeedmac()) {
-                MacAddressService macAddressService = new MacAddressService();
-                String macString = MsgBox.msgScanMac();
-                if (macString == null) {
-                    return null;
-                }
-                macAddress = new MacAddress(macString);
-                macAddress.setAsis(asis);
-                macAddressService.saveMac(macAddress);
-                asis.setMacAddress(macAddress);
-            }
-        }
-        return asis;
-    }
-
-    private ArticleHeaders getArticle(String article) {
-        ArticleHeadersService articleHeadersService = new ArticleHeadersService();
-        ArticleHeaders articleHeaders;
-        try {
-            articleHeaders = articleHeadersService.findArticleByName(article).get(0);
-        } catch (IndexOutOfBoundsException e) {
-            MsgBox.msgWarning("Warning", String.format("Article %s not found", article));
-            return null;
-        }
-        return articleHeaders;
+    public void writeConsole(String val) {
+        console.appendText(val + "\n");
+        console.selectPositionCaret(console.getLength());
     }
 
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
     }
 
+    public ObservableList<ShippingSystem> getDeviceData() {
+        return shippingSystems;
+    }
+
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
         ShippingJournalService shippingJournalService = new ShippingJournalService();
-        tSysToShip.setItems(FXCollections.observableArrayList(shippingJournalService
-                .getJournalByDate(java.sql.Date.valueOf(dateFrom.getValue()), java.sql.Date.valueOf(dateTo.getValue()))));
+        shippingSystems = FXCollections.observableArrayList(shippingJournalService
+                .getJournalByDate(java.sql.Date.valueOf(dateFrom.getValue()), java.sql.Date.valueOf(dateTo.getValue())));
+        tSysToShip.setItems(shippingSystems);
     }
+
+//    static class Caller implements Callback{
+//        private ArrayList<ShippingSystem> systems = new ArrayList<>();
+//
+//        public ArrayList<ShippingSystem> getSystems(){
+//            return systems;
+//        }
+//        @Override
+//        public void callMeBack(ShippingSystem system){
+//            synchronized (systems) {
+//                systems.add(system);
+//            }
+//        }
+//    }
+//
+//    interface Callback {
+//        void callMeBack(ShippingSystem system);
+//    }
+
+
 }

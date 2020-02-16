@@ -10,6 +10,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -40,15 +41,11 @@ public class Device {
         this.sn = sn;
     }
 
-    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, optional = true)
     @JoinColumn(name = "deviceInfo_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
     private DeviceInfo deviceInfo;
 
     public DeviceInfo getDeviceInfo() {
-        DeviceInfoService deviceInfoService = new DeviceInfoService();
-        DeviceInfo deviceInfo = deviceInfoService.findDeviceInfoById((long) 1);
-        System.out.println(deviceInfo);
         return deviceInfo;
     }
 

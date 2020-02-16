@@ -146,16 +146,14 @@ public class Asis {
 
 	@Override
 	public String toString() {
-		final StringBuffer sb = new StringBuffer("Asis{");
-		sb.append("id=").append(id);
-		sb.append(", asis='").append(asis).append('\'');
-		sb.append(", dateCreate=").append(dateCreate);
-		sb.append(", isImported=").append(isImported);
-		sb.append(", articleHeaders=").append(articleHeaders.getArticle());
-		sb.append(", printJob=").append(printJob.getId());
-		sb.append(", macAddress=").append(macAddress.getMac());
-		sb.append(", device=").append(device.getDeviceInfo());
-		sb.append('}');
-		return sb.toString();
+		return "Asis{" +
+				"id=" + id +
+				", asis='" + asis + '\'' +
+				", dateCreate=" + dateCreate +
+				", isImported=" + isImported +
+				", articleHeaders=" + articleHeaders +
+				", macAddress=" + macAddress +
+				", device=" + device +
+				'}';
 	}
 }

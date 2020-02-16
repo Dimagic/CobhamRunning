@@ -11,16 +11,26 @@ public class DeviceDao implements UniversalDao {
 		return HibernateSessionFactoryUtil.getSessionFactory().openSession().get(Device.class, id);
 	}
 
-	public List findDeviceByAsis(String asis) {
+	public Device findDeviceByAsis(String asis) {
 		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+		Device device = (Device) session.createSQLQuery("SELECT * FROM public.device WHERE asis_id = (SELECT id FROM public.asis WHERE asis = :asis)")
+				.addEntity(Device.class).setParameter("asis", asis).getSingleResult();
+		session.close();
+		return device;
+	}
 
-		return session.createSQLQuery("SELECT * FROM public.device WHERE asis_id = (SELECT id FROM public.asis WHERE asis = :asis)")
-				.addEntity(Device.class).setParameter("asis", asis).list();
+	public Device findDeviceBySn(String sn) {
+		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+		Device device = (Device) session.createSQLQuery("SELECT * FROM public.device WHERE sn = :sn")
+				.addEntity(Device.class).setParameter("sn", sn).getSingleResult();
+		session.close();
+		return device;
 	}
 
 	public List findAll() {
-		List devices = HibernateSessionFactoryUtil.getSessionFactory().openSession()
-				.createQuery("From Device").list();
+		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+		List devices = session.createQuery("From Device").list();
+		session.close();
 		return devices;
 	}
 

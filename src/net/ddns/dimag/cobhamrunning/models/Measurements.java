@@ -24,6 +24,8 @@ public class Measurements {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+//	ToDo: constructor
+
 	@Column(nullable = false, length = 128)
 	private String measName;
 
@@ -39,6 +41,9 @@ public class Measurements {
 
 	@Column(length = 128)
 	private String measMax;
+
+	@Column(name = "measureNumber")
+	private int measureNumber;
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "test_id", nullable = false)
@@ -102,10 +107,33 @@ public class Measurements {
 		this.test = test;
 	}
 
-	@Override
-	public String toString() {
-		return "Measurements [id=" + id + ", measName=" + measName + ", measMin=" + measMin + ", measVal=" + measVal
-				+ ", measMax=" + measMax + ", test=" + test + "]";
+	public int getMeasureNumber() {
+		return measureNumber;
 	}
 
+	public void setMeasureNumber(int measureNumber) {
+		this.measureNumber = measureNumber;
+	}
+
+	public Date getMeasDate() {
+		return measDate;
+	}
+
+	public void setMeasDate(Date measDate) {
+		this.measDate = measDate;
+	}
+
+	@Override
+	public String toString() {
+		return "Measurements{" +
+				"id=" + id +
+				", measName='" + measName + '\'' +
+				", measDate=" + measDate +
+				", measMin='" + measMin + '\'' +
+				", measVal='" + measVal + '\'' +
+				", measMax='" + measMax + '\'' +
+				", measureNumber=" + measureNumber +
+				", test=" + test +
+				'}';
+	}
 }

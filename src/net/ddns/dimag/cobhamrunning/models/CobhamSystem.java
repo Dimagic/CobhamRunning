@@ -48,31 +48,31 @@ public class CobhamSystem extends Task<Void> implements SystemCommands {
 	public CobhamSystem(){};
 
 	public CobhamSystem(String article, String asis, String mac, RunningTestController controller) {
-		super();
-		ArticleHeadersService articleServ = new ArticleHeadersService();
-//		ToDo: rebuild all
-//		this.device = new Device(articleServ.findArticleByName(article), asis, mac);
-		this.device = null;
-		
-		DeviceService devServ = new DeviceService();
-        List<Device> devList = devServ.findDeviceByAsis(asis);
-        if (devList.size() > 0){
-//        	ToDo: if size > 1
-        	if (this.device.hashCode() == devList.get(0).hashCode()){
-        		device = devList.get(0);
-			} else {
-//				If device found but != this device
-			}
-        	
-        } else {
-//        	If device not found
-        	devServ.saveDevice(this.device);
-
-        }
-        
-        
-		
-		this.controller = controller;
+//		super();
+//		ArticleHeadersService articleServ = new ArticleHeadersService();
+////		ToDo: rebuild all
+////		this.device = new Device(articleServ.findArticleByName(article), asis, mac);
+//		this.device = null;
+//
+//		DeviceService devServ = new DeviceService();
+//        Device device = devServ.findDeviceByAsis(asis);
+//        if (devList.size() > 0){
+////        	ToDo: if size > 1
+//        	if (this.device.hashCode() == devList.get(0).hashCode()){
+//        		device = devList.get(0);
+//			} else {
+////				If device found but != this device
+//			}
+//
+//        } else {
+////        	If device not found
+//        	devServ.saveDevice(this.device);
+//
+//        }
+//
+//
+//
+//		this.controller = controller;
 	}
 
 	public CobhamSystem(Device dev){
@@ -81,25 +81,25 @@ public class CobhamSystem extends Task<Void> implements SystemCommands {
 	}
 	
 	public CobhamSystem(String article, String asis, String mac) {
-		super();
-		ArticleHeadersService articleServ = new ArticleHeadersService();
-//		ToDo: rebuild all
-//		this.device = new Device(articleServ.findArticleByName(article), asis, mac);
-		this.device = null;
-		DeviceService devServ = new DeviceService();
-        List<Device> devList = devServ.findDeviceByAsis(asis);
-        if (devList.size() > 0){
-//        	ToDo: if size > 1
-        	if (this.device.hashCode() == devList.get(0).hashCode()){
-        		device = devList.get(0);
-			} else {
-//				If device found but != this device
-			}
-        	
-        } else {
-//        	If device not found
-        	devServ.saveDevice(this.device);
-        }
+//		super();
+//		ArticleHeadersService articleServ = new ArticleHeadersService();
+////		ToDo: rebuild all
+////		this.device = new Device(articleServ.findArticleByName(article), asis, mac);
+//		this.device = null;
+//		DeviceService devServ = new DeviceService();
+//        List<Device> devList = devServ.findDeviceByAsis(asis);
+//        if (devList.size() > 0){
+////        	ToDo: if size > 1
+//        	if (this.device.hashCode() == devList.get(0).hashCode()){
+//        		device = devList.get(0);
+//			} else {
+////				If device found but != this device
+//			}
+//
+//        } else {
+////        	If device not found
+//        	devServ.saveDevice(this.device);
+//        }
 
 	}
 

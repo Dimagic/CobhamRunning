@@ -27,6 +27,13 @@
 				</includes>
 			</resource>
 			<resource>
+				<directory>src/net/ddns/dimag/cobhamrunning/view</directory>
+				<filtering>true</filtering>
+				<includes>
+					<include>*.fxml</include>
+				</includes>
+			</resource>
+			<resource>
 				<directory>src</directory>
 				<filtering>false</filtering>
 				<includes>

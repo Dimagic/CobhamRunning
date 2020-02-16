@@ -25,6 +25,17 @@ import org.hibernate.annotations.OnDeleteAction;
 @Entity
 @Table(name = "tests")
 public class Tests {
+	@Column(nullable = false)
+	private String name;
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(nullable = false, insertable = true, updatable = false)
 	private Date testDate;
@@ -90,7 +101,11 @@ public class Tests {
 
 	@Override
 	public String toString() {
-		return "Tests [id=" + id + ", testDate=" + testDate + ", device=" + device + ", meas=" + meas + "]";
+		return "Tests{" +
+				"name='" + name + '\'' +
+				", testDate=" + testDate +
+				", device=" + device +
+				", id=" + id +
+				'}';
 	}
-
 }
