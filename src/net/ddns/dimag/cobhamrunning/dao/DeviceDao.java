@@ -8,7 +8,10 @@ import java.util.List;
 
 public class DeviceDao implements UniversalDao {
 	public Device findById(int id) {
-		return HibernateSessionFactoryUtil.getSessionFactory().openSession().get(Device.class, id);
+		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+		Device device = session.get(Device.class, id);
+		session.close();
+		return device;
 	}
 
 	public Device findDeviceByAsis(String asis) {

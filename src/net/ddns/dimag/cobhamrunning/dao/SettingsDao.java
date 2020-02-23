@@ -10,7 +10,10 @@ import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 
 public class SettingsDao {
 	public Settings findById(int id) {
-        return HibernateSessionFactoryUtil.getSessionFactory().openSession().get(Settings.class, id);
+        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        Settings settings = session.get(Settings.class, id);
+        session.close();
+        return settings;
     }
 	
 	public void save(Settings setting) {
@@ -38,8 +41,10 @@ public class SettingsDao {
     }
 
     public List<Settings> findAll() {
-        List<Settings> settings = (List<Settings>)  HibernateSessionFactoryUtil.getSessionFactory().openSession().createQuery("From Settings").list();
-        return settings;
+        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        List<Settings> settingsList = session.createQuery("From Settings").list();
+        session.close();
+        return settingsList;
     }
 
 }

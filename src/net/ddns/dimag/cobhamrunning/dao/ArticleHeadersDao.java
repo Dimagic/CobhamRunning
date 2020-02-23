@@ -9,7 +9,10 @@ import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 
 public class ArticleHeadersDao implements UniversalDao {
 	public ArticleHeaders findById(int id) {
-        return HibernateSessionFactoryUtil.getSessionFactory().openSession().get(ArticleHeaders.class, id);
+		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+		ArticleHeaders articleHeaders = session.get(ArticleHeaders.class, id);
+		session.close();
+        return articleHeaders;
     }
 	
 	public ArticleHeaders findArticleHeadersByName(String article){

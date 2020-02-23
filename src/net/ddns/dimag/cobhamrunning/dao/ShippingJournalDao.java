@@ -12,7 +12,10 @@ import org.hibernate.Session;
 
 public class ShippingJournalDao implements UniversalDao {
     public ShippingSystem findById(int id) {
-        return HibernateSessionFactoryUtil.getSessionFactory().openSession().get(ShippingSystem.class, id);
+        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        ShippingSystem shippingSystem = session.get(ShippingSystem.class, id);
+        session.close();
+        return shippingSystem;
     }
 
     public boolean isDeviceInJournal(Device device) {
@@ -42,7 +45,9 @@ public class ShippingJournalDao implements UniversalDao {
     }
 
     public List<ShippingSystem> findAll() {
-        List<ShippingSystem> journal = (List<ShippingSystem>) HibernateSessionFactoryUtil.getSessionFactory().openSession().createQuery("From shippingjournal").list();
+        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        List<ShippingSystem> journal = (List<ShippingSystem>) session.createQuery("From shippingjournal").list();
+        session.close();
         return journal;
     }
 }

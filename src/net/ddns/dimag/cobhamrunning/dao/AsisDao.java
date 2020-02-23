@@ -11,7 +11,10 @@ import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 public class AsisDao implements UniversalDao{
 
 	public Asis findById(int id) {
-        return HibernateSessionFactoryUtil.getSessionFactory().openSession().get(Asis.class, id);
+		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+		Asis asis = session.get(Asis.class, id);
+		session.close();
+        return asis;
     }
 
     public Asis findByName(String name){

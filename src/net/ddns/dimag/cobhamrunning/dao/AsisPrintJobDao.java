@@ -10,7 +10,10 @@ import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 
 public class AsisPrintJobDao implements UniversalDao {
 	public AsisPrintJob findById(int id) {
-        return HibernateSessionFactoryUtil.getSessionFactory().openSession().get(AsisPrintJob.class, id);
+		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+		AsisPrintJob asisPrintJob = session.get(AsisPrintJob.class, id);
+		session.close();
+        return asisPrintJob;
     }
 	
 	public int getUnprintedAsisCount() {
