@@ -19,6 +19,9 @@ import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
+import net.ddns.dimag.cobhamrunning.view.TestsViewController;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public interface MsgBox {
 	Image favicon = new Image("file:src/resources/images/cobham_C_64x64.png");

@@ -42,7 +42,6 @@ public class Tests {
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "device_id", nullable = false)
-	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Device device;
 
 	@Id
@@ -81,7 +80,7 @@ public class Tests {
 	@ElementCollection(targetClass = Long.class)
 	private Set<Measurements> meas = new HashSet<Measurements>();
 
-	@OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "test", orphanRemoval = true)
 	public Set<Measurements> getMeas() {
 		return this.meas;
 	}

@@ -41,7 +41,7 @@ public class Device {
         this.sn = sn;
     }
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true, optional = true)
+    @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true)
     @JoinColumn(name = "deviceInfo_id")
     private DeviceInfo deviceInfo;
 
@@ -82,7 +82,7 @@ public class Device {
     @ElementCollection(targetClass = Long.class)
     private Set<Tests> tests = new HashSet<Tests>();
 
-    @OneToMany(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "device", orphanRemoval = true)
     public Set<Tests> getTests() {
         return this.tests;
     }
@@ -100,7 +100,7 @@ public class Device {
         getTests().remove(tests);
     }
 
-    @OneToOne(mappedBy = "device", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "device", orphanRemoval = true)
     private ShippingSystem shippingSystem;
 
     public ShippingSystem getShippingSystem() {
@@ -155,4 +155,5 @@ public class Device {
             return new SimpleStringProperty("");
         }
     }
+
 }

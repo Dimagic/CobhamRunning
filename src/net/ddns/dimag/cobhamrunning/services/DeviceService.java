@@ -4,10 +4,13 @@ import java.util.List;
 
 import net.ddns.dimag.cobhamrunning.dao.DeviceDao;
 import net.ddns.dimag.cobhamrunning.models.Device;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import javax.persistence.NoResultException;
 
 public class DeviceService {
+    private final Logger LOGGER = LogManager.getLogger(this.getClass().getName());
 	private DeviceDao deviceDao = new DeviceDao();
 	
 	public DeviceService() {	
@@ -40,7 +43,7 @@ public class DeviceService {
     }
 
     public void deleteDevice(Device device) {
-    	deviceDao.delete(device);
+            deviceDao.delete(device);
     }
 
     public void updateDevice(Device device) {

@@ -44,6 +44,10 @@ public class MeasurementsService {
         }
     }
 
+    public List<Measurements> getMeasureSetByTest(Tests test){
+	    return measDao.getMeasureSetByTest(test);
+    }
+
     public void deleteMeas(Measurements meas) {
     	measDao.delete(meas);
     }

@@ -1,36 +1,28 @@
 package net.ddns.dimag.cobhamrunning.view;
 
-import com.sun.javafx.binding.StringFormatter;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 import net.ddns.dimag.cobhamrunning.MainApp;
-import net.ddns.dimag.cobhamrunning.models.*;
-import net.ddns.dimag.cobhamrunning.services.*;
-import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
+import net.ddns.dimag.cobhamrunning.models.Device;
+import net.ddns.dimag.cobhamrunning.models.ShippingSystem;
+import net.ddns.dimag.cobhamrunning.services.DeviceService;
+import net.ddns.dimag.cobhamrunning.services.ShippingJournalService;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
-import net.ddns.dimag.cobhamrunning.utils.RmvUtils;
 import net.ddns.dimag.cobhamrunning.utils.ShippingJournalData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
-import org.postgresql.util.PSQLException;
 
-import javax.persistence.NoResultException;
-import java.sql.SQLException;
-import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
-import java.util.*;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.Executor;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 
 public class ShippingViewController implements MsgBox {
     private static final Logger LOGGER = LogManager.getLogger(ShippingViewController.class.getName());
@@ -101,6 +93,17 @@ public class ShippingViewController implements MsgBox {
         systemVerColumn.setCellValueFactory(cellData -> cellData.getValue().getDevice().systemVerProperty());
         targetVerColumn.setCellValueFactory(cellData -> cellData.getValue().getDevice().targetVerProperty());
 
+        tSysToShip.setRowFactory(tv -> {
+            TableRow<ShippingSystem> row = new TableRow<>();
+            row.setOnMouseClicked(event -> {
+                if (event.getButton() == MouseButton.SECONDARY) {
+//                    cm.show(tArticle, event.getScreenX(), event.getScreenY());
+                } else if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    mainApp.showMeasureView(row.getItem().getDevice());
+                }
+            });
+            return row;
+        });
 
 
 //        console.textProperty().addListener(new ChangeListener<Object>() {
@@ -140,26 +143,36 @@ public class ShippingViewController implements MsgBox {
         tSysToShip.setContextMenu(menu);
 
         mDel.setOnAction((ActionEvent event) -> {
-            ShippingSystem shippingSystem = tSysToShip.getSelectionModel().getSelectedItem();
-            new DeviceService().deleteDevice(shippingSystem.getDevice());
-            shippingSystems.remove(shippingSystem);
-            tSysToShip.refresh();
+            try {
+//                ShippingSystem shippingSystem = tSysToShip.getSelectionModel().getSelectedItem();
+//                Device device = shippingSystem.getDevice();
+//                DeviceService deviceService = new DeviceService();
+//                deviceService.deleteDevice(device);
+//                shippingSystems.remove(shippingSystem);
+//                tSysToShip.refresh();
+            } catch (Exception e) {
+                LOGGER.error(e.getClass() + ": " +  e.getMessage(), e);
+                MsgBox.msgException(e);
+            }
         });
     }
 
     @FXML
     private void handeleAddBtn() {
-        List<String> currSys = MsgBox.msgScanSystemBarcode();
-        String articleString = currSys.get(0);
-        String asisString = currSys.get(1);
-        String snString = MsgBox.msgInputSN();
-        console.clear();
-//        Caller caller = new Caller();
-//        new GetData(caller, this, asisString, articleString, snString).start();
-        Thread thread = new ShippingJournalData(this, asisString, articleString, snString);
-        thread.start();
-
-
+        try {
+            List<String> currSys = MsgBox.msgScanSystemBarcode();
+            String articleString = currSys.get(0);
+            String asisString = currSys.get(1);
+            String snString = MsgBox.msgInputSN();
+            console.clear();
+            Thread thread = new ShippingJournalData(this, asisString, articleString, snString);
+            thread.start();
+        } catch (NullPointerException e) {
+            return;
+        } catch (Exception e){
+            LOGGER.error(e.getMessage());
+            MsgBox.msgException(e);
+        }
     }
 
     public void setShippingSystems(ShippingSystem system) {
@@ -206,7 +219,7 @@ public class ShippingViewController implements MsgBox {
         this.dialogStage = dialogStage;
     }
 
-    public ObservableList<ShippingSystem> getDeviceData() {
+    private ObservableList<ShippingSystem> getDeviceData() {
         return shippingSystems;
     }
 
@@ -217,24 +230,4 @@ public class ShippingViewController implements MsgBox {
                 .getJournalByDate(java.sql.Date.valueOf(dateFrom.getValue()), java.sql.Date.valueOf(dateTo.getValue())));
         tSysToShip.setItems(shippingSystems);
     }
-
-//    static class Caller implements Callback{
-//        private ArrayList<ShippingSystem> systems = new ArrayList<>();
-//
-//        public ArrayList<ShippingSystem> getSystems(){
-//            return systems;
-//        }
-//        @Override
-//        public void callMeBack(ShippingSystem system){
-//            synchronized (systems) {
-//                systems.add(system);
-//            }
-//        }
-//    }
-//
-//    interface Callback {
-//        void callMeBack(ShippingSystem system);
-//    }
-
-
 }

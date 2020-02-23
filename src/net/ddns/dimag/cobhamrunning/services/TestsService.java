@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.ddns.dimag.cobhamrunning.dao.SettingsDao;
 import net.ddns.dimag.cobhamrunning.dao.TestsDao;
+import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.Tests;
 
 public class TestsService {
@@ -20,7 +21,11 @@ public class TestsService {
     	System.out.println(tests);
     	testsDao.save(tests);
     }
-    
+
+    public List<Tests> getTestsByDevice(Device device){
+	    return testsDao.getTestsByDevice(device);
+    }
+
     public void deleteTest(Tests tests) {
     	testsDao.delete(tests);
     }

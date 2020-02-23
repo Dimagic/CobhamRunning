@@ -1,17 +1,21 @@
 package net.ddns.dimag.cobhamrunning.utils;
 
 import net.ddns.dimag.cobhamrunning.models.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
 import org.hibernate.internal.util.config.ConfigurationException;
+import org.hibernate.stat.Statistics;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
 
 public class HibernateSessionFactoryUtil implements MsgBox {
+    private static final Logger LOGGER = LogManager.getLogger(HibernateSessionFactoryUtil.class.getName());
     private static SessionFactory sessionFactory;
 
     private HibernateSessionFactoryUtil() {
@@ -45,13 +49,15 @@ public class HibernateSessionFactoryUtil implements MsgBox {
                         .setProperty("hibernate.connection.autocommit", "false")
                         .configure();
 
-
                 StandardServiceRegistryBuilder builder = new StandardServiceRegistryBuilder().applySettings(configuration.getProperties());
                 sessionFactory = configuration.buildSessionFactory(builder.build());
+                Statistics stats = sessionFactory.getStatistics();
+                stats.setStatisticsEnabled(true);
             } catch (ConfigurationException e) {
+                LOGGER.error(e);
                 MsgBox.msgError("DB connection", e.getMessage());
             } catch (Exception e) {
-                e.printStackTrace();
+                LOGGER.error(e);
                 MsgBox.msgException(e);
             }
         }
@@ -65,6 +71,7 @@ public class HibernateSessionFactoryUtil implements MsgBox {
             Unmarshaller um = context.createUnmarshaller();
             return (Settings) um.unmarshal(file);
         } catch (Exception e) {
+            LOGGER.error(e);
             MsgBox.msgException(e);
         }
         return null;

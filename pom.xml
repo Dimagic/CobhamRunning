@@ -7,6 +7,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<java.version>1.8</java.version>
+		<itext.version>RELEASE</itext.version>
 	</properties>
 
 	<build>
@@ -50,7 +51,7 @@
 						<source>1.8</source>
 						<target>1.8</target>
 						<fork>true</fork>
-						<executable>c:\Drivers\Work\JDK\bin\javac</executable>
+						<executable>C:\Drivers\Application\JDK\bin\javac</executable>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -154,8 +155,6 @@
 			<version>3.5</version>
 		</dependency>
 
-
-
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>
@@ -174,7 +173,6 @@
 			<artifactId>json</artifactId>
 			<version>20190722</version>
 		</dependency>
-
 
 		<dependency>
 			<groupId>org.firebirdsql.jdbc</groupId>
@@ -216,5 +214,12 @@
 			<version>0.0.3</version>
 		</dependency>
 
+		<!-- add all iText 7 modules -->
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itext7-core</artifactId>
+			<version>${itext.version}</version>
+			<type>pom</type>
+		</dependency>
 	</dependencies>
 </project>

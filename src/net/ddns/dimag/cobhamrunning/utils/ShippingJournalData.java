@@ -4,12 +4,14 @@ import javafx.application.Platform;
 import net.ddns.dimag.cobhamrunning.models.*;
 import net.ddns.dimag.cobhamrunning.services.*;
 import net.ddns.dimag.cobhamrunning.view.ShippingViewController;
-import org.junit.Test;
 
 import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 public class ShippingJournalData extends Thread{
     private ShippingViewController controller;
@@ -17,10 +19,7 @@ public class ShippingJournalData extends Thread{
     private String asisString;
     private String snString;
     private RmvUtils rmvUtils;
-//    private ShippingViewController.Callback cb;
 
-//    public ShippingJournalData(ShippingViewController.Callback cb, ShippingViewController controller, String asisString, String articleString, String snString) {
-//        this.cb = cb;
 public ShippingJournalData(ShippingViewController controller, String asisString, String articleString, String snString) {
         this.controller = controller;
         this.articleString = articleString;
@@ -72,10 +71,16 @@ public ShippingJournalData(ShippingViewController controller, String asisString,
 
             for (String testName: testMap.keySet()){
                 HashMap<String, Object> testHeader = rmvUtils.getLastTestResult(asis.getAsis(), testName);
-                if ((int) testHeader.get("TestStatus") != 0){
-                    MsgBox.msgWarning("Warning", "Not all tests in RMV DB is PASS");
+                try {
+                    if ((int) testHeader.get("TestStatus") != 0){
+                        MsgBox.msgWarning("Warning", "Not all tests in RMV DB is PASS");
+                        return;
+                    }
+                } catch (NullPointerException e){
+                    MsgBox.msgWarning("Warning", String.format("Measures for test: %s not found", testName));
                     return;
                 }
+
                 Tests tests = new Tests();
                 tests.setName(testName);
                 tests.setDevice(device);
@@ -112,9 +117,6 @@ public ShippingJournalData(ShippingViewController controller, String asisString,
             }
             device.setTests(setTests);
 
-
-
-
             ShippingSystem shippingSystem = new ShippingSystem();
             shippingSystem.setDevice(device);
             shippingSystem.setDateShip(new Date());
@@ -122,27 +124,6 @@ public ShippingJournalData(ShippingViewController controller, String asisString,
 
             controller.setShippingSystems(shippingSystem);
             writeConsole("Done");
-
-
-//            getTestsList(asis);
-
-
-//            DeviceInfo deviceInfo = getDeviseInfo(device);
-//
-//            ShippingSystem shippingSystem = new ShippingSystem();
-//            shippingSystem.setDevice(device);
-//            shippingSystem.setDateShip(new Date());
-//
-//            DeviceInfoService deviceInfoService = new DeviceInfoService();
-//            deviceInfoService.saveOrUpdateDeviceInfo(deviceInfo);
-//            device.setDeviceInfo(deviceInfo);
-//            deviceService.saveOrUpdateDevice(device);
-//            shippingJournalService.saveShippingJournal(shippingSystem);
-//
-//            getTestMeasures(device);
-//            controller.setShippingSystems(shippingSystem);
-//            writeConsole("Done");
-//            cb.callMeBack(shippingSystem);
         } catch (SQLException | ClassNotFoundException e) {
             MsgBox.msgException(e);
             return;
@@ -170,23 +151,6 @@ public ShippingJournalData(ShippingViewController controller, String asisString,
         }
         return articleHeaders;
     }
-
-
-
-//    private void isAllRmvTestPass(Asis asis) throws CobhamRunningException, SQLException, ClassNotFoundException {
-//        controller.writeConsole("Searching latest test results on RMV...");
-//        HashMap<String, HashMap<String, Object>> rmvTestResult = new HashMap<>();
-//        for (Object testName : testNames) {
-//            System.out.println(testNames);
-//            HashMap<String, Object> res = RmvUtils.getLastTestResult(asis.getAsis(), (String) testName);
-//            writeConsole(String.format("Found test %s: %s", testName, res.get("TestStatus")));
-//            rmvTestResult.put((String) testName, res);
-//        }
-//        /** check if all tests in RMV is pass */
-//        if (rmvTestResult.containsValue(false)) {
-//            throw new CobhamRunningException("Not all tests in RMV is PASS");
-//        }
-//    }
 
     private void getTestMeasures(Device device){
 //        try {

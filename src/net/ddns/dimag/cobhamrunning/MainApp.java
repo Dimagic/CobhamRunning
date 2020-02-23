@@ -11,8 +11,8 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import jdk.nashorn.internal.objects.Global;
 import net.ddns.dimag.cobhamrunning.models.ArticleHeaders;
+import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.Settings;
 import net.ddns.dimag.cobhamrunning.utils.CobhamPreloader;
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
@@ -35,6 +35,7 @@ public class MainApp extends Application implements MsgBox {
     private Stage runningTestStage;
     private Stage asisCreatorStage;
     private Stage articlesStage;
+    private Stage shippingStage;
     private BorderPane rootLayout;
 	private Settings currentSettings;
 	private TestsViewController testsViewController;
@@ -64,7 +65,7 @@ public class MainApp extends Application implements MsgBox {
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        String VERSION = "0.0.16";
+        String VERSION = "0.0.18";
         this.primaryStage.setTitle(String.format("CobhamRunning %s", VERSION));
         this.primaryStage.getIcons().add(favicon);
         try {
@@ -102,7 +103,7 @@ public class MainApp extends Application implements MsgBox {
     		FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("ShippingView.fxml"));
             AnchorPane page = loader.load();
-            Stage shippingStage = new Stage();
+            shippingStage = new Stage();
             shippingStage.setTitle("Shipping journal");
             shippingStage.getIcons().add(favicon);
             shippingStage.initModality(Modality.WINDOW_MODAL);
@@ -114,6 +115,7 @@ public class MainApp extends Application implements MsgBox {
             shippingStage.showAndWait();
         } catch (IOException e) {
         	e.printStackTrace();
+        	LOGGER.error(e.toString());
             MsgBox.msgException(e);
         }
     }
@@ -163,7 +165,30 @@ public class MainApp extends Application implements MsgBox {
             MsgBox.msgException(e);
         }
     }
-    
+
+    public void showMeasureView(Device device){
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("MeasureView.fxml"));
+            AnchorPane page = loader.load();
+            Stage measureStage = new Stage();
+            measureStage.setTitle("Measures");
+            measureStage.getIcons().add(favicon);
+            measureStage.initModality(Modality.WINDOW_MODAL);
+            measureStage.initOwner(shippingStage);
+            Scene scene = new Scene(page);
+            measureStage.setScene(scene);
+
+            MeasureViewController controller = loader.getController();
+            controller.setMainApp(this);
+            controller.setDevice(device);
+            controller.setDialogStage(measureStage);
+
+            measureStage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public boolean showArticleEditView(ArticleHeaders articleHeaders){
     	try {
     		FXMLLoader loader = new FXMLLoader();
@@ -339,7 +364,7 @@ public class MainApp extends Application implements MsgBox {
             return false;
         }
     }
-    
+
     public boolean showCalibrationView() {
     	try {
 			FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("CalibrationView.fxml"));

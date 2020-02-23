@@ -1,38 +1,21 @@
 package net.ddns.dimag.cobhamrunning.view;
 
-import javax.print.PrintService;
-import javax.print.PrintServiceLookup;
-
-import java.awt.PrintJob;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.regexp.recompile;
-import org.krysalis.barcode4j.impl.code39.Code39Bean;
-import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
-import org.krysalis.barcode4j.tools.UnitConv;
-
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.print.PrinterJob;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.input.MouseEvent;
-import javafx.event.EventHandler;
 import net.ddns.dimag.cobhamrunning.MainApp;
-import net.ddns.dimag.cobhamrunning.utils.AsisGenerator;
-import net.ddns.dimag.cobhamrunning.utils.HtmlParser;
 import net.ddns.dimag.cobhamrunning.utils.JComClient;
 import net.ddns.dimag.cobhamrunning.utils.JTelnetClient;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import net.ddns.dimag.cobhamrunning.utils.ZebraPrint;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TestsViewController implements MsgBox {
 	private static final Logger LOGGER = LogManager.getLogger(TestsViewController.class.getName());

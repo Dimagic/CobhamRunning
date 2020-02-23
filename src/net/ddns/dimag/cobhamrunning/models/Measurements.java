@@ -14,6 +14,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import javafx.beans.property.SimpleStringProperty;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -121,6 +122,22 @@ public class Measurements {
 
 	public void setMeasDate(Date measDate) {
 		this.measDate = measDate;
+	}
+
+	public SimpleStringProperty measNameProperty(){
+		return new SimpleStringProperty(getMeasName());
+	}
+
+	public SimpleStringProperty measMinProperty(){
+		return new SimpleStringProperty(getMeasMin());
+	}
+
+	public SimpleStringProperty measMaxProperty(){
+		return new SimpleStringProperty(getMeasMax());
+	}
+
+	public SimpleStringProperty measValProperty(){
+		return new SimpleStringProperty(getMeasVal());
 	}
 
 	@Override
