@@ -16,6 +16,10 @@ public class LabelTemplateService {
 	public LabelTemplate findLabelTemplateById(long id) {
         return labelTemplateDao.findById(id);
     }
+
+    public LabelTemplate findByName(String name) {
+        return labelTemplateDao.findByName(name);
+    }
 	
     public void saveLabelTemplate(LabelTemplate labelTemplate) {
     	labelTemplateDao.save(labelTemplate);    	

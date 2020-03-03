@@ -42,6 +42,14 @@ public class LabelTemplateDao implements UniversalDao{
 		session.close();
         return labelTemplates;
     }
+
+	public LabelTemplate findByName(String name) {
+		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+		String query = String.format("SELECT * FROM public.labeltemplate WHERE name = '%s'", name);
+		LabelTemplate labelTemplate = (LabelTemplate) session.createSQLQuery(query).addEntity(LabelTemplate.class).getSingleResult();
+		session.close();
+		return labelTemplate;
+	}
 	
 	public List findAllWithoutMac() {
 		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
