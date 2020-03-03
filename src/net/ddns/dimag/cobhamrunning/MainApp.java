@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
+    private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
     private Stage asisCreatorStage;
@@ -50,11 +51,11 @@ public class MainApp extends Application implements MsgBox {
     }
 
     @Override
-    public void init() throws IOException {
-        System.out.println("Start init");
+    public void init() {
         /** test DB connection*/
-        HibernateSessionFactoryUtil.getSessionFactory();
-        System.out.println("Finish init");
+        LOGGER.info("Start init");
+        currUrl = HibernateSessionFactoryUtil.getConnectionInfo().get("DataBaseUrl");
+        LOGGER.info("Finish init");
     }
 
     @Override
@@ -64,8 +65,9 @@ public class MainApp extends Application implements MsgBox {
 
     @Override
     public void start(Stage primaryStage) {
+//        LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
         this.primaryStage = primaryStage;
-        String VERSION = "0.0.18";
+        String VERSION = "0.0.21";
         this.primaryStage.setTitle(String.format("CobhamRunning %s", VERSION));
         this.primaryStage.getIcons().add(favicon);
         try {
@@ -73,8 +75,10 @@ public class MainApp extends Application implements MsgBox {
 			rootLayout = loader.load();
 			Scene scene = new Scene(rootLayout);
 			primaryStage.setScene(scene);
+			primaryStage.setResizable(false);
 			RootLayoutController controller = loader.getController();
             controller.setMainApp(this);
+            controller.setDbNameLbl(currUrl);
 			primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -89,7 +93,6 @@ public class MainApp extends Application implements MsgBox {
 			FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("TestsView.fxml"));
 			AnchorPane overviewPage = loader.load();
 			rootLayout.setCenter(overviewPage);
-
 			testsViewController = loader.getController();
 			testsViewController.setMainApp(this);
         } catch (IOException e) {
@@ -107,6 +110,7 @@ public class MainApp extends Application implements MsgBox {
             shippingStage.setTitle("Shipping journal");
             shippingStage.getIcons().add(favicon);
             shippingStage.initModality(Modality.WINDOW_MODAL);
+            shippingStage.initOwner(primaryStage);
             Scene scene = new Scene(page);
             shippingStage.setScene(scene);
             ShippingViewController controller = loader.getController();
@@ -254,6 +258,30 @@ public class MainApp extends Application implements MsgBox {
             printAsisStage.showAndWait();
         } catch (IOException e) {
         	e.printStackTrace();
+            MsgBox.msgException(e);
+        }
+    }
+
+    public void showPrintCustomLabelView(){
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getClassLoader().getResource("PrintCustomLabelView.fxml"));
+            AnchorPane page = loader.load();
+            Stage printCustomLabelStage = new Stage();
+            printCustomLabelStage.setTitle("Print custom label");
+            printCustomLabelStage.getIcons().add(favicon);
+            printCustomLabelStage.initModality(Modality.WINDOW_MODAL);
+            printCustomLabelStage.initOwner(primaryStage);
+            printCustomLabelStage.setResizable(false);
+            Scene scene = new Scene(page);
+            printCustomLabelStage.setScene(scene);
+            PrintCustomLabelViewController printCustomLabelViewController = loader.getController();
+            printCustomLabelViewController.setMainApp(this);
+            printCustomLabelViewController.setDialogStage(printCustomLabelStage);
+            printCustomLabelStage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOGGER.error(e.toString());
             MsgBox.msgException(e);
         }
     }
@@ -431,7 +459,6 @@ public class MainApp extends Application implements MsgBox {
 	}
 
     public static void main(String[] args) {
-//        launch(args);
         LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
     }
     
