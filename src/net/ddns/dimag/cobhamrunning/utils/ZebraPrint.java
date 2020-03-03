@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -82,6 +84,11 @@ public class ZebraPrint {
 		this.templates = printJob.getArticle().getTemplates();
 	}
 
+	public ZebraPrint(String printerName){
+		this.printerName = printerName;
+		this.printService = getPrinterByName(printerName);
+	}
+
 	public PrintService getPrintService() {
 		return printService;
 	}
@@ -117,8 +124,12 @@ public class ZebraPrint {
 			}
 			runPrinting(buffer.toString());
 		}
-
 		return true;
+	}
+
+	public void printTemplate(String templ){
+		templ = templ.replaceAll("<DATE>", getDateTimeNow());
+		runPrinting(templ);
 	}
 
 	private void runPrinting(String s) {
@@ -133,6 +144,12 @@ public class ZebraPrint {
 			MsgBox.msgException(e);
 		}
 
+	}
+
+	private String getDateTimeNow(){
+		Date date = Calendar.getInstance().getTime();
+		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+		return dateFormat.format(date);
 	}
 
 	private String getDateForPrint(Date date) {
