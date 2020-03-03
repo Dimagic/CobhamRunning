@@ -22,3 +22,8 @@ settings.xml
 hibernate.cfg.xml
 
 
+/out/
+/logs/
+/lib/
+/!old/
+/target/
