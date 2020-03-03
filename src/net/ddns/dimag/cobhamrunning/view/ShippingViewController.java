@@ -8,6 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.ShippingSystem;
@@ -20,6 +21,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.time.LocalDate;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -72,7 +74,7 @@ public class ShippingViewController implements MsgBox {
 
     @FXML
     private void initialize() {
-        initItemMenu();
+//        initItemMenu();
         initDate();
 
         console.setEditable(false);
@@ -192,7 +194,54 @@ public class ShippingViewController implements MsgBox {
 
     private void initDate() {
         dateFrom.setShowWeekNumbers(true);
+        dateFrom.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                dateFrom.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+
         dateTo.setShowWeekNumbers(true);
+        dateTo.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+            {
+                dateTo.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
 
         Calendar cal = Calendar.getInstance();
         cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
@@ -209,6 +258,13 @@ public class ShippingViewController implements MsgBox {
 
     }
 
+    @FXML
+    public void refreshJournal(){
+        ShippingJournalService shippingJournalService = new ShippingJournalService();
+        shippingSystems = FXCollections.observableArrayList(shippingJournalService
+                .getJournalByDate(java.sql.Date.valueOf(dateFrom.getValue()), java.sql.Date.valueOf(dateTo.getValue())));
+        tSysToShip.setItems(shippingSystems);
+    }
 
     public void writeConsole(String val) {
         console.appendText(val + "\n");
@@ -225,9 +281,6 @@ public class ShippingViewController implements MsgBox {
 
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
-        ShippingJournalService shippingJournalService = new ShippingJournalService();
-        shippingSystems = FXCollections.observableArrayList(shippingJournalService
-                .getJournalByDate(java.sql.Date.valueOf(dateFrom.getValue()), java.sql.Date.valueOf(dateTo.getValue())));
-        tSysToShip.setItems(shippingSystems);
+        refreshJournal();
     }
 }

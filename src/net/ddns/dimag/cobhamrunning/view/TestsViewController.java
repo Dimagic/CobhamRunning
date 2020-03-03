@@ -19,17 +19,7 @@ import org.apache.logging.log4j.Logger;
 
 public class TestsViewController implements MsgBox {
 	private static final Logger LOGGER = LogManager.getLogger(TestsViewController.class.getName());
-	@FXML
-    private Button calibrationButton;
-	@FXML
-    private Button runninTestBtn;
-	@FXML
-	private TextArea console;
-	@FXML
-	private Label lbl;
-	@FXML
-	private TextField cmd;
-	
+
 	private MainApp mainApp;
 	
 		
@@ -39,17 +29,14 @@ public class TestsViewController implements MsgBox {
 
 	@FXML
     private void initialize() {
-		console.setEditable(false);
-		EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() { 
-	        @Override 
-	        public void handle(MouseEvent e) { 
-	           System.out.println("Hello World"); 
-	        } 
-	     };  
+//		EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
+//	        @Override
+//	        public void handle(MouseEvent e) {
+//	           System.out.println("Hello World");
+//	        }
+//	     };
 	     //Registering the event filter 
-	     console.addEventFilter(MouseEvent.MOUSE_CLICKED, eventHandler);
-	     
-	     
+//	     console.addEventFilter(MouseEvent.MOUSE_CLICKED, eventHandler);
     }
 	
 	@FXML
@@ -88,11 +75,11 @@ public class TestsViewController implements MsgBox {
 	                    	JComClient comPort = new JComClient();
 	                		comPort.setMainApp(mainApp);
 	                		String tx_val = "txtxtxt";
-	                		writeConsole(tx_val);
+	                		System.out.println(tx_val);
 	                		try {
-								writeConsole(comPort.write(tx_val));
+                                System.out.println(comPort.write(tx_val));
 							} catch (Exception e) {
-								writeConsole(e.getLocalizedMessage());
+                                System.out.println(e.getLocalizedMessage());
 							}
 							return null;
 	                    }
@@ -123,6 +110,11 @@ public class TestsViewController implements MsgBox {
 	@FXML
 	private void handleAsisCreator(){
 		mainApp.showArticleCreatorView();
+	}
+
+	@FXML
+	private void handlePrintCustomLabel(){
+		mainApp.showPrintCustomLabelView();
 	}
 		
 	@FXML 
@@ -155,12 +147,7 @@ public class TestsViewController implements MsgBox {
 //        System.out.println(parser.login());
     }
 	
-	@FXML
-    private void setLbl() {
-		lbl.setText(console.getText());
-	}
-	
-	
+
 	
 	@FXML
     private void handleCalibration() {
@@ -197,11 +184,7 @@ public class TestsViewController implements MsgBox {
 			MsgBox.msgException(e);
 		}	
     }
-	
-	public void writeConsole(String val){
-		console.appendText(val + "\n");;
-	}
-	
+
 	public TestsViewController getController() {
 		return this;
 	}

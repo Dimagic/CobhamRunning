@@ -30,8 +30,8 @@
           <Button fx:id="closeBtn" mnemonicParsing="false" text="Close" />
         </buttons>
       </ButtonBar>
-      <DatePicker fx:id="dateFrom" layoutX="49.0" layoutY="9.0" prefHeight="25.0" prefWidth="110.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="10.0" />
-      <DatePicker fx:id="dateTo" layoutX="246.0" layoutY="9.0" prefHeight="25.0" prefWidth="110.0" AnchorPane.leftAnchor="245.0" AnchorPane.topAnchor="10.0" />
+      <DatePicker fx:id="dateFrom" layoutX="49.0" layoutY="9.0" onAction="#refreshJournal" prefHeight="25.0" prefWidth="110.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="10.0" />
+      <DatePicker fx:id="dateTo" layoutX="246.0" layoutY="9.0" onAction="#refreshJournal" prefHeight="25.0" prefWidth="110.0" AnchorPane.leftAnchor="245.0" AnchorPane.topAnchor="10.0" />
       <Label layoutX="14.0" layoutY="13.0" text="From:" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="15.0" />
       <Label layoutX="226.0" layoutY="13.0" text="To:" AnchorPane.leftAnchor="225.0" AnchorPane.topAnchor="15.0" />
       <Button alignment="CENTER" ellipsisString="" layoutX="164.0" layoutY="9.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="25.0" text="M" AnchorPane.leftAnchor="165.0" AnchorPane.topAnchor="10.0">
@@ -45,6 +45,6 @@
          </font>
       </Button>
       <TextArea fx:id="console" layoutX="10.0" layoutY="306.0" prefHeight="83.0" prefWidth="249.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="340.0" />
-      <Button layoutX="368.0" layoutY="9.0" mnemonicParsing="false" prefHeight="25.0" prefWidth="75.0" text="Refresh" AnchorPane.leftAnchor="365.0" AnchorPane.topAnchor="10.0" />
+      <Button layoutX="368.0" layoutY="9.0" mnemonicParsing="false" onAction="#refreshJournal" prefHeight="25.0" prefWidth="75.0" text="Refresh" AnchorPane.leftAnchor="365.0" AnchorPane.topAnchor="10.0" />
    </children>
 </AnchorPane>
