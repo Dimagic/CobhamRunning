@@ -72,7 +72,6 @@ public class JTelnetClient extends Observable {
                 sb.append(ch);
                 if (ch == lastChar) {
                     if (sb.toString().endsWith(pattern)) {
-                    	controller.writeConsole(sb.toString());
                     	System.out.println(sb.toString());
                         return sb.toString();
                     }
