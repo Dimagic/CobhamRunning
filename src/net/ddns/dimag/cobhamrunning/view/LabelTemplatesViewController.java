@@ -75,7 +75,18 @@ public class LabelTemplatesViewController implements MsgBox {
     @FXML
     private void addTemplate() {
         String name = MsgBox.msgInputString("Enter template name:");
+        if (name.isEmpty() && name != null) {
+            MsgBox.msgWarning("Add new label template", "You have set name of template.");
+            return;
+        }
         String template = MsgBox.msgIntutText("Enter template:");
+        if (template.isEmpty() && template != null) {
+            MsgBox.msgWarning("Add new label template", "Template field should be filling.");
+            return;
+        }
+        if (name == null){
+            return;
+        }
         LabelTemplate labelTemplate = new LabelTemplate(name, template);
         try {
             labelTemplateService.saveLabelTemplate(labelTemplate);

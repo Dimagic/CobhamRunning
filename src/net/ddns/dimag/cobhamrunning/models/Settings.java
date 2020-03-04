@@ -1,18 +1,14 @@
 package net.ddns.dimag.cobhamrunning.models;
 
-import java.io.File;
-import java.lang.reflect.Field;
-import java.util.HashMap;
-
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlRootElement;
-
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import net.ddns.dimag.cobhamrunning.view.SettingsViewController;
 
+import javax.xml.bind.annotation.XmlRootElement;
+import java.lang.reflect.Field;
+import java.util.HashMap;
+
 @XmlRootElement(name = "settings")
-public class Settings extends SettingsViewController{
+public class Settings extends SettingsViewController implements MsgBox {
 	private String ip_telnet_combo;
 	private String ip_ssh_combo;
 	private String com_combo;
@@ -45,18 +41,6 @@ public class Settings extends SettingsViewController{
                 | IllegalAccessException e) {
             MsgBox.msgException(e);
 		}
-	}
-	
-	public static Settings loadSettings() {
-		File file = new File("./settings.xml");
-	    try {    	
-	        JAXBContext context = JAXBContext.newInstance(Settings.class);
-	        Unmarshaller um = context.createUnmarshaller();
-	        return  (Settings) um.unmarshal(file);
-	    } catch (Exception e) { 
-	    	MsgBox.msgException(e);
-	    }
-		return null;
 	}
 
 	public String getIp_telnet() {

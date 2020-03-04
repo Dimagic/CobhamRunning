@@ -282,6 +282,7 @@ public interface MsgBox {
 		alert.getDialogPane().setContent(expContent);
 
 		Optional<ButtonType> result = alert.showAndWait();
+
 		if (result.isPresent()) {
 			return textArea.getText();
 		}

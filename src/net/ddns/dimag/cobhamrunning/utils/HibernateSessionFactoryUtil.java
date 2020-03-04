@@ -11,6 +11,7 @@ import org.hibernate.cfg.Configuration;
 import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.hibernate.internal.util.config.ConfigurationException;
 import org.hibernate.jdbc.Work;
+import org.hibernate.service.spi.ServiceException;
 import org.hibernate.stat.Statistics;
 import sun.awt.CausedFocusEvent;
 
@@ -20,6 +21,7 @@ import java.io.File;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.HashMap;
+import java.util.Properties;
 
 public class HibernateSessionFactoryUtil implements MsgBox {
     private static final Logger LOGGER = LogManager.getLogger(HibernateSessionFactoryUtil.class.getName());
@@ -60,9 +62,10 @@ public class HibernateSessionFactoryUtil implements MsgBox {
                 sessionFactory = configuration.buildSessionFactory(builder.build());
                 Statistics stats = sessionFactory.getStatistics();
                 stats.setStatisticsEnabled(true);
-            } catch (ConfigurationException e) {
+            } catch (ConfigurationException | ServiceException e) {
                 LOGGER.error(e);
-                MsgBox.msgError("DB connection", e.getMessage());
+                throw new CobhamRunningException("Can't establish connection with DB.\n" +
+                        "Please check settings and try again.");
             } catch (Exception e) {
                 LOGGER.error(e);
                 throw new CobhamRunningException(e.getCause().getCause().getMessage());
@@ -78,7 +81,11 @@ public class HibernateSessionFactoryUtil implements MsgBox {
 
     public static HashMap<String, String> getConnectionInfo() throws CobhamRunningException {
         HashMap<String, String> connInfoMap = new HashMap<>();
-        Session session = getSessionFactory().openSession();
+        SessionFactory sessionFactory = getSessionFactory();
+        if (sessionFactory == null) {
+            throw new CobhamRunningException("Can't get session factory. Try fix the problem and try again.");
+        }
+        Session session = sessionFactory.openSession();
         ConnectionInfo connectionInfo = new ConnectionInfo();
         session.doWork(connectionInfo);
         connInfoMap.put("DataBaseProductName", connectionInfo.getDataBaseProductName());

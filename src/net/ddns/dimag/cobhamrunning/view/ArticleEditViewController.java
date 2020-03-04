@@ -61,6 +61,7 @@ public class ArticleEditViewController implements MsgBox{
 	@FXML
 	private void initialize() {
 		initItemMenu();
+		addTemplateBtn.setDisable(true);
 		revisionField.textProperty().addListener(new ChangeListener<String>() {
 	        @Override
 	        public void changed(final ObservableValue<? extends String> ov, final String oldValue, final String newValue) {
