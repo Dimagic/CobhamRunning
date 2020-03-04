@@ -2,13 +2,7 @@ package net.ddns.dimag.cobhamrunning.view;
 
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.utils.JComClient;
 import net.ddns.dimag.cobhamrunning.utils.JTelnetClient;

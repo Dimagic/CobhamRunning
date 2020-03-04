@@ -2,6 +2,7 @@ package net.ddns.dimag.cobhamrunning.services;
 
 import java.util.List;
 
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -20,11 +21,11 @@ public class ArticleHeadersService {
 	public ArticleHeadersService() {	
 	}
 	
-	public ArticleHeaders findArticle(int id) {
+	public ArticleHeaders findArticle(int id)throws CobhamRunningException {
         return articleHeadersDao.findById(id);
     }
 
-	public ArticleHeaders findArticleByName(String article) {
+	public ArticleHeaders findArticleByName(String article) throws CobhamRunningException{
 	    try {
             return articleHeadersDao.findArticleHeadersByName(article);
         } catch (NoResultException e){
@@ -32,15 +33,15 @@ public class ArticleHeadersService {
         }
 	}
 
-	public List findArticleHeadersListByName(String article){
+	public List findArticleHeadersListByName(String article) throws CobhamRunningException{
 	    return articleHeadersDao.findArticleHeadersListByName(article);
     }
 	
-    public void saveArticle(ArticleHeaders articleHeaders) {
+    public void saveArticle(ArticleHeaders articleHeaders) throws CobhamRunningException {
     	articleHeadersDao.save(articleHeaders);
     }
 
-    public boolean saveListArticle(List<ArticleHeaders> articleHeadersList){
+    public boolean saveListArticle(List<ArticleHeaders> articleHeadersList) throws CobhamRunningException{
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         StringBuilder stringBuilder = new StringBuilder();
         Transaction tx = session.beginTransaction();
@@ -59,15 +60,15 @@ public class ArticleHeadersService {
         }
     }
     
-    public void deleteArticle(ArticleHeaders articleHeaders) {
+    public void deleteArticle(ArticleHeaders articleHeaders)throws CobhamRunningException {
     	articleHeadersDao.delete(articleHeaders);
     }
 
-    public void updateArticle(ArticleHeaders articleHeaders) {
+    public void updateArticle(ArticleHeaders articleHeaders)throws CobhamRunningException {
     	articleHeadersDao.update(articleHeaders);
     }
 
-    public List<ArticleHeaders> findAllArticleHeaders() {
+    public List<ArticleHeaders> findAllArticleHeaders() throws CobhamRunningException {
         return articleHeadersDao.findAll();
     }
 }

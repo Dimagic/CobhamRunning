@@ -14,6 +14,7 @@ import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.ShippingSystem;
 import net.ddns.dimag.cobhamrunning.services.DeviceService;
 import net.ddns.dimag.cobhamrunning.services.ShippingJournalService;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import net.ddns.dimag.cobhamrunning.utils.ShippingJournalData;
 import org.apache.logging.log4j.LogManager;
@@ -153,7 +154,7 @@ public class ShippingViewController implements MsgBox {
 //                shippingSystems.remove(shippingSystem);
 //                tSysToShip.refresh();
             } catch (Exception e) {
-                LOGGER.error(e.getClass() + ": " +  e.getMessage(), e);
+                LOGGER.error(e.getClass() + ": " + e.getMessage(), e);
                 MsgBox.msgException(e);
             }
         });
@@ -171,7 +172,7 @@ public class ShippingViewController implements MsgBox {
             thread.start();
         } catch (NullPointerException e) {
             return;
-        } catch (Exception e){
+        } catch (Exception e) {
             LOGGER.error(e.getMessage());
             MsgBox.msgException(e);
         }
@@ -188,7 +189,7 @@ public class ShippingViewController implements MsgBox {
         tSysToShip.refresh();
     }
 
-    public ObservableList<ShippingSystem> getShippingSystems(){
+    public ObservableList<ShippingSystem> getShippingSystems() {
         return shippingSystems;
     }
 
@@ -197,11 +198,13 @@ public class ShippingViewController implements MsgBox {
         dateFrom.setConverter(new StringConverter<LocalDate>() {
             String pattern = "yyyy-MM-dd";
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+
             {
                 dateFrom.setPromptText(pattern.toLowerCase());
             }
 
-            @Override public String toString(LocalDate date) {
+            @Override
+            public String toString(LocalDate date) {
                 if (date != null) {
                     return dateFormatter.format(date);
                 } else {
@@ -209,7 +212,8 @@ public class ShippingViewController implements MsgBox {
                 }
             }
 
-            @Override public LocalDate fromString(String string) {
+            @Override
+            public LocalDate fromString(String string) {
                 if (string != null && !string.isEmpty()) {
                     return LocalDate.parse(string, dateFormatter);
                 } else {
@@ -222,11 +226,13 @@ public class ShippingViewController implements MsgBox {
         dateTo.setConverter(new StringConverter<LocalDate>() {
             String pattern = "yyyy-MM-dd";
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+
             {
                 dateTo.setPromptText(pattern.toLowerCase());
             }
 
-            @Override public String toString(LocalDate date) {
+            @Override
+            public String toString(LocalDate date) {
                 if (date != null) {
                     return dateFormatter.format(date);
                 } else {
@@ -234,7 +240,8 @@ public class ShippingViewController implements MsgBox {
                 }
             }
 
-            @Override public LocalDate fromString(String string) {
+            @Override
+            public LocalDate fromString(String string) {
                 if (string != null && !string.isEmpty()) {
                     return LocalDate.parse(string, dateFormatter);
                 } else {
@@ -259,11 +266,16 @@ public class ShippingViewController implements MsgBox {
     }
 
     @FXML
-    public void refreshJournal(){
-        ShippingJournalService shippingJournalService = new ShippingJournalService();
-        shippingSystems = FXCollections.observableArrayList(shippingJournalService
-                .getJournalByDate(java.sql.Date.valueOf(dateFrom.getValue()), java.sql.Date.valueOf(dateTo.getValue())));
-        tSysToShip.setItems(shippingSystems);
+    public void refreshJournal() {
+        try {
+            ShippingJournalService shippingJournalService = new ShippingJournalService();
+            shippingSystems = FXCollections.observableArrayList(shippingJournalService
+                    .getJournalByDate(java.sql.Date.valueOf(dateFrom.getValue()), java.sql.Date.valueOf(dateTo.getValue())));
+            tSysToShip.setItems(shippingSystems);
+        } catch (CobhamRunningException e) {
+            e.printStackTrace();
+        }
+
     }
 
     public void writeConsole(String val) {

@@ -11,6 +11,7 @@ import javax.print.PrintServiceLookup;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 
+import net.ddns.dimag.cobhamrunning.utils.*;
 import org.apache.commons.codec.digest.DigestUtils;
 
 import javafx.collections.FXCollections;
@@ -23,11 +24,6 @@ import javafx.scene.control.TitledPane;
 import javafx.stage.Stage;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.Settings;
-import net.ddns.dimag.cobhamrunning.utils.HibernateUtils;
-import net.ddns.dimag.cobhamrunning.utils.JComClient;
-import net.ddns.dimag.cobhamrunning.utils.MsgBox;
-import net.ddns.dimag.cobhamrunning.utils.NetworkUtils;
-import net.ddns.dimag.cobhamrunning.utils.PyVisaClient;
 
 public class SettingsViewController implements MsgBox {
 	boolean saveClicked = false;
@@ -116,6 +112,7 @@ public class SettingsViewController implements MsgBox {
     private void saveBtnClick(){
     	if (saveSettings()){
     		mainApp.loadSettings();
+    		mainApp.setDbUrl();
 //    		dialogStage.close();
     	}	
     }

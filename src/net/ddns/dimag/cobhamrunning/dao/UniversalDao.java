@@ -18,15 +18,15 @@ import java.util.Set;
 public interface UniversalDao {
     Logger LOGGER = LogManager.getLogger(UniversalDao.class.getName());
 
-	default void save(Object obj) {
-		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+    default void save(Object obj) throws CobhamRunningException {
+        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.save(obj);
         tx1.commit();
         session.close();
     }
 
-    default void update(Object obj) {
+    default void update(Object obj) throws CobhamRunningException {
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.update(obj);
@@ -34,7 +34,7 @@ public interface UniversalDao {
         session.close();
     }
 
-    default void saveOrUpdate(Object obj){
+    default void saveOrUpdate(Object obj) throws CobhamRunningException {
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.saveOrUpdate(obj);
@@ -42,25 +42,25 @@ public interface UniversalDao {
         session.close();
     }
 
-    default void delete(Object obj) {
+    default void delete(Object obj) throws CobhamRunningException {
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
         session.delete(obj);
-        try{
+        try {
             tx1.commit();
         } catch (PersistenceException hibernateEx) {
             LOGGER.error(hibernateEx);
             try {
                 tx1.rollback();
-            } catch(RuntimeException runtimeEx){
+            } catch (RuntimeException runtimeEx) {
                 MsgBox.msgException("Couldn’t Roll Back Transaction", runtimeEx);
             }
 //            hibernateEx.printStackTrace();
         } finally {
-            if(session!= null) {
+            if (session != null) {
                 session.close();
             }
-            MsgBox.msgWarning("Delete operation","Can't delete this object.\nFor more information see log file");
+            MsgBox.msgWarning("Delete operation", "Can't delete this object.\nFor more information see log file");
         }
         session.close();
     }

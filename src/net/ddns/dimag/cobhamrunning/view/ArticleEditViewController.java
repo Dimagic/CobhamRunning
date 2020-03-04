@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import javafx.scene.control.*;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import org.hibernate.TransientObjectException;
 import org.hibernate.exception.ConstraintViolationException;
 import javafx.beans.value.ChangeListener;
@@ -98,8 +99,12 @@ public class ArticleEditViewController implements MsgBox{
 
 		LabelTemplateService labelTemplateService = new LabelTemplateService();
 		templList = new ArrayList<LabelTemplate>();
-		labelTemplateService.findAllLabelTemplate().forEach(item->templList.add(item));
-		
+		try {
+			labelTemplateService.findAllLabelTemplate().forEach(item->templList.add(item));
+		} catch (CobhamRunningException e) {
+			e.printStackTrace();
+		}
+
 		List<String> templNameList = new ArrayList<String>();
 		templList.forEach(item->templNameList.add(item.getName()));
 

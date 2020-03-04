@@ -17,6 +17,7 @@ import net.ddns.dimag.cobhamrunning.models.Measurements;
 import net.ddns.dimag.cobhamrunning.models.Tests;
 import net.ddns.dimag.cobhamrunning.services.MeasurementsService;
 import net.ddns.dimag.cobhamrunning.services.TestsService;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -81,7 +82,11 @@ public class MeasureViewController {
     private void setTableMeasure(Device device){
         testsNameList.clear();
         TestsService testsService = new TestsService();
-        testsList = testsService.getTestsByDevice(device);
+        try {
+            testsList = testsService.getTestsByDevice(device);
+        } catch (CobhamRunningException e) {
+            e.printStackTrace();
+        }
         testsList.forEach((c) -> testsNameList.add(c.getName()));
         testsChoiceBox.setItems(FXCollections.observableArrayList(testsNameList));
         if (testsNameList.size() != 0){
@@ -96,8 +101,14 @@ public class MeasureViewController {
     private ObservableList<Measurements> getMeasureList(Tests test) {
         dateTest_lbl.setText(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(test.getDateTest()));
         MeasurementsService measurementsService = new MeasurementsService();
-        ObservableList<Measurements> measList = FXCollections.observableArrayList(measurementsService.getMeasureSetByTest(test));
-        return measList;
+        ObservableList<Measurements> measList = null;
+        try {
+            measList = FXCollections.observableArrayList(measurementsService.getMeasureSetByTest(test));
+            return measList;
+        } catch (CobhamRunningException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private SimpleStringProperty getMeasStatus(Measurements measure){

@@ -5,18 +5,19 @@ import java.util.Set;
 
 import net.ddns.dimag.cobhamrunning.models.Measurements;
 import net.ddns.dimag.cobhamrunning.models.Tests;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 import org.hibernate.Session;
 
 public class MeasurementsDao implements UniversalDao{
-	public Measurements findById(int id) {
+	public Measurements findById(int id) throws CobhamRunningException {
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         Measurements measurements = session.get(Measurements.class, id);
         session.close();
         return measurements;
     }
 
-    public List<Measurements> getMeasureSetByTest(Tests test){
+    public List<Measurements> getMeasureSetByTest(Tests test) throws CobhamRunningException{
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         List measList = session.createSQLQuery("select * from public.measurements where test_id = :test_id order by measurenumber")
                 .addEntity(Measurements.class)
@@ -25,7 +26,7 @@ public class MeasurementsDao implements UniversalDao{
         return measList;
     }
 	
-	public List<Measurements> findAll() {
+	public List<Measurements> findAll() throws CobhamRunningException{
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         List<Measurements> meases = (List<Measurements>)  session.createQuery("From measurements").list();
         session.close();

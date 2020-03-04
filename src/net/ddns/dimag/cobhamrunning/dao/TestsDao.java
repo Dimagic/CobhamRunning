@@ -4,18 +4,19 @@ import java.util.List;
 
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.Tests;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 import org.hibernate.Session;
 
 public class TestsDao implements UniversalDao{
-	public Tests findById(int id) {
+	public Tests findById(int id) throws CobhamRunningException {
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         Tests tests = session.get(Tests.class, id);
         session.close();
         return tests;
     }
 
-    public List<Tests> getTestsByDevice(Device device){
+    public List<Tests> getTestsByDevice(Device device) throws CobhamRunningException{
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         List testsList = session.createSQLQuery("select * from public.tests where device_id = :dev_id order by testdate")
                 .addEntity(Tests.class)
@@ -25,7 +26,7 @@ public class TestsDao implements UniversalDao{
 
     }
 
-	public List<Tests> findAll() {
+	public List<Tests> findAll() throws CobhamRunningException{
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         List<Tests> testsList = (List<Tests>)  session.createQuery("From tests").list();
         session.close();

@@ -8,9 +8,11 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
+import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.hibernate.internal.util.config.ConfigurationException;
 import org.hibernate.jdbc.Work;
 import org.hibernate.stat.Statistics;
+import sun.awt.CausedFocusEvent;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
@@ -26,7 +28,7 @@ public class HibernateSessionFactoryUtil implements MsgBox {
     private HibernateSessionFactoryUtil() {
     }
 
-    public static SessionFactory getSessionFactory() {
+    public static SessionFactory getSessionFactory() throws CobhamRunningException {
         Settings settings = getSettings();
         if (sessionFactory == null) {
             try {
@@ -63,13 +65,18 @@ public class HibernateSessionFactoryUtil implements MsgBox {
                 MsgBox.msgError("DB connection", e.getMessage());
             } catch (Exception e) {
                 LOGGER.error(e);
-                MsgBox.msgException(e);
+                throw new CobhamRunningException(e.getCause().getCause().getMessage());
             }
         }
         return sessionFactory;
     }
 
-    public static HashMap<String, String> getConnectionInfo() {
+    public static SessionFactory restartSessionFactory() throws CobhamRunningException {
+        sessionFactory = null;
+        return getSessionFactory();
+    }
+
+    public static HashMap<String, String> getConnectionInfo() throws CobhamRunningException {
         HashMap<String, String> connInfoMap = new HashMap<>();
         Session session = getSessionFactory().openSession();
         ConnectionInfo connectionInfo = new ConnectionInfo();
@@ -78,7 +85,7 @@ public class HibernateSessionFactoryUtil implements MsgBox {
         connInfoMap.put("DataBaseUrl", connectionInfo.getDataBaseUrl());
         connInfoMap.put("DriverName", connectionInfo.getDriverName());
         connInfoMap.put("Username", connectionInfo.getUsername());
-        for (String c: connInfoMap.keySet()){
+        for (String c : connInfoMap.keySet()) {
             LOGGER.info(String.format("%s : %s", c, connInfoMap.get(c)));
         }
         session.close();

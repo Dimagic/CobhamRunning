@@ -7,6 +7,7 @@ import java.util.Set;
 import net.ddns.dimag.cobhamrunning.dao.MeasurementsDao;
 import net.ddns.dimag.cobhamrunning.models.Measurements;
 import net.ddns.dimag.cobhamrunning.models.Tests;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import org.hibernate.Session;
@@ -18,15 +19,15 @@ public class MeasurementsService {
 	public MeasurementsService() {	
 	}
 	
-	public Measurements findMeas(int id) {
+	public Measurements findMeas(int id) throws CobhamRunningException {
         return measDao.findById(id);
     }
 
-    public void saveMeas(Measurements meas) {
+    public void saveMeas(Measurements meas) throws CobhamRunningException {
     	measDao.save(meas);
     }
 
-    public boolean saveSet(Set<Measurements> measSet){
+    public boolean saveSet(Set<Measurements> measSet) throws CobhamRunningException {
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
         try {
@@ -44,19 +45,19 @@ public class MeasurementsService {
         }
     }
 
-    public List<Measurements> getMeasureSetByTest(Tests test){
+    public List<Measurements> getMeasureSetByTest(Tests test) throws CobhamRunningException {
 	    return measDao.getMeasureSetByTest(test);
     }
 
-    public void deleteMeas(Measurements meas) {
+    public void deleteMeas(Measurements meas) throws CobhamRunningException {
     	measDao.delete(meas);
     }
 
-    public void updateMeas(Tests tests) {
+    public void updateMeas(Tests tests) throws CobhamRunningException {
     	measDao.update(tests);
     }
 
-    public List<Measurements> findAllMeas() {
+    public List<Measurements> findAllMeas() throws CobhamRunningException {
         return measDao.findAll();
     }
 }

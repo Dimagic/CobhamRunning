@@ -69,8 +69,8 @@ public class PrintCustomLabelViewController implements MsgBox {
                                 t.getTablePosition().getRow())
                         ).setFieldValue(t.getNewValue());
                         Boolean isNotAllFill = false;
-                        for (RowData row: rowDataList){
-                            if (row.fieldValue.equals("")){
+                        for (RowData row : rowDataList) {
+                            if (row.fieldValue.equals("")) {
                                 isNotAllFill = true;
                             }
                         }
@@ -92,27 +92,38 @@ public class PrintCustomLabelViewController implements MsgBox {
     }
 
     @FXML
-    private void printLabel(){
-        LabelTemplate labelTemplate = labelTemplateService.findByName(templatesBox.getValue());
-        String templ = labelTemplate.getTemplate();
-        for (RowData row: rowDataList){
-            templ = templ.replaceAll(String.format("<:%s:>", row.getFieldName()),row.getFieldValue());
-            System.out.println(String.format("%s : %s", row.getFieldName(), row.getFieldValue()));
+    private void printLabel() {
+        LabelTemplate labelTemplate = null;
+        try {
+            labelTemplate = labelTemplateService.findByName(templatesBox.getValue());
+            String templ = labelTemplate.getTemplate();
+            for (RowData row : rowDataList) {
+                templ = templ.replaceAll(String.format("<:%s:>", row.getFieldName()), row.getFieldValue());
+                System.out.println(String.format("%s : %s", row.getFieldName(), row.getFieldValue()));
+            }
+            ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
+            zebraPrint.printTemplate(templ);
+        } catch (CobhamRunningException e) {
+            e.printStackTrace();
         }
-        ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
-        zebraPrint.printTemplate(templ);
+
     }
 
     private void fillLabelBox() {
-        labelList = labelTemplateService.findAllLabelTemplate();
-        List<String> namesList = new ArrayList<>();
-        for (LabelTemplate template : labelList) {
-            namesList.add(template.getName());
+        try {
+            labelList = labelTemplateService.findAllLabelTemplate();
+
+            List<String> namesList = new ArrayList<>();
+            for (LabelTemplate template : labelList) {
+                namesList.add(template.getName());
+            }
+            templatesBox.setItems(FXCollections.observableArrayList(namesList));
+        } catch (CobhamRunningException e) {
+            e.printStackTrace();
         }
-        templatesBox.setItems(FXCollections.observableArrayList(namesList));
     }
 
-    private void initItemMenu(){
+    private void initItemMenu() {
         ContextMenu menu = new ContextMenu();
         MenuItem mDel = new MenuItem("Delete");
         mDel.setOnAction((ActionEvent event) -> {

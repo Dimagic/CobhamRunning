@@ -145,11 +145,14 @@ public ShippingJournalData(ShippingViewController controller, String asisString,
         ArticleHeaders articleHeaders;
         try {
             articleHeaders = articleHeadersService.findArticleByName(article);
+            return articleHeaders;
         } catch (IndexOutOfBoundsException e) {
             MsgBox.msgWarning("Warning", String.format("Article %s not found", article));
             return null;
+        } catch (CobhamRunningException e) {
+            e.printStackTrace();
         }
-        return articleHeaders;
+        return null;
     }
 
     private void getTestMeasures(Device device){

@@ -4,6 +4,7 @@ import java.util.List;
 
 import net.ddns.dimag.cobhamrunning.dao.DeviceDao;
 import net.ddns.dimag.cobhamrunning.models.Device;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -16,41 +17,41 @@ public class DeviceService {
 	public DeviceService() {	
 	}
 	
-	public Device findDeviceById(int id) {
+	public Device findDeviceById(int id) throws CobhamRunningException {
         return deviceDao.findById(id);
     }
 	
 	public Device findDeviceByAsis(String asis) {
 	    try {
             return deviceDao.findDeviceByAsis(asis);
-        } catch (NoResultException e){}
+        } catch (NoResultException | CobhamRunningException e){}
 	    return null;
     }
 
     public Device findDeviceBySn(String sn) {
         try {
             return deviceDao.findDeviceBySn(sn);
-        } catch (NoResultException e){}
+        } catch (NoResultException | CobhamRunningException e){}
         return null;
     }
 
-    public void saveDevice(Device device) {
+    public void saveDevice(Device device) throws CobhamRunningException {
     	deviceDao.save(device);    	
     }
 
-    public void saveOrUpdateDevice(Device device){
+    public void saveOrUpdateDevice(Device device) throws CobhamRunningException {
 	    deviceDao.saveOrUpdate(device);
     }
 
-    public void deleteDevice(Device device) {
+    public void deleteDevice(Device device) throws CobhamRunningException {
             deviceDao.delete(device);
     }
 
-    public void updateDevice(Device device) {
+    public void updateDevice(Device device) throws CobhamRunningException {
     	deviceDao.update(device);
     }
 
-    public List<Device> findAllDevice() {
+    public List<Device> findAllDevice() throws CobhamRunningException {
         return deviceDao.findAll();
     }
     

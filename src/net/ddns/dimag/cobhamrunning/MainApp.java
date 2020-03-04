@@ -14,10 +14,7 @@ import javafx.stage.WindowEvent;
 import net.ddns.dimag.cobhamrunning.models.ArticleHeaders;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.Settings;
-import net.ddns.dimag.cobhamrunning.utils.CobhamPreloader;
-import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
-import net.ddns.dimag.cobhamrunning.utils.MsgBox;
-import net.ddns.dimag.cobhamrunning.utils.NetworkUtils;
+import net.ddns.dimag.cobhamrunning.utils.*;
 import net.ddns.dimag.cobhamrunning.view.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,6 +39,7 @@ public class MainApp extends Application implements MsgBox {
 	private TestsViewController testsViewController;
 	private ArticlesViewController articlesViewController;
     private AsisCreatorController asisCreatorController;
+    private RootLayoutController rootLayoutController;
     private static final Logger LOGGER = LogManager.getLogger(MainApp.class.getName());
 
 	private Image favicon = new Image("file:src/resources/images/cobham_C_64x64.png");
@@ -53,9 +51,14 @@ public class MainApp extends Application implements MsgBox {
     @Override
     public void init() {
         /** test DB connection*/
-        LOGGER.info("Start init");
-        currUrl = HibernateSessionFactoryUtil.getConnectionInfo().get("DataBaseUrl");
-        LOGGER.info("Finish init");
+        try {
+            LOGGER.info("Start init");
+            currUrl = HibernateSessionFactoryUtil.getConnectionInfo().get("DataBaseUrl");
+            LOGGER.info("Finish init");
+        } catch (CobhamRunningException e){
+            MsgBox.msgWarning("Warning", e.getMessage());
+        }
+
     }
 
     @Override
@@ -67,7 +70,7 @@ public class MainApp extends Application implements MsgBox {
     public void start(Stage primaryStage) {
 //        LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
         this.primaryStage = primaryStage;
-        String VERSION = "0.0.21";
+        String VERSION = "0.0.22";
         this.primaryStage.setTitle(String.format("CobhamRunning %s", VERSION));
         this.primaryStage.getIcons().add(favicon);
         try {
@@ -76,9 +79,9 @@ public class MainApp extends Application implements MsgBox {
 			Scene scene = new Scene(rootLayout);
 			primaryStage.setScene(scene);
 			primaryStage.setResizable(false);
-			RootLayoutController controller = loader.getController();
-            controller.setMainApp(this);
-            controller.setDbNameLbl(currUrl);
+            rootLayoutController = loader.getController();
+            rootLayoutController.setMainApp(this);
+            rootLayoutController.setDbNameLbl(currUrl);
 			primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();
@@ -449,7 +452,17 @@ public class MainApp extends Application implements MsgBox {
 	    }
 
 	}
-	
+
+	public void setDbUrl(){
+	    try {
+            HibernateSessionFactoryUtil.restartSessionFactory();
+            rootLayoutController.setDbNameLbl(HibernateSessionFactoryUtil.getConnectionInfo().get("DataBaseUrl"));
+        } catch (CobhamRunningException e){
+	        MsgBox.msgWarning("Warning", e.getMessage());
+        }
+
+    }
+
 	public void setCurrentSettings(Settings currentSettings) {
 		this.currentSettings = currentSettings;
 	}

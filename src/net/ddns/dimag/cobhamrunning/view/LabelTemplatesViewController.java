@@ -77,7 +77,11 @@ public class LabelTemplatesViewController implements MsgBox {
         String name = MsgBox.msgInputString("Enter template name:");
         String template = MsgBox.msgIntutText("Enter template:");
         LabelTemplate labelTemplate = new LabelTemplate(name, template);
-        labelTemplateService.saveLabelTemplate(labelTemplate);
+        try {
+            labelTemplateService.saveLabelTemplate(labelTemplate);
+        } catch (CobhamRunningException e) {
+            e.printStackTrace();
+        }
         fillTable();
     }
 
@@ -102,8 +106,13 @@ public class LabelTemplatesViewController implements MsgBox {
     }
 
     private void fillTable() {
-        templateList = FXCollections.observableArrayList(labelTemplateService.findAllLabelTemplate());
-        tTemplates.setItems(templateList);
+        try {
+            templateList = FXCollections.observableArrayList(labelTemplateService.findAllLabelTemplate());
+            tTemplates.setItems(templateList);
+        } catch (CobhamRunningException e) {
+            e.printStackTrace();
+        }
+
     }
 
     @FXML
@@ -113,7 +122,11 @@ public class LabelTemplatesViewController implements MsgBox {
                 labelTemplateService.updateLabelTemplate(template);
 //				MsgBox.msgInfo(template.getName(), "Save template complete.");
             } catch (Exception e) {
-                labelTemplateService.saveLabelTemplate(template);
+                try {
+                    labelTemplateService.saveLabelTemplate(template);
+                } catch (CobhamRunningException ex) {
+                    ex.printStackTrace();
+                }
             }
         }
         dialogStage.close();
@@ -124,7 +137,11 @@ public class LabelTemplatesViewController implements MsgBox {
         MenuItem mDel = new MenuItem("Delete");
         mDel.setOnAction((ActionEvent event) -> {
             LabelTemplate template = tTemplates.getSelectionModel().getSelectedItem();
-            new LabelTemplateService().deleteLabelTemplate(template);
+            try {
+                new LabelTemplateService().deleteLabelTemplate(template);
+            } catch (CobhamRunningException e) {
+                e.printStackTrace();
+            }
             templateList.remove(template);
 			fillTable();
 //            tTemplates.refresh();

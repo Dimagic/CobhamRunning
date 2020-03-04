@@ -11,6 +11,7 @@ import net.ddns.dimag.cobhamrunning.models.Asis;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.services.AsisService;
 import net.ddns.dimag.cobhamrunning.services.DeviceService;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import javafx.event.ActionEvent;
@@ -94,9 +95,14 @@ public class RunningTestController implements MsgBox {
 		AsisService asisService = new AsisService();
 
         List<String> currSys = MsgBox.msgScanSystemBarcode();
-		Asis asis = asisService.findByName(currSys.get(1));
+        Asis asis = null;
+        try {
+            asis = asisService.findByName(currSys.get(1));
+        } catch (CobhamRunningException e) {
+            e.printStackTrace();
+        }
 
-		try {
+        try {
 			System.out.println(deviceService.findDeviceByAsis(asis.getAsis()));
 		} catch (Exception e) {
 

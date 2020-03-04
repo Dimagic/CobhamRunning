@@ -2,6 +2,7 @@ package net.ddns.dimag.cobhamrunning.services;
 
 import java.util.List;
 
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import org.hibernate.Session;
 
 import net.ddns.dimag.cobhamrunning.dao.AsisDao;
@@ -15,7 +16,7 @@ public class AsisService {
 	public AsisService() {	
 	}
 
-	public Asis findAsis(int id) {
+	public Asis findAsis(int id) throws CobhamRunningException {
 		return asisDao.findById(id);
 	}
 
@@ -23,35 +24,35 @@ public class AsisService {
 //		return asisDao.findArticleHeadersByName(asis);
 //	}
 
-	public List<Asis> getAvaliableAsisRange(int count){
+	public List<Asis> getAvaliableAsisRange(int count) throws CobhamRunningException {
 		return asisDao.getAvaliableAsisRange(count);
 	}
 
-	public Asis findByName(String name) {
+	public Asis findByName(String name) throws CobhamRunningException {
 		return asisDao.findByName(name);
 	}
 	
-	public void saveAsis(Asis asis) {
+	public void saveAsis(Asis asis) throws CobhamRunningException {
 		asisDao.save(asis);
 	}
 
-	public void deleteAsis(Asis asis) {
+	public void deleteAsis(Asis asis) throws CobhamRunningException {
 		asisDao.delete(asis);
 	}
 
-	public void updateAsis(Asis asis) {
+	public void updateAsis(Asis asis) throws CobhamRunningException {
 		asisDao.update(asis);
 	}
 
-	public List<Asis> findAllAsis() {
+	public List<Asis> findAllAsis() throws CobhamRunningException {
 		return asisDao.findAll();
 	}
 	
-	public int getAvaliableAsisCount() {
+	public int getAvaliableAsisCount() throws CobhamRunningException {
 		return asisDao.getAvaliableAsisCount();
 	}
 		
-	public int getUnprintedCount() {
+	public int getUnprintedCount() throws CobhamRunningException {
 		return asisDao.getUnprintedCount();
 	}
 }

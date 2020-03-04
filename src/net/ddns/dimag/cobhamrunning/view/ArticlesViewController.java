@@ -3,6 +3,7 @@ package net.ddns.dimag.cobhamrunning.view;
 import javafx.event.ActionEvent;
 import javafx.scene.control.*;
 import javafx.scene.input.MouseButton;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -44,29 +45,29 @@ public class ArticlesViewController {
 
     @FXML
     private void initialize() {
-		ContextMenu cm = new ContextMenu();
-		MenuItem mNewRev = new MenuItem("Add new revision");
-		cm.getItems().add(mNewRev);
+        ContextMenu cm = new ContextMenu();
+        MenuItem mNewRev = new MenuItem("Add new revision");
+        cm.getItems().add(mNewRev);
 
         tArticle.setRowFactory(tv -> {
             TableRow<ArticleHeaders> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getButton() == MouseButton.SECONDARY) {
-					cm.show(tArticle, event.getScreenX(), event.getScreenY());
+                    cm.show(tArticle, event.getScreenX(), event.getScreenY());
                 } else if (event.getClickCount() == 2 && (!row.isEmpty())) {
                     if (mainApp.showArticleEditView(row.getItem())) {
-						fillTable();
-					}
+                        fillTable();
+                    }
                 }
             });
             return row;
         });
 
-		mNewRev.setOnAction((ActionEvent event) -> {
-			ArticleHeaders currArticle = (ArticleHeaders) tArticle.getSelectionModel().getSelectedItem();
-			ArticleHeaders newArticle = new ArticleHeaders(currArticle);
-			mainApp.showArticleEditView(newArticle);
-		});
+        mNewRev.setOnAction((ActionEvent event) -> {
+            ArticleHeaders currArticle = (ArticleHeaders) tArticle.getSelectionModel().getSelectedItem();
+            ArticleHeaders newArticle = new ArticleHeaders(currArticle);
+            mainApp.showArticleEditView(newArticle);
+        });
 
         searchField.textProperty().addListener((observable, oldValue, newValue) -> fillTable());
 
@@ -96,9 +97,14 @@ public class ArticlesViewController {
     }
 
     private ObservableList<ArticleHeaders> getArticleList() {
-        String val = searchField.getText().toUpperCase();
-        ObservableList<ArticleHeaders> headersList = FXCollections.observableArrayList(getArticleSerice().findArticleHeadersListByName(val));
-        return headersList;
+        try {
+            String val = searchField.getText().toUpperCase();
+            ObservableList<ArticleHeaders> headersList = FXCollections.observableArrayList(getArticleSerice().findArticleHeadersListByName(val));
+            return headersList;
+        } catch (CobhamRunningException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     private ArticleHeadersService getArticleSerice() {
@@ -110,7 +116,7 @@ public class ArticlesViewController {
     }
 
     private void initItemMenu(ArticleHeaders articleHeaders) {
-		System.out.println(articleHeaders);
+        System.out.println(articleHeaders);
 
     }
 

@@ -21,7 +21,7 @@ public class ImportData implements MsgBox {
     public ImportData() {
     }
 
-    public void importAsis() {
+    public void importAsis() throws CobhamRunningException {
         int count = (MsgBox.msgInputInt("Enter ASIS count:")).intValue();
         AsisGenerator aisGenerator = new AsisGenerator();
         List<String> asisRange = aisGenerator.getNewAsisRange(count);
@@ -43,7 +43,7 @@ public class ImportData implements MsgBox {
         }
     }
 
-    public void generateMac() {
+    public void generateMac() throws CobhamRunningException {
         int count = (MsgBox.msgInputInt("Enter MAC address count:")).intValue();
         MacAddressService macService = new MacAddressService();
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
@@ -64,7 +64,7 @@ public class ImportData implements MsgBox {
 
     }
 
-    private HashMap<String, LabelTemplate> checkTemplates() {
+    private HashMap<String, LabelTemplate> checkTemplates() throws CobhamRunningException {
         LabelTemplateService labelService = new LabelTemplateService();
         List<LabelTemplate> labelList = labelService.findAllLabelTemplate();
         HashMap<String, LabelTemplate> labelsMap = new HashMap<String, LabelTemplate>();
@@ -90,7 +90,7 @@ public class ImportData implements MsgBox {
         return labelsMap;
     }
 
-    public void importArticles() {
+    public void importArticles() throws CobhamRunningException {
         if (checkTemplates() == null) {
             return;
         }
