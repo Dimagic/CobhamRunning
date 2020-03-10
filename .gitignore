@@ -19,8 +19,6 @@
 ./logs
 
 settings.xml
-hibernate.cfg.xml
-
 
 /out/
 /logs/
