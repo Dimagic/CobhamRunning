@@ -1,5 +1,6 @@
 package net.ddns.dimag.cobhamrunning.utils;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -189,6 +190,45 @@ public interface MsgBox {
 	}
 
 	static void msgException(String s, RuntimeException e) {
+		Platform.runLater(() -> {
+			Alert alert = new Alert(AlertType.ERROR);
+			System.out.println(e.getLocalizedMessage());
+			alert.setTitle("Exception");
+			Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+			stage.getIcons().add(favicon);
+			alert.setHeaderText(e.getMessage());
+			alert.setContentText(e.toString());
+
+			// Create expandable Exception.
+			StringWriter sw = new StringWriter();
+			PrintWriter pw = new PrintWriter(sw);
+			e.printStackTrace(pw);
+			String exceptionText = sw.toString();
+
+			Label label = new Label("The exception stacktrace was:");
+
+			TextArea textArea = new TextArea(exceptionText);
+			textArea.setEditable(false);
+			textArea.setWrapText(true);
+
+			textArea.setMaxWidth(Double.MAX_VALUE);
+			textArea.setMaxHeight(Double.MAX_VALUE);
+			GridPane.setVgrow(textArea, Priority.ALWAYS);
+			GridPane.setHgrow(textArea, Priority.ALWAYS);
+
+			GridPane expContent = new GridPane();
+			expContent.setMaxWidth(Double.MAX_VALUE);
+			expContent.add(label, 0, 0);
+			expContent.add(textArea, 0, 1);
+
+			// Set expandable Exception into the dialog pane.
+			alert.getDialogPane().setExpandableContent(expContent);
+
+			alert.showAndWait();
+		});
+	}
+
+	static void msgException(String s, IOException e) {
 		Platform.runLater(() -> {
 			Alert alert = new Alert(AlertType.ERROR);
 			System.out.println(e.getLocalizedMessage());
