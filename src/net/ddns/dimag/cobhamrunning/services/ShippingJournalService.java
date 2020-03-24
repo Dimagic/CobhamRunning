@@ -34,6 +34,10 @@ private ShippingJournalDao shippingJournalDao = new ShippingJournalDao();
 	    return shippingJournalDao.getJournalByDate(dateFrom, dateTo);
     }
 
+    public List<ShippingSystem> getJournalByFilter(String filter, Date dateFrom, Date dateTo) throws CobhamRunningException{
+	    return shippingJournalDao.getJournalByFilter(filter, dateFrom, dateTo);
+    }
+
     public boolean isDeviceInJournal(Device device) throws CobhamRunningException {
 	    return shippingJournalDao.isDeviceInJournal(device);
     }

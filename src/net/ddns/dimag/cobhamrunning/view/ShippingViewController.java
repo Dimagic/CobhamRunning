@@ -1,5 +1,7 @@
 package net.ddns.dimag.cobhamrunning.view;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -10,9 +12,7 @@ import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import net.ddns.dimag.cobhamrunning.MainApp;
-import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.ShippingSystem;
-import net.ddns.dimag.cobhamrunning.services.DeviceService;
 import net.ddns.dimag.cobhamrunning.services.ShippingJournalService;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
@@ -29,6 +29,7 @@ import java.util.List;
 
 public class ShippingViewController implements MsgBox {
     private static final Logger LOGGER = LogManager.getLogger(ShippingViewController.class.getName());
+    private final ShippingJournalService shippingJournalService = new ShippingJournalService();
     private ObservableList<ShippingSystem> shippingSystems = FXCollections.observableArrayList();
     private Image procImage = new Image("file:src/resources/images/process.gif");
     private Thread getDataThread;
@@ -44,15 +45,9 @@ public class ShippingViewController implements MsgBox {
     @FXML
     private DatePicker dateTo;
     @FXML
-    private Button addBtn;
-    @FXML
-    private Button delBtn;
-    @FXML
-    private Button saveBtn;
-    @FXML
-    private Button closeBtn;
-    @FXML
     private TextArea console;
+    @FXML
+    private TextField filterField;
 
     @FXML
     private TableColumn<ShippingSystem, String> dateShipColumn;
@@ -75,7 +70,7 @@ public class ShippingViewController implements MsgBox {
 
     @FXML
     private void initialize() {
-//        initItemMenu();
+        initItemMenu();
         initDate();
 
         console.setEditable(false);
@@ -109,13 +104,23 @@ public class ShippingViewController implements MsgBox {
         });
 
 
-//        console.textProperty().addListener(new ChangeListener<Object>() {
-//            @Override
-//            public void changed(ObservableValue<?> observable, Object oldValue,
-//                                Object newValue) {
-//                console.setScrollTop(Double.MAX_VALUE);
-//            }
-//        });
+        filterField.textProperty().addListener(new ChangeListener<Object>() {
+            @Override
+            public void changed(ObservableValue<?> observable, Object oldValue,
+                                Object newValue) {
+                String tmp = newValue.toString().toUpperCase();
+                try {
+                    shippingSystems = FXCollections.observableArrayList(
+                            shippingJournalService.getJournalByFilter(tmp, java.sql.Date.valueOf(dateFrom.getValue()),
+                                    java.sql.Date.valueOf(dateTo.getValue())));
+                    tSysToShip.setItems(shippingSystems);
+                  } catch (CobhamRunningException e) {
+                    e.printStackTrace();
+                }
+
+
+            }
+        });
 
 //		tableTypeBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
 //			@Override
@@ -141,12 +146,13 @@ public class ShippingViewController implements MsgBox {
 
     private void initItemMenu() {
         ContextMenu menu = new ContextMenu();
-        MenuItem mDel = new MenuItem("Delete");
-        menu.getItems().add(mDel);
+        MenuItem mEdit = new MenuItem("Edit");
+        menu.getItems().add(mEdit);
         tSysToShip.setContextMenu(menu);
 
-        mDel.setOnAction((ActionEvent event) -> {
+        mEdit.setOnAction((ActionEvent event) -> {
             try {
+                System.out.println(tSysToShip.getSelectionModel().getSelectedItem());
 //                ShippingSystem shippingSystem = tSysToShip.getSelectionModel().getSelectedItem();
 //                Device device = shippingSystem.getDevice();
 //                DeviceService deviceService = new DeviceService();
@@ -261,13 +267,9 @@ public class ShippingViewController implements MsgBox {
     }
 
     @FXML
-    private void handleSaveBtn() {
-
-    }
-
-    @FXML
     public void refreshJournal() {
         try {
+            filterField.setText("");
             ShippingJournalService shippingJournalService = new ShippingJournalService();
             shippingSystems = FXCollections.observableArrayList(shippingJournalService
                     .getJournalByDate(java.sql.Date.valueOf(dateFrom.getValue()), java.sql.Date.valueOf(dateTo.getValue())));
@@ -276,6 +278,18 @@ public class ShippingViewController implements MsgBox {
             e.printStackTrace();
         }
 
+    }
+
+    @FXML
+    private void addYear() {
+        dateTo.setValue(dateFrom.getValue().plusYears(1));
+        refreshJournal();
+    }
+
+    @FXML
+    private void addMonth() {
+        dateTo.setValue(dateFrom.getValue().plusMonths(1));
+        refreshJournal();
     }
 
     public void writeConsole(String val) {

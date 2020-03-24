@@ -45,7 +45,6 @@ public class MainApp extends Application implements MsgBox {
 	private Image favicon = new Image("file:src/resources/images/cobham_C_64x64.png");
 
     public MainApp(){
-
     }
 
     @Override
@@ -70,7 +69,7 @@ public class MainApp extends Application implements MsgBox {
     public void start(Stage primaryStage) {
 //        LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
         this.primaryStage = primaryStage;
-        String VERSION = "0.0.23";
+        String VERSION = "0.0.24";
         this.primaryStage.setTitle(String.format("CobhamRunning %s", VERSION));
         this.primaryStage.getIcons().add(favicon);
         try {
