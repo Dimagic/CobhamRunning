@@ -110,10 +110,14 @@ public class ShippingViewController implements MsgBox {
                                 Object newValue) {
                 String tmp = newValue.toString().toUpperCase();
                 try {
-                    shippingSystems = FXCollections.observableArrayList(
-                            shippingJournalService.getJournalByFilter(tmp, java.sql.Date.valueOf(dateFrom.getValue()),
-                                    java.sql.Date.valueOf(dateTo.getValue())));
-                    tSysToShip.setItems(shippingSystems);
+                    if (!tmp.isEmpty()){
+                        shippingSystems = FXCollections.observableArrayList(
+                                shippingJournalService.getJournalByFilter(tmp, java.sql.Date.valueOf(dateFrom.getValue()),
+                                        java.sql.Date.valueOf(dateTo.getValue())));
+                        tSysToShip.setItems(shippingSystems);
+                    }else {
+                        refreshJournal();
+                    }
                   } catch (CobhamRunningException e) {
                     e.printStackTrace();
                 }
