@@ -35,29 +35,24 @@ public class MainApp extends Application implements MsgBox {
     private Stage articlesStage;
     private Stage shippingStage;
     private BorderPane rootLayout;
-	private Settings currentSettings;
-	private TestsViewController testsViewController;
-	private ArticlesViewController articlesViewController;
+    private Settings currentSettings;
+    private TestsViewController testsViewController;
+    private ArticlesViewController articlesViewController;
     private AsisCreatorController asisCreatorController;
     private RootLayoutController rootLayoutController;
     private static final Logger LOGGER = LogManager.getLogger(MainApp.class.getName());
 
-	private Image favicon = new Image("file:src/resources/images/cobham_C_64x64.png");
+    private Image favicon = new Image("file:src/resources/images/cobham_C_64x64.png");
 
-    public MainApp(){
+    public MainApp() {
     }
 
     @Override
     public void init() {
         /** test DB connection*/
-        try {
-            LOGGER.info("Start init");
-            currUrl = HibernateSessionFactoryUtil.getConnectionInfo().get("DataBaseUrl");
-            LOGGER.info("Finish init");
-        } catch (CobhamRunningException e){
-            MsgBox.msgWarning("Warning", e.getMessage());
-        }
-
+        LOGGER.info("Start init");
+        loadSettings();
+        LOGGER.info("Finish init");
     }
 
     @Override
@@ -69,43 +64,41 @@ public class MainApp extends Application implements MsgBox {
     public void start(Stage primaryStage) {
 //        LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
         this.primaryStage = primaryStage;
-        String VERSION = "0.0.24";
+        String VERSION = "0.0.25";
         this.primaryStage.setTitle(String.format("CobhamRunning %s", VERSION));
         this.primaryStage.getIcons().add(favicon);
         try {
-           	FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("RootLayout.fxml"));
-			rootLayout = loader.load();
-			Scene scene = new Scene(rootLayout);
-			primaryStage.setScene(scene);
-			primaryStage.setResizable(false);
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("RootLayout.fxml"));
+            rootLayout = loader.load();
+            Scene scene = new Scene(rootLayout);
+            primaryStage.setScene(scene);
+            primaryStage.setResizable(false);
             rootLayoutController = loader.getController();
             rootLayoutController.setMainApp(this);
             rootLayoutController.setDbNameLbl(currUrl);
-			primaryStage.show();
+            primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
         showTestsView();
-        loadSettings();
-
     }
-      
+
     public void showTestsView() {
         try {
-			FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("TestsView.fxml"));
-			AnchorPane overviewPage = loader.load();
-			rootLayout.setCenter(overviewPage);
-			testsViewController = loader.getController();
-			testsViewController.setMainApp(this);
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("TestsView.fxml"));
+            AnchorPane overviewPage = loader.load();
+            rootLayout.setCenter(overviewPage);
+            testsViewController = loader.getController();
+            testsViewController.setMainApp(this);
         } catch (IOException e) {
-        	e.printStackTrace();
+            e.printStackTrace();
             MsgBox.msgException(e);
         }
     }
-    
+
     public void showShippingView() {
-    	try {
-    		FXMLLoader loader = new FXMLLoader();
+        try {
+            FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("ShippingView.fxml"));
             AnchorPane page = loader.load();
             shippingStage = new Stage();
@@ -117,18 +110,18 @@ public class MainApp extends Application implements MsgBox {
             shippingStage.setScene(scene);
             ShippingViewController controller = loader.getController();
             controller.setMainApp(this);
-            controller.setDialogStage(shippingStage);     
+            controller.setDialogStage(shippingStage);
             shippingStage.showAndWait();
         } catch (IOException e) {
-        	e.printStackTrace();
-        	LOGGER.error(e.toString());
+            e.printStackTrace();
+            LOGGER.error(e.toString());
             MsgBox.msgException(e);
         }
     }
-    
-    public void showArticleCreatorView(){
-    	try {
-    		FXMLLoader loader = new FXMLLoader();
+
+    public void showArticleCreatorView() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("AsisCreatorView.fxml"));
             BorderPane page = loader.load();
             asisCreatorStage = new Stage();
@@ -141,17 +134,17 @@ public class MainApp extends Application implements MsgBox {
             asisCreatorStage.setScene(scene);
             asisCreatorController = loader.getController();
             asisCreatorController.setMainApp(this);
-            asisCreatorController.setDialogStage(asisCreatorStage);     
+            asisCreatorController.setDialogStage(asisCreatorStage);
             asisCreatorStage.showAndWait();
         } catch (IOException e) {
-        	e.printStackTrace();
+            e.printStackTrace();
             MsgBox.msgException(e);
         }
     }
-    
-    public void showArticlesView(){
-    	try {
-    		FXMLLoader loader = new FXMLLoader();
+
+    public void showArticlesView() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("ArticlesView.fxml"));
             AnchorPane page = loader.load();
             articlesStage = new Stage();
@@ -164,15 +157,15 @@ public class MainApp extends Application implements MsgBox {
             articlesStage.setScene(scene);
             articlesViewController = loader.getController();
             articlesViewController.setMainApp(this);
-            articlesViewController.setDialogStage(articlesStage);     
+            articlesViewController.setDialogStage(articlesStage);
             articlesStage.showAndWait();
         } catch (IOException e) {
-        	e.printStackTrace();
+            e.printStackTrace();
             MsgBox.msgException(e);
         }
     }
 
-    public void showMeasureView(Device device){
+    public void showMeasureView(Device device) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("MeasureView.fxml"));
             AnchorPane page = loader.load();
@@ -195,17 +188,17 @@ public class MainApp extends Application implements MsgBox {
         }
     }
 
-    public boolean showArticleEditView(ArticleHeaders articleHeaders){
-    	try {
-    		FXMLLoader loader = new FXMLLoader();
+    public boolean showArticleEditView(ArticleHeaders articleHeaders) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("ArticleEditView.fxml"));
             System.out.println(loader.getLocation());
             AnchorPane page = loader.load();
             Stage articleEditStage = new Stage();
-            if (articleHeaders == null){
+            if (articleHeaders == null) {
                 articleEditStage.setTitle("New article");
             } else {
-                if (articleHeaders.getArticle() != null && articleHeaders.getRevision() == null){
+                if (articleHeaders.getArticle() != null && articleHeaders.getRevision() == null) {
                     articleEditStage.setTitle(String.format("New revision for %s", articleHeaders.getArticle()));
                 } else {
                     articleEditStage.setTitle(articleHeaders.getArticle());
@@ -219,26 +212,26 @@ public class MainApp extends Application implements MsgBox {
             articleEditStage.setScene(scene);
             ArticleEditViewController controller = loader.getController();
             controller.setMainApp(this);
-            controller.setDialogStage(articleEditStage);  
+            controller.setDialogStage(articleEditStage);
             controller.setArticleHeaders(articleHeaders);
             articleEditStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
                 public void handle(WindowEvent we) {
-                	articlesViewController.fillTable();
-                	System.out.println(we);
+                    articlesViewController.fillTable();
+                    System.out.println(we);
                 }
-            }); 
+            });
             articleEditStage.showAndWait();
             return controller.isSaveClicked();
         } catch (IOException | IllegalStateException e) {
-        	e.printStackTrace();
+            e.printStackTrace();
             MsgBox.msgException(e);
         }
-    	return false;
+        return false;
     }
-    
-    public void showPrintAsisView(){
-    	try {
-    		FXMLLoader loader = new FXMLLoader();
+
+    public void showPrintAsisView() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("PrintAsisView.fxml"));
             AnchorPane page = loader.load();
             Stage printAsisStage = new Stage();
@@ -251,20 +244,20 @@ public class MainApp extends Application implements MsgBox {
             printAsisStage.setScene(scene);
             PrintAsisViewController printAsisController = loader.getController();
             printAsisController.setMainApp(this);
-            printAsisController.setDialogStage(printAsisStage);   
+            printAsisController.setDialogStage(printAsisStage);
             printAsisStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
                 public void handle(WindowEvent we) {
-                	asisCreatorController.setStatistic();
+                    asisCreatorController.setStatistic();
                 }
             });
             printAsisStage.showAndWait();
         } catch (IOException e) {
-        	e.printStackTrace();
+            e.printStackTrace();
             MsgBox.msgException(e);
         }
     }
 
-    public void showPrintCustomLabelView(){
+    public void showPrintCustomLabelView() {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("PrintCustomLabelView.fxml"));
@@ -287,10 +280,10 @@ public class MainApp extends Application implements MsgBox {
             MsgBox.msgException(e);
         }
     }
-    
-    public void showLabelTemplatesView(){
-    	try {
-    		FXMLLoader loader = new FXMLLoader();
+
+    public void showLabelTemplatesView() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("LabelTemplatesView.fxml"));
             AnchorPane page = loader.load();
             Stage labelTemplatesStage = new Stage();
@@ -303,30 +296,30 @@ public class MainApp extends Application implements MsgBox {
             labelTemplatesStage.setScene(scene);
             LabelTemplatesViewController controller = loader.getController();
             controller.setMainApp(this);
-            controller.setDialogStage(labelTemplatesStage);     
+            controller.setDialogStage(labelTemplatesStage);
             labelTemplatesStage.showAndWait();
         } catch (IOException e) {
-        	e.printStackTrace();
+            e.printStackTrace();
             MsgBox.msgException(e);
         }
     }
-    
+
     public void showRunningTestView() {
-    	try {
-    		currentSettings.getIp_ssh();
-		} catch (NullPointerException e) {
-			MsgBox.msgWarning("Settings warning", "The network interface is not specified in the settings");
-			return;
-		}
-    	if (!NetworkUtils.isIpInSystem(currentSettings.getIp_ssh())) {
-			MsgBox.msgWarning("Network scanner", String.format(
-					"Network interface with ip address %s not found in system. Please check the settings.", currentSettings.getIp_ssh()));
-			return;
-		}
-    	if (this.runningTestStage != null){
-    		return;
-    	}
-    	try {
+        try {
+            currentSettings.getIp_ssh();
+        } catch (NullPointerException e) {
+            MsgBox.msgWarning("Settings warning", "The network interface is not specified in the settings");
+            return;
+        }
+        if (!NetworkUtils.isIpInSystem(currentSettings.getIp_ssh())) {
+            MsgBox.msgWarning("Network scanner", String.format(
+                    "Network interface with ip address %s not found in system. Please check the settings.", currentSettings.getIp_ssh()));
+            return;
+        }
+        if (this.runningTestStage != null) {
+            return;
+        }
+        try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("RunningTest.fxml"));
             AnchorPane page = loader.load();
@@ -337,38 +330,38 @@ public class MainApp extends Application implements MsgBox {
 //            dialogStage.initOwner(primaryStage);
             Scene scene = new Scene(page);
             runningTestStage.setScene(scene);
-  
+
             RunningTestController controller = loader.getController();
             controller.setMainApp(this);
-     
-            controller.setDialogStage(runningTestStage);          
-            
+
+            controller.setDialogStage(runningTestStage);
+
             runningTestStage.setOnCloseRequest(event ->
             {
-            	
-            	System.out.println("Clearing systemData");
-            	runningTestStage = null;
-            	controller.stopTestFlag = true;
-            	Set<Thread> threads = Thread.getAllStackTraces().keySet();  
-            	List<String> items = new ArrayList<String>();
+
+                System.out.println("Clearing systemData");
+                runningTestStage = null;
+                controller.stopTestFlag = true;
+                Set<Thread> threads = Thread.getAllStackTraces().keySet();
+                List<String> items = new ArrayList<String>();
 //            	systemData.forEach(item -> items.add(item.getDevice().getAsis().getAsis()));
-            	for (Thread t : threads) {
-            		if (items.contains(t.getName())){
-            			if (t.isAlive()){
-            				t.stop();
-            			}
-            			System.out.println(String.format("Thread %d _. Status: %s", t.getName(), t.getState()));
-            		}
-            	}
+                for (Thread t : threads) {
+                    if (items.contains(t.getName())) {
+                        if (t.isAlive()) {
+                            t.stop();
+                        }
+                        System.out.println(String.format("Thread %d _. Status: %s", t.getName(), t.getState()));
+                    }
+                }
             });
             runningTestStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
-    
+
     public boolean showSettingsDialog() {
-    	try {
+        try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("SettingsView.fxml"));
             AnchorPane page = loader.load();
@@ -385,7 +378,7 @@ public class MainApp extends Application implements MsgBox {
             settingsViewController.setMainApp(this);
             settingsViewController.fillSettings();
             settingsViewController.setDialogStage(settingsStage);
-            
+
             settingsStage.showAndWait();
 
             return settingsViewController.isSaveClicked();
@@ -396,85 +389,88 @@ public class MainApp extends Application implements MsgBox {
     }
 
     public boolean showCalibrationView() {
-    	try {
-			FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("CalibrationView.fxml"));
-			AnchorPane page = loader.load();
-			Stage calibrationStage = new Stage();
-			calibrationStage.setTitle("Calibration");
-			calibrationStage.getIcons().add(favicon);
-			calibrationStage.initModality(Modality.WINDOW_MODAL);
-			calibrationStage.initOwner(primaryStage);
-			Scene scene = new Scene(page);
-			calibrationStage.setScene(scene);
-			
-			// Set the person into the controller
-			CalibrationViewController controller = loader.getController();
-			controller.setMainApp(this);
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("CalibrationView.fxml"));
+            AnchorPane page = loader.load();
+            Stage calibrationStage = new Stage();
+            calibrationStage.setTitle("Calibration");
+            calibrationStage.getIcons().add(favicon);
+            calibrationStage.initModality(Modality.WINDOW_MODAL);
+            calibrationStage.initOwner(primaryStage);
+            Scene scene = new Scene(page);
+            calibrationStage.setScene(scene);
+
+            // Set the person into the controller
+            CalibrationViewController controller = loader.getController();
+            controller.setMainApp(this);
             controller.setDialogStage(calibrationStage);
-            
+
             calibrationStage.showAndWait();
-			
-			return false;
-			
-		} catch (IOException e) {
-			// Exception gets thrown if the fxml file could not be loaded
-			e.printStackTrace();
-			return false;
-		}
-		
-    }
-    
-    /**
-	 * Returns the main stage.
-	 * @return
-	 */
-	public Stage getPrimaryStage() {
-		return primaryStage;
-	}
-	
-	public void loadSettings() {
-		File file = new File("./settings.xml");
-		if (!file.exists()){
-		    MsgBox.msgWarning("Load settings", "Settings file not found.\nWill create a new settings file.\nPlease fill settings form.");
-            if (!showSettingsDialog()){
-                return;
-            }
+
+            return false;
+
+        } catch (IOException e) {
+            // Exception gets thrown if the fxml file could not be loaded
+            e.printStackTrace();
+            return false;
         }
 
-	    try {    	
-	        JAXBContext context = JAXBContext.newInstance(Settings.class);
-	        Unmarshaller um = context.createUnmarshaller();
-//	        return  (Settings) um.unmarshal(file);
+    }
+
+    /**
+     * Returns the main stage.
+     *
+     * @return
+     */
+    public Stage getPrimaryStage() {
+        return primaryStage;
+    }
+
+    public boolean loadSettings() {
+        try {
+            File file = new File("settings.xml");
+            if (!file.exists()) {
+                MsgBox.msgWarning("Load settings", "Settings file not found.\nWill create a new settings file.\nPlease fill settings form.");
+                if (!showSettingsDialog()) {
+                    return false;
+                }
+            }
+
+            JAXBContext context = JAXBContext.newInstance(Settings.class);
+            Unmarshaller um = context.createUnmarshaller();
             setCurrentSettings((Settings) um.unmarshal(file));
-	    } catch (Exception e) { 
-	    	MsgBox.msgException(e);
-	    }
+            currUrl = HibernateSessionFactoryUtil.getConnectionInfo().get("DataBaseUrl");
+            return true;
+        } catch (Exception e) {
+            MsgBox.msgException(e);
+        }
 
-	}
+        return false;
+    }
 
-	public void setDbUrl(){
-	    try {
+    public void setDbUrl() {
+        try {
             HibernateSessionFactoryUtil.restartSessionFactory();
             rootLayoutController.setDbNameLbl(HibernateSessionFactoryUtil.getConnectionInfo().get("DataBaseUrl"));
-        } catch (CobhamRunningException e){
-	        MsgBox.msgWarning("Warning", e.getMessage());
+        } catch (CobhamRunningException e) {
+            MsgBox.msgWarning("Warning", e.getMessage());
         }
 
     }
 
-	public void setCurrentSettings(Settings currentSettings) {
-		this.currentSettings = currentSettings;
-	}
-	
-	public Settings getCurrentSettings() {
-		return currentSettings;
-	}
+    public void setCurrentSettings(Settings currentSettings) {
+        this.currentSettings = currentSettings;
+    }
+
+    public Settings getCurrentSettings() {
+        return currentSettings;
+    }
 
     public static void main(String[] args) {
         LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
     }
-    
-    public TestsViewController getController(){
-    	return testsViewController;
+
+    public TestsViewController getController() {
+        return testsViewController;
     }
 }

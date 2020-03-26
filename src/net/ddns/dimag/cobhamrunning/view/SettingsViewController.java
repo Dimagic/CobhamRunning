@@ -111,8 +111,9 @@ public class SettingsViewController implements MsgBox {
     @FXML
     private void saveBtnClick(){
     	if (saveSettings()){
+			mainApp.setDbUrl();
     		mainApp.loadSettings();
-    		mainApp.setDbUrl();
+
 //    		dialogStage.close();
     	}	
     }
