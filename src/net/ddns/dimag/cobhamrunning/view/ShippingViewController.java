@@ -7,8 +7,6 @@ import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.image.Image;
-import javafx.scene.input.MouseButton;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import net.ddns.dimag.cobhamrunning.MainApp;
@@ -16,6 +14,7 @@ import net.ddns.dimag.cobhamrunning.models.ShippingSystem;
 import net.ddns.dimag.cobhamrunning.services.ShippingJournalService;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
+import net.ddns.dimag.cobhamrunning.utils.ReportGenerator;
 import net.ddns.dimag.cobhamrunning.utils.ShippingJournalData;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -31,15 +30,11 @@ public class ShippingViewController implements MsgBox {
     private static final Logger LOGGER = LogManager.getLogger(ShippingViewController.class.getName());
     private final ShippingJournalService shippingJournalService = new ShippingJournalService();
     private ObservableList<ShippingSystem> shippingSystems = FXCollections.observableArrayList();
-    private Image procImage = new Image("file:src/resources/images/process.gif");
-    private Thread getDataThread;
     private MainApp mainApp;
     private Stage dialogStage;
 
     @FXML
     private TableView<ShippingSystem> tSysToShip;
-    @FXML
-    private ButtonBar bar;
     @FXML
     private DatePicker dateFrom;
     @FXML
@@ -94,9 +89,7 @@ public class ShippingViewController implements MsgBox {
         tSysToShip.setRowFactory(tv -> {
             TableRow<ShippingSystem> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
-                if (event.getButton() == MouseButton.SECONDARY) {
-//                    cm.show(tArticle, event.getScreenX(), event.getScreenY());
-                } else if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
                     mainApp.showMeasureView(row.getItem().getDevice());
                 }
             });
@@ -110,42 +103,19 @@ public class ShippingViewController implements MsgBox {
                                 Object newValue) {
                 String tmp = newValue.toString().toUpperCase();
                 try {
-                    if (!tmp.isEmpty()){
+                    if (!tmp.isEmpty()) {
                         shippingSystems = FXCollections.observableArrayList(
                                 shippingJournalService.getJournalByFilter(tmp, java.sql.Date.valueOf(dateFrom.getValue()),
                                         java.sql.Date.valueOf(dateTo.getValue())));
                         tSysToShip.setItems(shippingSystems);
-                    }else {
+                    } else {
                         refreshJournal();
                     }
-                  } catch (CobhamRunningException e) {
+                } catch (CobhamRunningException e) {
                     e.printStackTrace();
                 }
-
-
             }
         });
-
-//		tableTypeBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener<Number>() {
-//			@Override
-//			public void changed(ObservableValue<? extends Number> observableValue, Number oldValue, Number newValue) {
-//				if (newValue.intValue() == 0) {
-//					addBtn.setVisible(false);
-//					delBtn.setVisible(false);
-//					saveBtn.setVisible(false);
-//				}
-//				if (newValue.intValue() == 1) {
-//					addBtn.setVisible(true);
-//					delBtn.setVisible(true);
-//					saveBtn.setVisible(true);
-//				}
-//				initColumns(newValue.intValue());
-//			}
-//		});
-//		ObservableList<String> tableTypes = FXCollections.observableArrayList("Journal", "Shipping");
-//		tableTypeBox.setItems(tableTypes);
-//		tableTypeBox.getSelectionModel().select(0);
-
     }
 
     private void initItemMenu() {
@@ -157,12 +127,6 @@ public class ShippingViewController implements MsgBox {
         mEdit.setOnAction((ActionEvent event) -> {
             try {
                 System.out.println(tSysToShip.getSelectionModel().getSelectedItem());
-//                ShippingSystem shippingSystem = tSysToShip.getSelectionModel().getSelectedItem();
-//                Device device = shippingSystem.getDevice();
-//                DeviceService deviceService = new DeviceService();
-//                deviceService.deleteDevice(device);
-//                shippingSystems.remove(shippingSystem);
-//                tSysToShip.refresh();
             } catch (Exception e) {
                 LOGGER.error(e.getClass() + ": " + e.getMessage(), e);
                 MsgBox.msgException(e);
@@ -188,6 +152,17 @@ public class ShippingViewController implements MsgBox {
         }
     }
 
+    @FXML
+    private void handleExcelReport() {
+        ReportGenerator reportGenerator =
+                new ReportGenerator(dateFrom.getValue(), dateTo.getValue(), filterField.getText(), shippingSystems);
+        if (reportGenerator.shippingSystemReportToExcell()) {
+            MsgBox.msgInfo("Shipping system report", "Report generation complete");
+        } else {
+            MsgBox.msgError("Shipping system report", "Report generation failure");
+        }
+    }
+
     public void setShippingSystems(ShippingSystem system) {
         for (ShippingSystem item : shippingSystems) {
             if (item.equals(system)) {
@@ -197,10 +172,6 @@ public class ShippingViewController implements MsgBox {
         shippingSystems.add(system);
         tSysToShip.setItems(getDeviceData());
         tSysToShip.refresh();
-    }
-
-    public ObservableList<ShippingSystem> getShippingSystems() {
-        return shippingSystems;
     }
 
     private void initDate() {
@@ -274,12 +245,12 @@ public class ShippingViewController implements MsgBox {
     public void refreshJournal() {
         try {
             filterField.setText("");
-            ShippingJournalService shippingJournalService = new ShippingJournalService();
             shippingSystems = FXCollections.observableArrayList(shippingJournalService
                     .getJournalByDate(java.sql.Date.valueOf(dateFrom.getValue()), java.sql.Date.valueOf(dateTo.getValue())));
             tSysToShip.setItems(shippingSystems);
         } catch (CobhamRunningException e) {
-            e.printStackTrace();
+            LOGGER.error(e);
+            MsgBox.msgException(e);
         }
 
     }

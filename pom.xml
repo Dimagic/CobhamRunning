@@ -46,6 +46,19 @@
 		<pluginManagement>
 			<plugins>
 				<plugin>
+					<artifactId>maven-jar-plugin</artifactId>
+					<version>2.3</version>
+					<configuration>
+						<archive>
+							<manifest>
+								<addClasspath>true</addClasspath>
+								<classpathPrefix>lib/</classpathPrefix>
+								<classpathLayoutType>repository</classpathLayoutType>
+							</manifest>
+						</archive>
+					</configuration>
+				</plugin>
+				<plugin>
 					<artifactId>maven-assembly-plugin</artifactId>
 					<executions>
 						<execution>
@@ -111,6 +124,18 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>2.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.codehaus.plexus</groupId>
+			<artifactId>plexus-utils</artifactId>
+			<version>1.1</version>
+		</dependency>
+
+		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-core</artifactId>
 			<version>5.4.3.Final</version>
@@ -140,12 +165,6 @@
 			<artifactId>htmlunit</artifactId>
 			<version>2.19</version>
 		</dependency>
-
-<!--		<dependency>-->
-<!--			<groupId>hibernate</groupId>-->
-<!--			<artifactId>hibernate-entitymanager</artifactId>-->
-<!--			<version>3.4.0.GA</version>-->
-<!--		</dependency>-->
 
 		<dependency>
 			<groupId>org.postgresql</groupId>
@@ -231,12 +250,29 @@
 			<version>0.0.3</version>
 		</dependency>
 
-		<!-- add all iText 7 modules -->
+		<!-- add all iText 7 modules
 		<dependency>
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itext7-core</artifactId>
 			<version>${itext.version}</version>
 			<type>pom</type>
+		</dependency> -->
+
+		<!-- https://mvnrepository.com/artifact/ch.vorburger.exec/exec -->
+		<dependency>
+			<groupId>ch.vorburger.exec</groupId>
+			<artifactId>exec</artifactId>
+			<version>3.0.0</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.poi/poi-ooxml -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi-ooxml</artifactId>
+			<version>3.9</version>
+		</dependency>
+
+
+
 	</dependencies>
 </project>
