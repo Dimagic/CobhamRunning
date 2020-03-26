@@ -12,7 +12,7 @@
          <font>
             <Font name="System Bold" size="18.0" />
          </font></Button>
-      <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleShipping" prefHeight="75.0" prefWidth="250.0" text="Sipping journal" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="30.0">
+      <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleShipping" prefHeight="75.0" prefWidth="250.0" text="Shipping journal" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="30.0">
          <font>
             <Font name="System Bold" size="18.0" />
          </font></Button>
