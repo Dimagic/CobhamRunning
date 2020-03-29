@@ -2,7 +2,10 @@ package net.ddns.dimag.cobhamrunning.view;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -37,6 +40,8 @@ public class SettingsViewController implements MsgBox {
 	private TitledPane db_pane;
 	@FXML
 	private TitledPane prnt_pane;
+	@FXML
+	private TitledPane rmv_pane;
 	
 	@FXML
 	private Button cancel_btn;
@@ -68,9 +73,17 @@ public class SettingsViewController implements MsgBox {
 	private TextField name_db;
 	@FXML
 	private TextField user_db;
+	@FXML
+	private TextField addr_rmv;
+	@FXML
+	private TextField name_rmv;
+	@FXML
+	private TextField user_rmv;
 	
 	@FXML
 	private PasswordField pass_db;
+	@FXML
+	private PasswordField pass_rmv;
 	@FXML
 	private PasswordField pass_telnet;
 	@FXML
@@ -97,6 +110,7 @@ public class SettingsViewController implements MsgBox {
 		com_pane.setCollapsible(false);
 		db_pane.setCollapsible(false);
 		prnt_pane.setCollapsible(false);
+		rmv_pane.setCollapsible(false);
 		fillComCombo();
 		fillBaudCombo();
 		fillEthCombo();
@@ -113,9 +127,7 @@ public class SettingsViewController implements MsgBox {
     	if (saveSettings()){
 			mainApp.setDbUrl();
     		mainApp.loadSettings();
-
-//    		dialogStage.close();
-    	}	
+    	}
     }
     
     @FXML
@@ -138,6 +150,18 @@ public class SettingsViewController implements MsgBox {
 		}
 		MsgBox.msgInfo("DB connection", "Connection established");
     }
+
+    @FXML
+	private void testRmvConn(){
+		RmvUtils rmvUtils = new RmvUtils(addr_rmv.getText(), name_rmv.getText(), user_rmv.getText(), pass_rmv.getText());
+		try {
+			Connection conn = rmvUtils.getConnection();
+			conn.close();
+			MsgBox.msgInfo("RMV connection", "Connection established");
+		} catch (SQLException | ClassNotFoundException e) {
+			MsgBox.msgError("RMV connection", e.getLocalizedMessage());
+		}
+	}
           
     public void fillSettings() {
     	try {
@@ -156,6 +180,10 @@ public class SettingsViewController implements MsgBox {
     		user_db.setText(currSet.getUser_db());
     		pass_db.setText(currSet.getPass_db());
     		prnt_combo.setValue(currSet.getPrnt_combo());
+    		addr_rmv.setText(currSet.getAddr_rmv());
+    		name_rmv.setText(currSet.getName_rmv());
+    		user_rmv.setText(currSet.getUser_rmv());
+    		pass_rmv.setText(currSet.getPass_rmv());
     	} catch (NullPointerException e) {
 			return;
 		}
@@ -274,8 +302,13 @@ public class SettingsViewController implements MsgBox {
         this.mainApp = mainApp;
         pvc.setController(mainApp.getController());
     }
-    
-    public void setDialogStage(Stage dialogStage) {
+
+	public Settings getSettings(){
+		return mainApp.getCurrentSettings();
+	}
+
+
+	public void setDialogStage(Stage dialogStage) {
     	this.dialogStage = dialogStage;
     }
 }

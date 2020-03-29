@@ -20,7 +20,7 @@ public class RmvUtils {
 //  "jdbc:sqlserver://lhr9-pur-sql005;databaseName=RMV;user=rmv_user;password=RMV;"
 
     public RmvUtils(String rmvAddr, String rmvDbName, String rmvUser, String rmvPassw) {
-        this.JDBC_URL = String.format("jdbc:sqlserver:%s;databaseName=%s;user=%s;password=%s;", rmvAddr, rmvDbName, rmvUser, rmvPassw);
+        this.JDBC_URL = String.format("jdbc:sqlserver://%s;databaseName=%s;user=%s;password=%s;", rmvAddr, rmvDbName, rmvUser, rmvPassw);
     }
 
     public HashMap<String, String> getTestsMapWithDate(String asis) throws CobhamRunningException, SQLException, ClassNotFoundException {

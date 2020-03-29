@@ -5,6 +5,7 @@ import net.ddns.dimag.cobhamrunning.view.SettingsViewController;
 
 import javax.xml.bind.annotation.XmlRootElement;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
 
 @XmlRootElement(name = "settings")
@@ -25,6 +26,10 @@ public class Settings extends SettingsViewController implements MsgBox {
 	private String name_db;
 	private String user_db;
 	private String pass_db;
+	private String addr_rmv;
+	private String name_rmv;
+	private String user_rmv;
+	private String pass_rmv;
 	
 	public Settings(){	
 	}
@@ -171,42 +176,62 @@ public class Settings extends SettingsViewController implements MsgBox {
 		this.pass_db = pass_db;
 	}
 
-	@Override
-	public String toString() {
-		StringBuilder builder = new StringBuilder();
-		builder.append("Settings [ip_telnet_combo=");
-		builder.append(ip_telnet_combo);
-		builder.append(", ip_ssh_combo=");
-		builder.append(ip_ssh_combo);
-		builder.append(", com_combo=");
-		builder.append(com_combo);
-		builder.append(", baud_combo=");
-		builder.append(baud_combo);
-		builder.append(", gen_combo=");
-		builder.append(gen_combo);
-		builder.append(", sa_combo=");
-		builder.append(sa_combo);
-		builder.append(", prnt_combo=");
-		builder.append(prnt_combo);
-		builder.append(", login_telnet=");
-		builder.append(login_telnet);
-		builder.append(", login_ssh=");
-		builder.append(login_ssh);
-		builder.append(", pass_telnet=");
-		builder.append(pass_telnet);
-		builder.append(", pass_ssh=");
-		builder.append(pass_ssh);
-		builder.append(", addr_db=");
-		builder.append(addr_db);
-		builder.append(", name_db=");
-		builder.append(name_db);
-		builder.append(", user_db=");
-		builder.append(user_db);
-		builder.append(", pass_db=");
-		builder.append(pass_db);
-		builder.append("]");
-		return builder.toString();
+	public String getAddr_rmv() {
+		return addr_rmv;
 	}
 
-		
+	public void setAddr_rmv(String addr_rmv) {
+		this.addr_rmv = addr_rmv;
+	}
+
+	public String getName_rmv() {
+		return name_rmv;
+	}
+
+	public void setName_rmv(String name_rmv) {
+		this.name_rmv = name_rmv;
+	}
+
+	public String getUser_rmv() {
+		return user_rmv;
+	}
+
+	public void setUser_rmv(String user_rmv) {
+		this.user_rmv = user_rmv;
+	}
+
+	public String getPass_rmv() {
+		return pass_rmv;
+	}
+
+	public void setPass_rmv(String pass_rmv) {
+		this.pass_rmv = pass_rmv;
+	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("Settings{");
+		sb.append("ip_telnet_combo='").append(ip_telnet_combo).append('\'');
+		sb.append(", ip_ssh_combo='").append(ip_ssh_combo).append('\'');
+		sb.append(", com_combo='").append(com_combo).append('\'');
+		sb.append(", baud_combo='").append(baud_combo).append('\'');
+		sb.append(", gen_combo='").append(gen_combo).append('\'');
+		sb.append(", sa_combo='").append(sa_combo).append('\'');
+		sb.append(", prnt_combo='").append(prnt_combo).append('\'');
+		sb.append(", login_telnet='").append(login_telnet).append('\'');
+		sb.append(", login_ssh='").append(login_ssh).append('\'');
+		sb.append(", pass_telnet='").append(pass_telnet).append('\'');
+		sb.append(", pass_ssh='").append(pass_ssh).append('\'');
+		sb.append(", addr_db='").append(addr_db).append('\'');
+		sb.append(", port_db='").append(port_db).append('\'');
+		sb.append(", name_db='").append(name_db).append('\'');
+		sb.append(", user_db='").append(user_db).append('\'');
+		sb.append(", pass_db='").append(pass_db).append('\'');
+		sb.append(", addr_rmv='").append(addr_rmv).append('\'');
+		sb.append(", name_rmv='").append(name_rmv).append('\'');
+		sb.append(", user_rmv='").append(user_rmv).append('\'');
+		sb.append(", pass_rmv='").append(pass_rmv).append('\'');
+		sb.append('}');
+		return sb.toString();
+	}
 }
