@@ -10,6 +10,7 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import net.ddns.dimag.cobhamrunning.MainApp;
+import net.ddns.dimag.cobhamrunning.models.Settings;
 import net.ddns.dimag.cobhamrunning.models.ShippingSystem;
 import net.ddns.dimag.cobhamrunning.services.ShippingJournalService;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
@@ -126,7 +127,7 @@ public class ShippingViewController implements MsgBox {
 
         mEdit.setOnAction((ActionEvent event) -> {
             try {
-                System.out.println(tSysToShip.getSelectionModel().getSelectedItem());
+                System.out.println(tSysToShip.getSelectionModel().getSelectedItem().toString());
             } catch (Exception e) {
                 LOGGER.error(e.getClass() + ": " + e.getMessage(), e);
                 MsgBox.msgException(e);
@@ -143,6 +144,7 @@ public class ShippingViewController implements MsgBox {
             String snString = MsgBox.msgInputSN();
             console.clear();
             Thread thread = new ShippingJournalData(this, asisString, articleString, snString);
+
             thread.start();
         } catch (NullPointerException e) {
             return;
@@ -278,6 +280,10 @@ public class ShippingViewController implements MsgBox {
 
     private ObservableList<ShippingSystem> getDeviceData() {
         return shippingSystems;
+    }
+
+    public Settings getSettings(){
+        return mainApp.getCurrentSettings();
     }
 
     public void setMainApp(MainApp mainApp) {

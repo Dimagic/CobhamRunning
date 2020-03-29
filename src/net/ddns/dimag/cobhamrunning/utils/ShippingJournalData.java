@@ -1,6 +1,7 @@
 package net.ddns.dimag.cobhamrunning.utils;
 
 import javafx.application.Platform;
+import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.*;
 import net.ddns.dimag.cobhamrunning.services.*;
 import net.ddns.dimag.cobhamrunning.view.ShippingViewController;
@@ -15,6 +16,7 @@ import java.util.Set;
 
 public class ShippingJournalData extends Thread{
     private ShippingViewController controller;
+    private MainApp mainApp;
     private String articleString;
     private String asisString;
     private String snString;
@@ -30,7 +32,8 @@ public ShippingJournalData(ShippingViewController controller, String asisString,
     @Override
     public void run() {
         try {
-            rmvUtils = new RmvUtils("//lhr9-pur-sql005", "RMV", "rmv_user", "RMV");
+            Settings settings = this.controller.getSettings();
+            rmvUtils = new RmvUtils(settings.getAddr_rmv(), settings.getName_rmv(), settings.getUser_rmv(), settings.getPass_rmv());
             boolean devInDb = false;
             Asis asis = getSystemAsis(asisString, articleString);
             ShippingJournalService shippingJournalService = new ShippingJournalService();
@@ -216,5 +219,9 @@ public ShippingJournalData(ShippingViewController controller, String asisString,
 
     private void writeConsole(String val){
         Platform.runLater(() -> controller.writeConsole(val));
+    }
+
+    public void setMainApp(MainApp mainApp) {
+        this.mainApp = mainApp;
     }
 }
