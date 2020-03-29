@@ -153,7 +153,6 @@ public class Asis {
 				", isImported=" + isImported +
 				", articleHeaders=" + articleHeaders +
 				", macAddress=" + macAddress +
-				", device=" + device +
 				'}';
 	}
 }

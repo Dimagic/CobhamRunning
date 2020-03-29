@@ -112,4 +112,14 @@ public class DeviceInfo {
 			return false;
 		return true;
 	}
+
+	@Override
+	public String toString() {
+		return "DeviceInfo{" +
+				"id=" + id +
+				", systemVer='" + systemVer + '\'' +
+				", commonVer='" + commonVer + '\'' +
+				", targetVer='" + targetVer + '\'' +
+				'}';
+	}
 }
