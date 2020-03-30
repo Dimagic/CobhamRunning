@@ -11,25 +11,32 @@ import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.control.cell.TextFieldTreeCell;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.LabelTemplate;
 import net.ddns.dimag.cobhamrunning.services.LabelTemplateService;
-import net.ddns.dimag.cobhamrunning.utils.*;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
+import net.ddns.dimag.cobhamrunning.utils.MsgBox;
+import net.ddns.dimag.cobhamrunning.utils.RmvUtils;
+import net.ddns.dimag.cobhamrunning.utils.ZebraPrint;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.sql.SQLException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static javafx.collections.FXCollections.*;
+import java.util.stream.Collectors;
 
 public class PrintCustomLabelViewController implements MsgBox {
+    private static final Logger LOGGER = LogManager.getLogger(ShippingViewController.class.getName());
     private Stage dialogStage;
     private MainApp mainApp;
     private LabelTemplateService labelTemplateService = new LabelTemplateService();
@@ -37,8 +44,11 @@ public class PrintCustomLabelViewController implements MsgBox {
 
     private final ObservableList<RowData> rowDataList = FXCollections.observableArrayList();
 
+
     @FXML
     private ChoiceBox<String> templatesBox;
+    @FXML
+    private CheckBox useRmvData;
     @FXML
     private Button printBtn;
     @FXML
@@ -79,33 +89,96 @@ public class PrintCustomLabelViewController implements MsgBox {
                 }
         );
 
+        useRmvData.selectedProperty().addListener(new ChangeListener<Boolean>() {
+            @Override
+            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+                rowDataList.clear();
+                templatesBox.getSelectionModel().clearSelection();
+                templatesBox.setDisable(newValue);
+                printBtn.setDisable(!newValue);
+            }
+        });
+
         tPrintJob.setItems(rowDataList);
 
         templatesBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                rowDataList.clear();
-                printBtn.setDisable(true);
-                fillTable(labelList.get((int) newValue).toString());
+                if ((int) newValue > 0){
+                    rowDataList.clear();
+                    printBtn.setDisable(true);
+                    fillTable(labelList.get((int) newValue).toString());
+                }
             }
         });
     }
 
     @FXML
     private void printLabel() {
-        LabelTemplate labelTemplate = null;
-        try {
-            labelTemplate = labelTemplateService.findByName(templatesBox.getValue());
-            String templ = labelTemplate.getTemplate();
-            for (RowData row : rowDataList) {
-                templ = templ.replaceAll(String.format("<:%s:>", row.getFieldName()), row.getFieldValue());
-                System.out.println(String.format("%s : %s", row.getFieldName(), row.getFieldValue()));
+        String articleString;
+        String asisString;
+        if (useRmvData.isSelected()){
+            HashMap<String, Object> rmvRes = new HashMap<>();
+            List<String> currSys = MsgBox.msgScanSystemBarcode();
+            try {
+                articleString = currSys.get(0);
+                asisString = currSys.get(1);
+            } catch (NullPointerException | IndexOutOfBoundsException e){
+                return;
             }
-            ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
-            zebraPrint.printTemplate(templ);
-        } catch (CobhamRunningException e) {
-            e.printStackTrace();
+            try {
+                RmvUtils rmvUtils = new RmvUtils(mainApp);
+                rmvRes = rmvUtils.getLastTestsStatusWithDate(asisString);
+            } catch (SQLException | ClassNotFoundException | ParseException e) {
+                LOGGER.error(e);
+                MsgBox.msgWarning("Print label", e.getLocalizedMessage());
+                return;
+            }
+            if (rmvRes.keySet().isEmpty()){
+                MsgBox.msgInfo("Print label", String.format("Tests result for system with ASIS: %s not found", asisString));
+                return;
+            }
+            String testName = MsgBox.msgChoice(String.format("Select test for system with ASIS: %s", asisString),
+                    "Tests:", new ArrayList<String>(rmvRes.keySet()));
+            if (testName != null){
+                for (String k: rmvRes.keySet()) {
+                    HashMap<String, Object> test = (HashMap<String, Object>) rmvRes.get(k);
+                    if (Integer.parseInt(String.valueOf(test.get("TestStatus"))) != 0){
+                        MsgBox.msgInfo("Print label", String.format("Test: %s has status FAIL", testName));
+                        return;
+                    }
+                }
+                HashMap<String, Object> currTest = (HashMap<String, Object>) rmvRes.get(testName);
+                String rmvTemplate = String.format("^XA\n" +
+                        "^LH20,3\n" +
+                        "^FO5,5^A0N,30,30^FDSystem:^FS\n" +
+                        "^FO120,5^A0N,30,30^FD%s^FS\n" +
+                        "^FO5,40^A0N,30,30^FDTest:^FS\n" +
+                        "^FO100,40^A0N,30,30^FD%s PASS^FS\n" +
+                        "^FO5,75^A0N,30,30^FDDate:^FS\n" +
+                        "^FO100,75^A0N,30,30^FD%s^FS\n" +
+                        "^XZ", String.format("%s/%s", articleString, asisString), currTest.get("Configuration"),
+                        dateToString((Date) currTest.get("TestDate")));
+                System.out.println(rmvTemplate);
+//                ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
+//                zebraPrint.printTemplate(rmvTemplate);
+            }
+        } else {
+            LabelTemplate labelTemplate = null;
+            try {
+                labelTemplate = labelTemplateService.findByName(templatesBox.getValue());
+                String templ = labelTemplate.getTemplate();
+                for (RowData row : rowDataList) {
+                    templ = templ.replaceAll(String.format("<:%s:>", row.getFieldName()), row.getFieldValue());
+                    System.out.println(String.format("%s : %s", row.getFieldName(), row.getFieldValue()));
+                }
+                ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
+                zebraPrint.printTemplate(templ);
+            } catch (CobhamRunningException e) {
+                e.printStackTrace();
+            }
         }
+
 
     }
 
@@ -148,6 +221,11 @@ public class PrintCustomLabelViewController implements MsgBox {
 
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
+    }
+
+    private String dateToString(Date date){
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        return dateFormat.format(date);
     }
 
     public static class RowData {
