@@ -1,8 +1,10 @@
 package net.ddns.dimag.cobhamrunning.utils;
 
+import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.DeviceInfo;
 import net.ddns.dimag.cobhamrunning.models.Measurements;
+import net.ddns.dimag.cobhamrunning.models.Settings;
 
 import java.lang.reflect.Field;
 import java.sql.*;
@@ -21,6 +23,12 @@ public class RmvUtils {
 
     public RmvUtils(String rmvAddr, String rmvDbName, String rmvUser, String rmvPassw) {
         this.JDBC_URL = String.format("jdbc:sqlserver://%s;databaseName=%s;user=%s;password=%s;", rmvAddr, rmvDbName, rmvUser, rmvPassw);
+    }
+
+    public RmvUtils(MainApp mainApp){
+        Settings settings = mainApp.getCurrentSettings();
+        this.JDBC_URL = String.format("jdbc:sqlserver://%s;databaseName=%s;user=%s;password=%s;", settings.getAddr_rmv(),
+                settings.getName_rmv(), settings.getUser_rmv(), settings.getPass_rmv());
     }
 
     public HashMap<String, String> getTestsMapWithDate(String asis) throws CobhamRunningException, SQLException, ClassNotFoundException {
@@ -123,6 +131,28 @@ public class RmvUtils {
         return res.get(0).get("TestDate").toString();
     }
 
+    private HashMap<Date, HashMap<String, Object>> getTestsResultWithDate(String asis) throws SQLException, ClassNotFoundException, ParseException {
+        String q = String
+                .format("select Configuration, TestDate, TestStatus from RMV.dbo.tbl_RMV_Header where Serial = '%s'", asis);
+        List<HashMap<String, Object>> tmp = sendQuery(q);
+        HashMap<Date, HashMap<String, Object>> res = new HashMap<>();
+        for (HashMap<String, Object> obj: tmp){
+            res.put(strToDate(obj.get("TestDate")), obj);
+        }
+        return res;
+    }
+
+    public HashMap<String, Object> getLastTestsStatusWithDate(String asis) throws SQLException, ClassNotFoundException, ParseException {
+        HashMap<String, Object> res = new HashMap<>();
+        HashMap<Date, HashMap<String, Object>> dateMap = getTestsResultWithDate(asis);
+        List<Date> dateList = new ArrayList<Date>(dateMap.keySet());
+        Collections.sort(dateList);
+        for (Date d: dateList){
+            res.put(dateMap.get(d).get("Configuration").toString(), dateMap.get(d));
+        }
+        return res;
+    }
+
     private List getTestNamesByAsis(String asis) throws SQLException, ClassNotFoundException, CobhamRunningException {
         String q = String
                 .format("select DISTINCT Configuration from RMV.dbo.tbl_RMV_Header where Serial = '%s'", asis);
@@ -176,22 +206,6 @@ public class RmvUtils {
         }
         return measures;
     }
-
-    private Date strToDate(Object date) throws ParseException {
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        return formatter.parse(date.toString());
-
-    }
-
-//    private Connection getDbConnection() throws SQLException, ClassNotFoundException {
-////		try {
-//        appendToPath();
-//        Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-//        return DriverManager.getConnection(JDBC_URL);
-////		} catch (SQLException | ClassNotFoundException e) {
-////			throw e;
-////		}
-//}
 
     private void appendToPath() {
         String dir = "e:\\Work\\JProject\\CobhamRunning\\lib\\";
@@ -275,6 +289,12 @@ public class RmvUtils {
             setConnection(DriverManager.getConnection(JDBC_URL));
         }
         return connection;
+    }
+
+    private Date strToDate(Object date) throws ParseException {
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        return formatter.parse(date.toString());
+
     }
 
     public void setConnection(Connection connection) {

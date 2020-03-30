@@ -10,13 +10,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javafx.application.Platform;
-import javafx.scene.control.Alert;
+import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
@@ -331,17 +327,26 @@ public interface MsgBox {
 
 	static String msgInputSN() {
 		String sn = msgInputString("Enter serial number");
+		System.out.println(sn);
+		if (sn.equalsIgnoreCase("none")){
+			return sn.toUpperCase();
+		}
 		if (!Pattern.matches("^[\\d]{8,8}$", sn)) {
 			msgError("Input error", "Incorrect serial number");
 			return msgInputSN();
 		}
-		return sn;
+		return sn.toUpperCase();
 	}
 
 	static List<String> msgScanSystemBarcode() {
-
 		String val = msgInputString("Scan system barcode:");
-		Matcher matcherArt = patternArt.matcher(val);
+		Matcher matcherArt;
+		try {
+			matcherArt = patternArt.matcher(val);
+		}catch (NullPointerException e){
+			return null;
+		}
+
 		List<String> tmp = new ArrayList<>();
 		while (matcherArt.find())
 			tmp.add(val.substring(matcherArt.start(), matcherArt.end()).toUpperCase());
@@ -360,6 +365,15 @@ public interface MsgBox {
 			msgScanMac();
 		}
 		return val;
+	}
+
+	static String msgChoice(String header, String content, List<String> choices){
+		ChoiceDialog<String> dialog = new ChoiceDialog<>(null, choices);
+		dialog.setTitle("Choise");
+		dialog.setHeaderText(header);
+		dialog.setContentText(content);
+		Optional<String> result = dialog.showAndWait();
+		return result.orElse(null);
 	}
 
 }
