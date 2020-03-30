@@ -152,16 +152,15 @@ public class PrintCustomLabelViewController implements MsgBox {
                 String rmvTemplate = String.format("^XA\n" +
                         "^LH20,3\n" +
                         "^FO5,5^A0N,30,30^FDSystem:^FS\n" +
-                        "^FO120,5^A0N,30,30^FD%s^FS\n" +
+                        "^FO135,5^A0N,30,30^FD%s^FS\n" +
                         "^FO5,40^A0N,30,30^FDTest:^FS\n" +
-                        "^FO100,40^A0N,30,30^FD%s PASS^FS\n" +
-                        "^FO5,75^A0N,30,30^FDDate:^FS\n" +
-                        "^FO100,75^A0N,30,30^FD%s^FS\n" +
-                        "^XZ", String.format("%s/%s", articleString, asisString), currTest.get("Configuration"),
+                        "^FO135,40^A0N,30,30^FD%s PASS^FS\n" +
+                        "^FO5,75^A0N,30,30^FDRMV date:^FS\n" +
+                        "^FO135,75^A0N,30,30^FD%s^FS\n" +
+                            "^XZ", String.format("%s/%s", articleString, asisString), currTest.get("Configuration"),
                         dateToString((Date) currTest.get("TestDate")));
-                System.out.println(rmvTemplate);
-//                ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
-//                zebraPrint.printTemplate(rmvTemplate);
+                ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
+                zebraPrint.printTemplate(rmvTemplate);
             }
         } else {
             LabelTemplate labelTemplate = null;
