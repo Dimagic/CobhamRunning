@@ -64,7 +64,7 @@ public class MainApp extends Application implements MsgBox {
     public void start(Stage primaryStage) {
 //        LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
         this.primaryStage = primaryStage;
-        String VERSION = "0.0.26";
+        String VERSION = "0.0.27";
         this.primaryStage.setTitle(String.format("CobhamRunning %s", VERSION));
         this.primaryStage.getIcons().add(favicon);
         try {

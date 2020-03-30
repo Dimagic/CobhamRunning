@@ -10,12 +10,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
-
 public class CSVUtils implements MsgBox{
 	
 	public CSVUtils(){
-				
 	}
 	
 	public List<String[]> getCsvData() throws NullPointerException{

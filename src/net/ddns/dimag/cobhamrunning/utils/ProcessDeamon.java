@@ -1,32 +1,65 @@
 package net.ddns.dimag.cobhamrunning.utils;
 
-import javafx.concurrent.Task;
+import ch.vorburger.exec.ManagedProcess;
+import ch.vorburger.exec.ManagedProcessBuilder;
+import ch.vorburger.exec.ManagedProcessException;
+import net.ddns.dimag.cobhamrunning.MainApp;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-import java.io.*;
-import java.util.Arrays;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
-public class ProcessDeamon extends Task<Void> {
-    String name;
+public class ProcessDeamon extends Thread {
+    private static final Logger LOGGER = LogManager.getLogger(MainApp.class.getSimpleName());
+    private final Runtime rt = Runtime.getRuntime();
+    private final String[] cmdArr;
+    private String cmd;
 
-    public ProcessDeamon(String name){
-        this.name = name;
+    public ProcessDeamon(String cmd) {
+        this.cmd = cmd;
+        this.cmdArr = getCmdArray(cmd);
+
     }
 
-    @Override
-    protected Void call() throws IOException {
-        Process process = new ProcessBuilder("ping", "8.8.8.8", "-t").start();
-        InputStream is = process.getInputStream();
-        InputStreamReader isr = new InputStreamReader(is);
-        BufferedReader br = new BufferedReader(isr);
-        String line;
+    public void run() {
+        try {
+            ManagedProcess proc = new ManagedProcessBuilder("C:\\\\AdemBurn\\StormInterface.exe")
+                    .addArgument("a")
+                    .addArgument("-s")
+                    .addArgument("COM1")
+                    .addArgument("-f")
+                    .addArgument("DnaAutomaticConfig.ini")
+                    .setWorkingDirectory(new File("C:\\\\AdemBurn\\"))
+                    .setDestroyOnShutdown(true)
+                    .build();
 
-//        System.out.printf("Output of running %s is:", Arrays.toString(args));
+//            proc.start();
+            proc.startAndWaitForConsoleMessageMaxMs("started!", 7000);
+            while (proc.isAlive()){
+                System.out.println(proc.getConsole());
+            }
+            int status = proc.waitForExit();
+//            int status = proc.waitForExitMaxMsOrDestroy(3000);
+//            String output = proc.getConsole();
 
-        while ((line = br.readLine()) != null) {
-            System.out.println(String.format("Thread #%s : %s", name, line));
+
+
+            proc.destroy();
+        } catch (ManagedProcessException e) {
+            LOGGER.error(e);
+            e.printStackTrace();
         }
-        return null;
     }
+
+    private String[] getCmdArray(String cmdString) {
+        String[] tmp = cmdString.split("\\s+");
+        return tmp;
+    }
+
+
 }
 
 

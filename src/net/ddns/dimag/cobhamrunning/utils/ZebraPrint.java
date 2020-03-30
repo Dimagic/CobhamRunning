@@ -55,28 +55,8 @@ public class ZebraPrint {
 	private String printerName;
 
 	public ZebraPrint() {
-		testpng();
 	}
 	
-	public void testpng(){
-//		String s = "^XA^LH20,3^FO0,0^B3N,N,40,N,N^FD<AN9><SN>^FS^FO0,55^AFN,55,25^FD<SN>^FS^FO150,50^AFN,20,13^FD<AN>^FS^FO380,50^AFN,20,13^FD<SUBCON>^FS^FO150,80^AFN,20,13^FD<SAD>^FS^FO455,50^AFN,20,13^FD<REGDAT>^FS^FO470,80^AFN,20,13^FDCOBHAM^FS^XZ";
-//		ZplUtils zu = new ZplUtils();
-//		zu.zplCommand(s);
-//		ZebraLabel zebraLabel = new ZebraLabel(510, 90);
-//		zebraLabel.setDefaultZebraFont(ZebraFont.ZEBRA_ZERO);
-////		new ZebraBarCode39(positionX, positionY, text, barCodeHeigth)
-//		zebraLabel.addElement(new ZebraText(10, 20, "CA201212AA", 14));
-//		zebraLabel.addElement(new ZebraBarCode39(0, 0, "CA201212AA", 40, 0, 0));
-//		zebraLabel.addElement(new );
-//		BufferedImage image = zebraLabel.getImagePreview();
-//		try {
-//			ImageIO.write(image, "png", new File("zpl.png"));
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-	}
-
 	public ZebraPrint(AsisPrintJob printJob, String printerName) {
 		this.printerName = printerName;
 		this.printService = getPrinterByName(printerName);
