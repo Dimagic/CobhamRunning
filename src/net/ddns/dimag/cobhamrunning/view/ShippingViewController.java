@@ -259,13 +259,13 @@ public class ShippingViewController implements MsgBox {
 
     @FXML
     private void addYear() {
-        dateTo.setValue(dateFrom.getValue().plusYears(1));
+        dateTo.setValue(dateFrom.getValue().plusYears(1).minusDays(1));
         refreshJournal();
     }
 
     @FXML
     private void addMonth() {
-        dateTo.setValue(dateFrom.getValue().plusMonths(1));
+        dateTo.setValue(dateFrom.getValue().plusMonths(1).minusDays(1));
         refreshJournal();
     }
 
