@@ -143,9 +143,12 @@ public class PrintCustomLabelViewController implements MsgBox {
             if (testName != null){
                 for (String k: rmvRes.keySet()) {
                     HashMap<String, Object> test = (HashMap<String, Object>) rmvRes.get(k);
-                    if (Integer.parseInt(String.valueOf(test.get("TestStatus"))) != 0){
-                        MsgBox.msgInfo("Print label", String.format("Test: %s has status FAIL", testName));
-                        return;
+                    System.out.println(test);
+                    if (test.get("Configuration").equals(testName)){
+                        if (test.get("TestStatus") == null || Integer.parseInt(String.valueOf(test.get("TestStatus"))) != 0){
+                            MsgBox.msgInfo("Print label", String.format("Test: %s has status FAIL", testName));
+                            return;
+                        }
                     }
                 }
                 HashMap<String, Object> currTest = (HashMap<String, Object>) rmvRes.get(testName);
