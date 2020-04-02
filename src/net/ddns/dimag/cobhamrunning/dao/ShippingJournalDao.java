@@ -1,12 +1,10 @@
 package net.ddns.dimag.cobhamrunning.dao;
 
-import java.math.BigInteger;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 
-import net.ddns.dimag.cobhamrunning.models.Asis;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.ShippingSystem;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
@@ -32,25 +30,22 @@ public class ShippingJournalDao implements UniversalDao {
                 .setParameter("asis", device.getAsis().getAsis())
                 .setParameter("sn", device.getSn()).list();
         session.close();
-        if (journal.size() > 0) {
-            return true;
-        }
-        return false;
+        return journal.size() > 0;
     }
 
-    public List<ShippingSystem> getJournalByFilter(String filter, Date dateFrom, Date dateTo) throws CobhamRunningException {
+    public List getJournalByFilter(String filter, Date dateFrom, Date dateTo) throws CobhamRunningException {
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         SimpleDateFormat formatter =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             Date startDate = formatter.parse(String.format("%s 00:00:00", dateFrom));
             Date stopDate = formatter.parse(String.format("%s 23:59:59", dateTo));
             List journal = session.createSQLQuery("select * from public.shippingjournal where " +
-                    "device_id in (select id from public.device where asis_id " +
+                    "(device_id in (select id from public.device where asis_id " +
                     "in (select id from public.asis where articleheaders_id " +
                     "in (select id from public.articleheaders where article like :article))) or " +
                     "device_id in (select id from public.device where asis_id " +
                     "in (select id from public.asis where asis like :asis)) or " +
-                    "device_id in (select id from public.device where sn like :sn) and " +
+                    "device_id in (select id from public.device where sn like :sn)) and " +
                     "dateship BETWEEN :from AND :to")
                     .addEntity(ShippingSystem.class)
                     .setParameter("article", String.format("%%%s%%", filter.toUpperCase()))
@@ -71,8 +66,8 @@ public class ShippingJournalDao implements UniversalDao {
     public List getJournalByDate(Date dateFrom, Date dateTo) throws CobhamRunningException {
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         SimpleDateFormat formatter =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date startDate = null;
-        Date stopDate = null;
+        Date startDate;
+        Date stopDate;
         try {
             startDate = formatter.parse(String.format("%s 00:00:00", dateFrom));
             stopDate = formatter.parse(String.format("%s 23:59:59", dateTo));
