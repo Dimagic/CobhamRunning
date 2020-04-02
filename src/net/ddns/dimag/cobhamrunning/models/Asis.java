@@ -55,6 +55,10 @@ public class Asis {
 	@Column(name = "asis", length = 4, nullable = false, unique = true)
 	private String asis;
 
+	public void setAsis(String asis){
+		this.asis = asis;
+	}
+
 	public String getAsis() {
 		return asis;
 	}
@@ -78,6 +82,10 @@ public class Asis {
 	@Type(type = "org.hibernate.type.NumericBooleanType")
 	@Column(name = "is_imported")
 	private Boolean isImported;
+
+	public Boolean getIsImported(){
+		return isImported;
+	}
 
 	public Boolean getImported() {
 		return isImported;
