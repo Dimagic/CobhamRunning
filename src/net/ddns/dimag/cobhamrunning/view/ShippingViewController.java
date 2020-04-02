@@ -3,6 +3,7 @@ package net.ddns.dimag.cobhamrunning.view;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -97,7 +98,6 @@ public class ShippingViewController implements MsgBox {
             return row;
         });
 
-
         filterField.textProperty().addListener(new ChangeListener<Object>() {
             @Override
             public void changed(ObservableValue<?> observable, Object oldValue,
@@ -144,7 +144,6 @@ public class ShippingViewController implements MsgBox {
             String snString = MsgBox.msgInputSN();
             console.clear();
             Thread thread = new ShippingJournalData(this, asisString, articleString, snString);
-
             thread.start();
         } catch (NullPointerException e) {
             return;
@@ -158,10 +157,14 @@ public class ShippingViewController implements MsgBox {
     private void handleExcelReport() {
         ReportGenerator reportGenerator =
                 new ReportGenerator(dateFrom.getValue(), dateTo.getValue(), filterField.getText(), shippingSystems);
-        if (reportGenerator.shippingSystemReportToExcell()) {
-            MsgBox.msgInfo("Shipping system report", "Report generation complete");
+        if (!reportGenerator.isOfficeInstalled()){
+            MsgBox.msgInfo("Shipping system report", "Microsoft Excel not found in the system");
         } else {
-            MsgBox.msgError("Shipping system report", "Report generation failure");
+            if (reportGenerator.shippingSystemReportToExcell()) {
+                MsgBox.msgInfo("Shipping system report", "Report generation complete");
+            } else {
+                MsgBox.msgError("Shipping system report", "Report generation failure");
+            }
         }
     }
 
