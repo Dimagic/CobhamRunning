@@ -2,6 +2,9 @@ package net.ddns.dimag.cobhamrunning.utils;
 
 import javafx.collections.ObservableList;
 import net.ddns.dimag.cobhamrunning.models.ShippingSystem;
+import net.ddns.dimag.cobhamrunning.view.RunningTestController;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -9,15 +12,14 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.awt.*;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.*;
 import java.util.List;
 
 public class ReportGenerator {
+    private static final Logger LOGGER = LogManager.getLogger(ReportGenerator.class.getName());
     private final SimpleDateFormat fmt = new SimpleDateFormat("dd-MM-yyyy");
     private final LocalDate dateFrom;
     private final LocalDate dateTo;
@@ -214,6 +216,38 @@ public class ReportGenerator {
         style.setBorderTop(thin);
         style.setTopBorderColor(black);
         return style;
+    }
+
+    public boolean isOfficeInstalled(){
+        try {
+            Process p = Runtime.getRuntime().exec
+                    (new String [] { "cmd.exe", "/c", "assoc", ".xls"});
+            BufferedReader input =
+                    new BufferedReader
+                            (new InputStreamReader(p.getInputStream()));
+            String extensionType = input.readLine();
+            input.close();
+            // extract type
+            if (extensionType == null) {
+                return false;
+            }
+            String fileType[] = extensionType.split("=");
+
+            p = Runtime.getRuntime().exec
+                    (new String [] { "cmd.exe", "/c", "ftype", fileType[1]});
+            input =
+                    new BufferedReader
+                            (new InputStreamReader(p.getInputStream()));
+            String fileAssociation = input.readLine();
+            // extract path
+//            String officePath = fileAssociation.split("=")[1];
+            return true;
+        }
+        catch (Exception e) {
+            LOGGER.error(e);
+            MsgBox.msgException(e);
+        }
+        return false;
     }
 
 }
