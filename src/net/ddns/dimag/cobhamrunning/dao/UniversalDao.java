@@ -21,9 +21,17 @@ public interface UniversalDao {
     default void save(Object obj) throws CobhamRunningException {
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         Transaction tx1 = session.beginTransaction();
-        session.save(obj);
-        tx1.commit();
-        session.close();
+        try {
+            session.save(obj);
+            tx1.commit();
+        } catch (Exception e){
+            tx1.rollback();
+            session.close();
+            if (e.getCause() instanceof org.postgresql.util.PSQLException){
+                throw new CobhamRunningException(e.getCause().getMessage());
+            }
+            throw new CobhamRunningException(e);
+        }
     }
 
     default void update(Object obj) throws CobhamRunningException {
