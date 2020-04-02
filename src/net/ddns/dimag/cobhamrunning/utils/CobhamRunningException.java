@@ -5,4 +5,5 @@ public class CobhamRunningException extends Exception {
     {
         super(message);
     }
+    public CobhamRunningException(Exception e) {super(e);}
 }
