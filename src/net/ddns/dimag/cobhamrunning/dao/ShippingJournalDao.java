@@ -44,11 +44,16 @@ public class ShippingJournalDao implements UniversalDao {
         try {
             Date startDate = formatter.parse(String.format("%s 00:00:00", dateFrom));
             Date stopDate = formatter.parse(String.format("%s 23:59:59", dateTo));
-            List journal = session.createSQLQuery("select * from public.shippingjournal where device_id in " +
-                    "(select id from public.device where asis_id in " +
-                    "(select id from public.asis where asis like :asis)) or device_id in " +
-                    "(select id from public.device where sn like :sn) and dateship BETWEEN :from AND :to")
+            List journal = session.createSQLQuery("select * from public.shippingjournal where " +
+                    "device_id in (select id from public.device where asis_id " +
+                    "in (select id from public.asis where articleheaders_id " +
+                    "in (select id from public.articleheaders where article like :article))) or " +
+                    "device_id in (select id from public.device where asis_id " +
+                    "in (select id from public.asis where asis like :asis)) or " +
+                    "device_id in (select id from public.device where sn like :sn) and " +
+                    "dateship BETWEEN :from AND :to")
                     .addEntity(ShippingSystem.class)
+                    .setParameter("article", String.format("%%%s%%", filter.toUpperCase()))
                     .setParameter("asis", String.format("%%%s%%", filter.toUpperCase()))
                     .setParameter("sn", String.format("%%%s%%", filter.toUpperCase()))
                     .setParameter("from", startDate)
