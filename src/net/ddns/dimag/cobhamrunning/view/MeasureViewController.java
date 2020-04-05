@@ -113,9 +113,10 @@ public class MeasureViewController {
 
     private SimpleStringProperty getMeasStatus(Measurements measure){
         String status = "FAIL";
-        if (measure.getMeasMin().equals("\"\"") &&  measure.getMeasMax().equals("\"\"")){
+        if (measure.getMeasMin().equals("\"\"") &&  measure.getMeasMax().equals("\"\"")) {
             status = "PASS";
-            return new SimpleStringProperty(status);
+        } else if((measure.getMeasMin().isEmpty() &&  measure.getMeasMax().isEmpty())){
+            status = "PASS";
         } else {
             try {
                 double measVal = Double.parseDouble(measure.getMeasVal());
@@ -128,10 +129,9 @@ public class MeasureViewController {
                 if (measure.getMeasMin().equals(measure.getMeasMax()) &&  measure.getMeasMin().equals(measure.getMeasVal())){
                     status = "PASS";
                 }
-            } finally {
-                return new SimpleStringProperty(status);
             }
         }
+        return new SimpleStringProperty(status);
     }
 
     public void setDevice(Device device) {
