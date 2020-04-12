@@ -38,7 +38,7 @@
       </Button>
       <TextArea fx:id="console" layoutX="10.0" layoutY="306.0" prefHeight="135.0" prefWidth="300.0" AnchorPane.bottomAnchor="10.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="150.0" />
       <Button layoutX="368.0" layoutY="9.0" mnemonicParsing="false" onAction="#refreshJournal" prefHeight="25.0" prefWidth="75.0" text="Refresh" AnchorPane.leftAnchor="520.0" AnchorPane.topAnchor="10.0" />
-      <Button layoutX="527.0" layoutY="305.0" mnemonicParsing="false" onAction="#handeleAddBtn" prefHeight="25.0" prefWidth="125.0" text="Add " AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+      <Button layoutX="527.0" layoutY="305.0" mnemonicParsing="false" onAction="#handleAddBtn" prefHeight="25.0" prefWidth="125.0" text="Add " AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
       <TextField fx:id="filterField" layoutX="371.0" layoutY="11.0" prefHeight="25.0" prefWidth="110.0" AnchorPane.leftAnchor="405.0" AnchorPane.topAnchor="10.0" />
       <Label layoutX="363.0" layoutY="15.0" text="Filter:" AnchorPane.leftAnchor="370.0" AnchorPane.topAnchor="15.0" />
       <Button layoutX="465.0" layoutY="255.0" mnemonicParsing="false" onAction="#handleExcelReport" prefHeight="25.0" prefWidth="125.0" text="Generate Excel file" AnchorPane.bottomAnchor="120.0" AnchorPane.rightAnchor="10.0" />

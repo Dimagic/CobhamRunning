@@ -12,7 +12,6 @@ import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.stage.Stage;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.LabelTemplate;
 import net.ddns.dimag.cobhamrunning.services.LabelTemplateService;
@@ -33,18 +32,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class PrintCustomLabelViewController implements MsgBox {
     private static final Logger LOGGER = LogManager.getLogger(ShippingViewController.class.getName());
-    private Stage dialogStage;
     private MainApp mainApp;
     private LabelTemplateService labelTemplateService = new LabelTemplateService();
     private List<LabelTemplate> labelList = new ArrayList<>();
-
     private final ObservableList<RowData> rowDataList = FXCollections.observableArrayList();
-
-
     @FXML
     private ChoiceBox<String> templatesBox;
     @FXML
@@ -78,7 +72,7 @@ public class PrintCustomLabelViewController implements MsgBox {
                         ((RowData) t.getTableView().getItems().get(
                                 t.getTablePosition().getRow())
                         ).setFieldValue(t.getNewValue());
-                        Boolean isNotAllFill = false;
+                        boolean isNotAllFill = false;
                         for (RowData row : rowDataList) {
                             if (row.fieldValue.equals("")) {
                                 isNotAllFill = true;
@@ -89,28 +83,25 @@ public class PrintCustomLabelViewController implements MsgBox {
                 }
         );
 
-        useRmvData.selectedProperty().addListener(new ChangeListener<Boolean>() {
-            @Override
-            public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
+        useRmvData.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            rowDataList.clear();
+            templatesBox.getSelectionModel().clearSelection();
+            templatesBox.setDisable(newValue);
+            printBtn.setDisable(!newValue);
+            if (newValue){
+                printLabel();
+            }
+        });
+
+        templatesBox.getSelectionModel().selectedIndexProperty().addListener((ChangeListener) (observable, oldValue, newValue) -> {
+            if ((int) newValue > 0){
                 rowDataList.clear();
-                templatesBox.getSelectionModel().clearSelection();
-                templatesBox.setDisable(newValue);
-                printBtn.setDisable(!newValue);
+                printBtn.setDisable(true);
+                fillTable(labelList.get((int) newValue).toString());
             }
         });
 
         tPrintJob.setItems(rowDataList);
-
-        templatesBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                if ((int) newValue > 0){
-                    rowDataList.clear();
-                    printBtn.setDisable(true);
-                    fillTable(labelList.get((int) newValue).toString());
-                }
-            }
-        });
     }
 
     @FXML
@@ -180,8 +171,6 @@ public class PrintCustomLabelViewController implements MsgBox {
                 e.printStackTrace();
             }
         }
-
-
     }
 
     private void fillLabelBox() {
@@ -209,16 +198,12 @@ public class PrintCustomLabelViewController implements MsgBox {
         tPrintJob.setContextMenu(menu);
     }
 
-    public void fillTable(String template) {
+    private void fillTable(String template) {
         Matcher m = Pattern.compile("(?<=\\<:)(.*?)(?=\\:>)").matcher(template);
         while (m.find()) {
             rowDataList.add(new RowData(m.group()));
         }
         tPrintJob.setItems(rowDataList);
-    }
-
-    public void setDialogStage(Stage dialogStage) {
-        this.dialogStage = dialogStage;
     }
 
     public void setMainApp(MainApp mainApp) {

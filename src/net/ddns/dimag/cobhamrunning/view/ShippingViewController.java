@@ -136,7 +136,7 @@ public class ShippingViewController implements MsgBox {
     }
 
     @FXML
-    private void handeleAddBtn() {
+    private void handleAddBtn() {
         try {
             List<String> currSys = MsgBox.msgScanSystemBarcode();
             String articleString = currSys.get(0);

@@ -7,11 +7,9 @@ import java.util.List;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import net.ddns.dimag.cobhamrunning.models.Asis;
-import net.ddns.dimag.cobhamrunning.models.Device;
-import net.ddns.dimag.cobhamrunning.services.AsisService;
-import net.ddns.dimag.cobhamrunning.services.DeviceService;
-import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
+import net.ddns.dimag.cobhamrunning.models.*;
+import net.ddns.dimag.cobhamrunning.services.*;
+import net.ddns.dimag.cobhamrunning.utils.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import javafx.event.ActionEvent;
@@ -26,12 +24,6 @@ import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import net.ddns.dimag.cobhamrunning.MainApp;
-import net.ddns.dimag.cobhamrunning.models.CobhamSystem;
-import net.ddns.dimag.cobhamrunning.models.DeviceInfo;
-import net.ddns.dimag.cobhamrunning.services.DeviceInfoService;
-import net.ddns.dimag.cobhamrunning.utils.MsgBox;
-import net.ddns.dimag.cobhamrunning.utils.NetworkUtils;
-import net.ddns.dimag.cobhamrunning.utils.RmvUtils;
 
 public class RunningTestController implements MsgBox {
     private ObservableList<Device> systemData = FXCollections.observableArrayList();
@@ -40,17 +32,17 @@ public class RunningTestController implements MsgBox {
     @FXML
     private TableView<Device> tSysToRun;
     @FXML
-    private TableColumn<CobhamSystem, String> articleColumn;
+    private TableColumn<Device, String> articleColumn;
     @FXML
-    private TableColumn<CobhamSystem, String> asisColumn;
+    private TableColumn<Device, String> asisColumn;
     @FXML
-    private TableColumn<CobhamSystem, String> macColumn;
+    private TableColumn<Device, String> macColumn;
     @FXML
-    private TableColumn<CobhamSystem, String> ipColumn;
+    private TableColumn<Device, String> ipColumn;
     @FXML
-    private TableColumn<CobhamSystem, String> statusColumn;
+    private TableColumn<Device, String> statusColumn;
     @FXML
-    private TableColumn<CobhamSystem, Double> progressColumn;
+    private TableColumn<Device, Double> progressColumn;
     @FXML
     private CheckBox testCheck;
     @FXML
@@ -78,48 +70,30 @@ public class RunningTestController implements MsgBox {
         statusColumn.prefWidthProperty().bind(tSysToRun.widthProperty().divide(6));
         progressColumn.prefWidthProperty().bind(tSysToRun.widthProperty().divide(6));
 
-//		articleColumn.setCellValueFactory(cellData -> cellData.getValue().articleProperty());
+        articleColumn.setCellValueFactory(cellData -> cellData.getValue().articleProperty());
         asisColumn.setCellValueFactory(cellData -> cellData.getValue().asisProperty());
         macColumn.setCellValueFactory(cellData -> cellData.getValue().macProperty());
-        ipColumn.setCellValueFactory(cellData -> cellData.getValue().ipProperty());
+//        ipColumn.setCellValueFactory(cellData -> cellData.getValue().ipProperty());
 
-        statusColumn.setCellValueFactory(new PropertyValueFactory<CobhamSystem, String>("message"));
-        progressColumn.setCellValueFactory(new PropertyValueFactory<CobhamSystem, Double>("progress"));
+        statusColumn.setCellValueFactory(new PropertyValueFactory<Device, String>("message"));
+        progressColumn.setCellValueFactory(new PropertyValueFactory<Device, Double>("progress"));
 
-        progressColumn.setCellFactory(ProgressBarTableCell.<CobhamSystem>forTableColumn());
+        progressColumn.setCellFactory(ProgressBarTableCell.<Device>forTableColumn());
     }
 
     @FXML
-    private void addSystemForTest() {
-		DeviceService deviceService = new DeviceService();
-		AsisService asisService = new AsisService();
-
-        List<String> currSys = MsgBox.msgScanSystemBarcode();
-        Asis asis = null;
+    private boolean addSystemForTest() {
+        Device deviceObj;
         try {
-            asis = asisService.findByName(currSys.get(1));
+            deviceObj = getDevice();
+            setSystemData(deviceObj);
+            tSysToRun.setItems(systemData);
+            tSysToRun.refresh();
         } catch (CobhamRunningException e) {
-            e.printStackTrace();
+            MsgBox.msgWarning("Running test", e.getLocalizedMessage());
+            return false;
         }
-
-        try {
-			System.out.println(deviceService.findDeviceByAsis(asis.getAsis()));
-		} catch (Exception e) {
-
-//			String currMac = asis.getMacAddress().getMac();
-//			Device device = new Device(asis, "12345678");
-//			writeConsole(currSys.toString());
-//			writeConsole(currMac);
-//			new DeviceService().saveDevice(device);
-		}
-//				mainApp.setSystemData(new CobhamSystem(currSys.get(0), currSys.get(1), currMac, this));
-        System.out.println(getSystemData());
-        tSysToRun.setItems(getSystemData());
-//			}
-//		} catch (Exception e) {
-//			LOGGER.warn("addSystemForTest", e);
-//			MsgBox.msgException(e);
-//		} 
+        return true;
     }
 
     @FXML
@@ -131,16 +105,16 @@ public class RunningTestController implements MsgBox {
         try {
             ipMacMap = NetworkUtils.getArpMap(mainApp.getCurrentSettings().getIp_ssh());
             stopTestFlag = false;
-//			for (CobhamSystem cobhamSystem : tSysToRun.getItems()) {
-//				System.out.println(cobhamSystem);
-//				cobhamSystem.setLocalStopTestFlag(stopTestFlag);
+			for (Device deviceObj : tSysToRun.getItems()) {
+				System.out.println(deviceObj);
+//                deviceObj.setLocalStopTestFlag(stopTestFlag);
 //				DeviceInfoService deviceInfoService = new DeviceInfoService();
 //				DeviceInfo devInfo = RmvUtils.getDeviceInfo(cobhamSystem.getDevice());
 //				System.out.println(devInfo);
 //				cobhamSystem.getDevice().setDeviceInfo(devInfo);
 //				deviceInfoService.saveDeviceInfo(devInfo);
 //				handleRunTest(cobhamSystem);
-//			}
+			}
         } catch (Exception e) {
             LOGGER.error("handleRunAllTests()", e);
             e.printStackTrace();
@@ -230,6 +204,104 @@ public class RunningTestController implements MsgBox {
             }
         }
         systemData.add(tmp);
+    }
+
+    private Device getDevice() throws CobhamRunningException {
+        Device deviceObj;
+        Asis asisObj;
+        String articleName;
+        String asisName;
+        List<String> currSys = MsgBox.msgScanSystemBarcode();
+        if (currSys != null && currSys.size() == 2) {
+            articleName = currSys.get(0);
+            asisName = currSys.get(1);
+        } else {
+            return null;
+        }
+        DeviceService deviceService = new DeviceService();
+        deviceObj = deviceService.findDeviceByAsis(asisName);
+        if (deviceObj != null) {
+            String art = deviceObj.getAsis().getArticleHeaders().getArticle();
+            if (!art.equalsIgnoreCase(articleName)) {
+                throw new CobhamRunningException(String.format("ASIS: %s already has another article: %s", asisName, art));
+            }
+            return deviceObj;
+        }
+        asisObj = getAsisObj(articleName, asisName);
+        String currSn = MsgBox.msgInputSN();
+        deviceObj = new Device(asisObj, currSn);
+        deviceService.saveDevice(deviceObj);
+        return deviceObj;
+    }
+
+    private Asis getAsisObj(String articleName, String asisName) throws CobhamRunningException {
+        AsisService asisService = new AsisService();
+
+        Asis asisObj;
+        ArticleHeaders articleObj;
+
+
+        asisObj = asisService.findByName(asisName);
+        if (asisObj != null) {
+            return asisObj;
+        }
+
+        articleObj = getArticleObj(articleName);
+        if (articleObj == null) {
+            MsgBox.msgWarning("Running test", String.format("Article %s not found.", articleName));
+            return null;
+        }
+
+        asisObj = new Asis(asisName);
+        asisObj.setArticleHeaders(articleObj);
+        asisObj.setImported(true);
+        asisService.saveAsis(asisObj);
+        if (articleObj.getNeedmac()) {
+            MacAddress macObj;
+            macObj = getMacObj(asisObj);
+            asisObj.setMacAddress(macObj);
+        }
+
+        return asisObj;
+    }
+
+    private ArticleHeaders getArticleObj(String articleName) {
+        ArticleHeadersService articleHeadersService = new ArticleHeadersService();
+        ArticleHeaders articleObj;
+        try {
+            articleObj = articleHeadersService.findArticleByName(articleName);
+            if (articleObj != null) {
+                return articleObj;
+            }
+        } catch (CobhamRunningException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    private MacAddress getMacObj(Asis asis) {
+        MacAddressService macService = new MacAddressService();
+        MacAddress macObj;
+        String mac;
+        mac = MsgBox.msgScanMac();
+        macObj = new MacAddress(mac, asis);
+        try {
+            macService.saveMac(macObj);
+        } catch (CobhamRunningException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return macObj;
+    }
+
+    private MacAddress getRmvMac(String asisName) {
+//        AsisDbUtils asisDbUtils = new AsisDbUtils(mainApp);
+//        asisDbUtils.getMacByAsis(asisName);
+        return null;
+    }
+
+    private MacAddress getSelfMac() {
+        return null;
     }
 
     public void writeConsole(String val) {
