@@ -25,5 +25,10 @@
             <Font name="System Bold" size="18.0" />
          </font>
       </Button>
+      <Button layoutX="24.0" layoutY="230.0" mnemonicParsing="false" onAction="#handleDevicesJournal" prefHeight="75.0" prefWidth="250.0" text="Devices journal" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="240.0">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Button>
    </children>
 </AnchorPane>

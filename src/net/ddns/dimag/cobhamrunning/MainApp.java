@@ -34,6 +34,7 @@ public class MainApp extends Application implements MsgBox {
     private Stage asisCreatorStage;
     private Stage articlesStage;
     private Stage shippingStage;
+    private Stage devicesJournalStage;
     private BorderPane rootLayout;
     private Settings currentSettings;
     private TestsViewController testsViewController;
@@ -64,7 +65,7 @@ public class MainApp extends Application implements MsgBox {
     public void start(Stage primaryStage) {
 //        LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
         this.primaryStage = primaryStage;
-        String VERSION = "0.0.27";
+        String VERSION = "0.0.29";
         this.primaryStage.setTitle(String.format("CobhamRunning %s", VERSION));
         this.primaryStage.getIcons().add(favicon);
         try {
@@ -112,6 +113,29 @@ public class MainApp extends Application implements MsgBox {
             controller.setMainApp(this);
             controller.setDialogStage(shippingStage);
             shippingStage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOGGER.error(e.toString());
+            MsgBox.msgException(e);
+        }
+    }
+
+    public void showDevicesJournalView() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getClassLoader().getResource("DeviceJournal.fxml"));
+            AnchorPane page = loader.load();
+            devicesJournalStage = new Stage();
+            devicesJournalStage.setTitle("Devices journal");
+            devicesJournalStage.getIcons().add(favicon);
+            devicesJournalStage.initModality(Modality.WINDOW_MODAL);
+            devicesJournalStage.initOwner(primaryStage);
+            Scene scene = new Scene(page);
+            devicesJournalStage.setScene(scene);
+            DeviceJournalController controller = loader.getController();
+            controller.setMainApp(this);
+            controller.setDialogStage(devicesJournalStage);
+            devicesJournalStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
             LOGGER.error(e.toString());
@@ -272,7 +296,7 @@ public class MainApp extends Application implements MsgBox {
             printCustomLabelStage.setScene(scene);
             PrintCustomLabelViewController printCustomLabelViewController = loader.getController();
             printCustomLabelViewController.setMainApp(this);
-            printCustomLabelViewController.setDialogStage(printCustomLabelStage);
+//            printCustomLabelViewController.setDialogStage(printCustomLabelStage);
             printCustomLabelStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();

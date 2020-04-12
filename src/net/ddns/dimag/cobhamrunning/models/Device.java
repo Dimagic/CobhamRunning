@@ -2,15 +2,9 @@ package net.ddns.dimag.cobhamrunning.models;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
-import net.ddns.dimag.cobhamrunning.services.DeviceInfoService;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -110,6 +104,31 @@ public class Device {
     public void setShippingSystem(ShippingSystem shippingSystem) {
         this.shippingSystem = shippingSystem;
     }
+
+//************** Assembly device ***********************************************
+//******************************************************************************
+//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+//    @JoinColumn(name = "device_id", nullable = false)
+//    private Device device;
+//
+//    @Column
+//    @ElementCollection(targetClass = Long.class)
+//    private Set<Device> assembly = new HashSet<Device>();
+//
+//    @OneToMany(mappedBy = "assembly", orphanRemoval = true)
+//    public Set<Device> getAssembly() {
+//        return this.assembly;
+//    }
+//
+//    public void setAssembly(Set<Device> assembly) {
+//        this.assembly = assembly;
+//    }
+//
+//    public void addAssembly(Tests tests) {
+//        tests.setDevice(this);
+//        getTests().add(tests);
+//    }
+//******************************************************************************
 
     public StringProperty commonVerProperty() {
         try {

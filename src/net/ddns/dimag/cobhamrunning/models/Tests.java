@@ -1,5 +1,6 @@
 package net.ddns.dimag.cobhamrunning.models;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -19,6 +20,7 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import javafx.beans.property.SimpleStringProperty;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
@@ -96,6 +98,17 @@ public class Tests {
 
 	public void removeTests(Measurements meas) {
 		getMeas().remove(meas);
+	}
+
+	public SimpleStringProperty nameProperty(){
+		return new SimpleStringProperty(getName());
+	}
+
+	public SimpleStringProperty testDateProperty() {
+		try {
+			return new SimpleStringProperty(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(getDateTest()));
+		} catch (NullPointerException e) {}
+		return new SimpleStringProperty("");
 	}
 
 	@Override
