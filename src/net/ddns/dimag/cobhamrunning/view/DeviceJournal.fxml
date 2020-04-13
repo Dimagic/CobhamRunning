@@ -3,6 +3,7 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.RadioButton?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.control.TextField?>
@@ -12,7 +13,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.231" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.ddns.dimag.cobhamrunning.view.DeviceJournalController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.221" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.ddns.dimag.cobhamrunning.view.DeviceJournalController">
    <children>
       <DatePicker fx:id="dateFrom" layoutX="49.0" layoutY="9.0" onAction="#refreshJournal" prefHeight="25.0" prefWidth="110.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="10.0" />
       <DatePicker fx:id="dateTo" layoutX="246.0" layoutY="9.0" onAction="#refreshJournal" prefHeight="25.0" prefWidth="110.0" AnchorPane.leftAnchor="245.0" AnchorPane.topAnchor="10.0" />
@@ -32,7 +33,7 @@
       <Button layoutX="527.0" layoutY="305.0" mnemonicParsing="false" onAction="#handleAddBtn" prefHeight="25.0" prefWidth="125.0" text="Add " AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
       <TextField fx:id="filterField" layoutX="371.0" layoutY="11.0" prefHeight="25.0" prefWidth="110.0" AnchorPane.leftAnchor="405.0" AnchorPane.topAnchor="10.0" />
       <Label layoutX="363.0" layoutY="15.0" text="Filter:" AnchorPane.leftAnchor="370.0" AnchorPane.topAnchor="15.0" />
-      <GridPane layoutX="15.0" layoutY="261.0" AnchorPane.bottomAnchor="150.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="40.0">
+      <GridPane layoutX="15.0" layoutY="261.0" AnchorPane.bottomAnchor="100.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="75.0">
         <columnConstraints>
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
           <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" prefWidth="100.0" />
@@ -65,5 +66,7 @@
             </TableView>
          </children>
       </GridPane>
+      <RadioButton fx:id="useDevDate" layoutX="45.0" layoutY="47.0" mnemonicParsing="false" text="use device date create" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="45.0" />
+      <RadioButton fx:id="useTestDate" layoutX="55.0" layoutY="57.0" mnemonicParsing="false" text="use device tests date" AnchorPane.leftAnchor="200.0" AnchorPane.topAnchor="45.0" />
    </children>
 </AnchorPane>

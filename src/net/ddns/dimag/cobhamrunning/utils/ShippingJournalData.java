@@ -16,17 +16,13 @@ import java.util.Set;
 
 public class ShippingJournalData extends Thread{
     private ShippingViewController controller;
+    private Device device;
     private MainApp mainApp;
-    private String articleString;
-    private String asisString;
-    private String snString;
     private RmvUtils rmvUtils;
 
-public ShippingJournalData(ShippingViewController controller, String asisString, String articleString, String snString) {
+public ShippingJournalData(ShippingViewController controller, Device device) {
         this.controller = controller;
-        this.articleString = articleString;
-        this.asisString = asisString;
-        this.snString = snString;
+        this.device = device;
     }
 
     @Override
@@ -34,36 +30,13 @@ public ShippingJournalData(ShippingViewController controller, String asisString,
         try {
             Settings settings = this.controller.getSettings();
             rmvUtils = new RmvUtils(settings.getAddr_rmv(), settings.getName_rmv(), settings.getUser_rmv(), settings.getPass_rmv());
-            boolean devInDb = false;
-            Asis asis = getSystemAsis(asisString, articleString);
             ShippingJournalService shippingJournalService = new ShippingJournalService();
             DeviceService deviceService = new DeviceService();
             TestsService testsService = new TestsService();
-
-
-            Device device = new Device(asis, snString);
-            Device dbDeviceByAsis = deviceService.findDeviceByAsis(asis.getAsis());
-            Device dbDeviceBySn = deviceService.findDeviceBySn(device.getSn());
-            if (dbDeviceByAsis != null){
-                if (!dbDeviceByAsis.getSn().equals(device.getSn())){
-                    MsgBox.msgWarning("Warning", String.format("System with ASIS: %s already in DB\n" +
-                            "and has SN: %s", dbDeviceByAsis.getAsis().getAsis(), dbDeviceByAsis.getSn()));
-                    return;
-                }
-            }
-            if (dbDeviceBySn != null){
-                if (!dbDeviceBySn.getAsis().getAsis().equals(device.getAsis().getAsis())){
-                    MsgBox.msgWarning("Warning", String.format("System with SN: %s already in DB\n" +
-                            "and has ASIS: %s", dbDeviceBySn.getSn(), dbDeviceBySn.getAsis().getAsis()));
-                    return;
-                }
-            }
-            if(dbDeviceByAsis != null && dbDeviceBySn != null){
-                device = dbDeviceByAsis;
-                devInDb = true;
-            }
+            Asis asis = device.getAsis();
             if (shippingJournalService.isDeviceInJournal(device)) {
-                MsgBox.msgWarning("Warning", String.format("System with ASIS: %s article: %s\nor/and SN:%s already shipped.",
+                MsgBox.msgInfo("Warning", String.format("System with ASIS: %s article: %s\n" +
+                                "and SN:%s already shipped.",
                         asis.getAsis(), asis.getArticleHeaders().getArticle(), device.getSn()));
                 return;
             }
@@ -110,7 +83,7 @@ public ShippingJournalData(ShippingViewController controller, String asisString,
             DeviceInfoService deviceInfoService = new DeviceInfoService();
             deviceInfoService.saveOrUpdateDeviceInfo(deviceInfo);
             device.setDeviceInfo(deviceInfo);
-            deviceService.saveDevice(device);
+            deviceService.updateDevice(device);
             MeasurementsService measurementsService = new MeasurementsService();
             for (Tests tests: testMeasMap.keySet()){
                 testsService.saveTest(tests);

@@ -140,6 +140,29 @@ public class Measurements {
 		return new SimpleStringProperty(getMeasVal());
 	}
 
+	public SimpleStringProperty measStatusProperty(){
+		String status = "FAIL";
+		if (measMin.equals("\"\"") &&  measMax.equals("\"\"")) {
+			status = "PASS";
+		} else if((measMin.isEmpty() &&  measMax.isEmpty())){
+			status = "PASS";
+		} else {
+			try {
+				double measValTmp = Double.parseDouble(measVal);
+				double measMinTmp = Double.parseDouble(measMin);
+				double measMaxTmp = Double.parseDouble(measMax);
+				if (measMinTmp <= measValTmp || measValTmp <= measMaxTmp){
+					status = "PASS";
+				}
+			} catch (Exception e){
+				if (measMin.equals(measMax) &&  measMin.equals(measVal)){
+					status = "PASS";
+				}
+			}
+		}
+		return new SimpleStringProperty(status);
+	}
+
 	@Override
 	public String toString() {
 		return "Measurements{" +

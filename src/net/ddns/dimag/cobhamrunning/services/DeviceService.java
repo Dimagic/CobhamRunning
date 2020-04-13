@@ -1,5 +1,6 @@
 package net.ddns.dimag.cobhamrunning.services;
 
+import java.util.Date;
 import java.util.List;
 
 import net.ddns.dimag.cobhamrunning.dao.DeviceDao;
@@ -49,6 +50,14 @@ public class DeviceService {
 
     public void updateDevice(Device device) throws CobhamRunningException {
     	deviceDao.update(device);
+    }
+
+    public List<Device> findDeviceByDateCreate(Date dateFrom, Date dateTo) throws CobhamRunningException{
+	    return deviceDao.findDeviceByDateCreate(dateFrom, dateTo);
+    }
+
+    public List<Device> findDeviceByTestDate(Date dateFrom, Date dateTo) throws CobhamRunningException{
+        return deviceDao.findDeviceByTestDate(dateFrom, dateTo);
     }
 
     public List<Device> findAllDevice() throws CobhamRunningException {

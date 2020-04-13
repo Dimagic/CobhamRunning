@@ -68,7 +68,7 @@ public class MeasureViewController {
         measMinColumn.setCellValueFactory(cellData -> cellData.getValue().measMinProperty());
         measValColumn.setCellValueFactory(cellData -> cellData.getValue().measValProperty());
         measMaxColumn.setCellValueFactory(cellData -> cellData.getValue().measMaxProperty());
-        measStatusColumn.setCellValueFactory(cellData -> getMeasStatus(cellData.getValue()));
+        measStatusColumn.setCellValueFactory(cellData -> cellData.getValue().measStatusProperty());
 
         testsChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener() {
             @Override
@@ -109,29 +109,6 @@ public class MeasureViewController {
             e.printStackTrace();
         }
         return null;
-    }
-
-    private SimpleStringProperty getMeasStatus(Measurements measure){
-        String status = "FAIL";
-        if (measure.getMeasMin().equals("\"\"") &&  measure.getMeasMax().equals("\"\"")) {
-            status = "PASS";
-        } else if((measure.getMeasMin().isEmpty() &&  measure.getMeasMax().isEmpty())){
-            status = "PASS";
-        } else {
-            try {
-                double measVal = Double.parseDouble(measure.getMeasVal());
-                double measMin = Double.parseDouble(measure.getMeasMin());
-                double measMax = Double.parseDouble(measure.getMeasMax());
-                if (measMin <= measVal || measVal <= measMax){
-                    status = "PASS";
-                }
-            } catch (Exception e){
-                if (measure.getMeasMin().equals(measure.getMeasMax()) &&  measure.getMeasMin().equals(measure.getMeasVal())){
-                    status = "PASS";
-                }
-            }
-        }
-        return new SimpleStringProperty(status);
     }
 
     public void setDevice(Device device) {

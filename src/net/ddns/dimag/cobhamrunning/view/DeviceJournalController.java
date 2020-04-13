@@ -1,10 +1,13 @@
 package net.ddns.dimag.cobhamrunning.view;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import javafx.util.StringConverter;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.Settings;
@@ -16,11 +19,18 @@ import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
+
 
 public class DeviceJournalController {
     private static final Logger LOGGER = LogManager.getLogger(ShippingViewController.class.getName());
     private final DeviceService deviceService = new DeviceService();
     private final TestsService testsService = new TestsService();
+    private final ToggleGroup datesRadioGroup = new ToggleGroup();
     private ObservableList<Device> devices = FXCollections.observableArrayList();
     private ObservableList<Tests> tests = FXCollections.observableArrayList();
     private Stage dialogStage;
@@ -37,9 +47,11 @@ public class DeviceJournalController {
     @FXML
     private TextField filterField;
     @FXML
-    private TableColumn<Device, String> articleColumn;
+    private RadioButton useDevDate;
     @FXML
-    private TableColumn<Device, String> revColumn;
+    private RadioButton useTestDate;
+    @FXML
+    private TableColumn<Device, String> articleColumn;
     @FXML
     private TableColumn<Device, String> asisColumn;
     @FXML
@@ -54,6 +66,11 @@ public class DeviceJournalController {
 
     @FXML
     private void initialize() {
+        initDate();
+        useDevDate.setToggleGroup(datesRadioGroup);
+        useTestDate.setToggleGroup(datesRadioGroup);
+        useDevDate.setSelected(true);
+
         articleColumn.prefWidthProperty().bind(tDevices.widthProperty().divide(3));
         asisColumn.prefWidthProperty().bind(tDevices.widthProperty().divide(3));
         snColumn.prefWidthProperty().bind(tDevices.widthProperty().divide(3));
@@ -68,7 +85,7 @@ public class DeviceJournalController {
 
         testNameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
         testDateColumn.setCellValueFactory(cellData -> cellData.getValue().testDateProperty());
-//        testResultColumn.setCellValueFactory(cellData -> cellData.getValue().);
+        testResultColumn.setCellValueFactory(cellData -> cellData.getValue().testStatusProperty());
 
         tDevices.setRowFactory(tv -> {
             TableRow<Device> row = new TableRow<>();
@@ -77,12 +94,33 @@ public class DeviceJournalController {
             });
             return row;
         });
+
+        datesRadioGroup.selectedToggleProperty().addListener(new ChangeListener<Toggle>() {
+            public void changed(ObservableValue<? extends Toggle> ov,
+                                Toggle old_toggle, Toggle new_toggle) {
+                if (datesRadioGroup.getSelectedToggle() != null) {
+                    refreshJournal();
+                }
+            }
+        });
     }
 
     @FXML
     public void refreshJournal() {
         try {
-            devices = FXCollections.observableArrayList(deviceService.findAllDevice());
+            tTests.getItems().clear();
+            devices.clear();
+            if (useDevDate.isSelected()){
+                devices = FXCollections.observableArrayList(
+                        deviceService.findDeviceByDateCreate(
+                                java.sql.Date.valueOf(dateFrom.getValue()),
+                                java.sql.Date.valueOf(dateTo.getValue())));
+            } else if (useTestDate.isSelected()){
+                devices = FXCollections.observableArrayList(
+                        deviceService.findDeviceByTestDate(
+                                java.sql.Date.valueOf(dateFrom.getValue()),
+                                java.sql.Date.valueOf(dateTo.getValue())));
+            }
             tDevices.setItems(devices);
         } catch (CobhamRunningException e) {
             LOGGER.error(e);
@@ -107,7 +145,8 @@ public class DeviceJournalController {
 
     @FXML
     private void handleAddBtn() {
-        System.out.println("ADD");
+        Device device = new Device();
+        System.out.println(device.getDeviceByAsisSn());
     }
 
     @FXML
@@ -120,6 +159,73 @@ public class DeviceJournalController {
     private void addMonth() {
         dateTo.setValue(dateFrom.getValue().plusMonths(1).minusDays(1));
         refreshJournal();
+    }
+
+    private void initDate() {
+        dateFrom.setShowWeekNumbers(true);
+        dateFrom.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+
+            {
+                dateFrom.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override
+            public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+
+        dateTo.setShowWeekNumbers(true);
+        dateTo.setConverter(new StringConverter<LocalDate>() {
+            String pattern = "yyyy-MM-dd";
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+
+            {
+                dateTo.setPromptText(pattern.toLowerCase());
+            }
+
+            @Override
+            public String toString(LocalDate date) {
+                if (date != null) {
+                    return dateFormatter.format(date);
+                } else {
+                    return "";
+                }
+            }
+
+            @Override
+            public LocalDate fromString(String string) {
+                if (string != null && !string.isEmpty()) {
+                    return LocalDate.parse(string, dateFormatter);
+                } else {
+                    return null;
+                }
+            }
+        });
+
+        Calendar cal = Calendar.getInstance();
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
+        Date input = cal.getTime();
+        LocalDate curDate = input.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate start = curDate.withDayOfMonth(1);
+        LocalDate stop = curDate.withDayOfMonth(curDate.lengthOfMonth());
+        dateFrom.setValue(start);
+        dateTo.setValue(stop);
     }
 
     private Settings getSettings(){

@@ -11,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import net.ddns.dimag.cobhamrunning.MainApp;
+import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.Settings;
 import net.ddns.dimag.cobhamrunning.models.ShippingSystem;
 import net.ddns.dimag.cobhamrunning.services.ShippingJournalService;
@@ -138,12 +139,12 @@ public class ShippingViewController implements MsgBox {
     @FXML
     private void handleAddBtn() {
         try {
-            List<String> currSys = MsgBox.msgScanSystemBarcode();
-            String articleString = currSys.get(0);
-            String asisString = currSys.get(1);
-            String snString = MsgBox.msgInputSN();
+            Device device = new Device().getDeviceByAsisSn();
+            if (device == null){
+                return;
+            }
             console.clear();
-            Thread thread = new ShippingJournalData(this, asisString, articleString, snString);
+            Thread thread = new ShippingJournalData(this, device);
             thread.start();
         } catch (NullPointerException e) {
             return;

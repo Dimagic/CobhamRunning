@@ -327,15 +327,16 @@ public interface MsgBox {
 
 	static String msgInputSN() {
 		String sn = msgInputString("Enter serial number");
-		System.out.println(sn);
-		if (sn.equalsIgnoreCase("none")){
-			return sn.toUpperCase();
+		try {
+			sn = sn.toUpperCase();
+			if (!Pattern.matches("^[\\d]{8,8}$", sn)) {
+				msgError("Input error", "Incorrect serial number");
+				return msgInputSN();
+			}
+		} catch (NullPointerException e){
+			return null;
 		}
-		if (!Pattern.matches("^[\\d]{8,8}$", sn)) {
-			msgError("Input error", "Incorrect serial number");
-			return msgInputSN();
-		}
-		return sn.toUpperCase();
+		return sn;
 	}
 
 	static List<String> msgScanSystemBarcode() {

@@ -2,15 +2,25 @@ package net.ddns.dimag.cobhamrunning.models;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import net.ddns.dimag.cobhamrunning.services.ArticleHeadersService;
+import net.ddns.dimag.cobhamrunning.services.AsisService;
+import net.ddns.dimag.cobhamrunning.services.DeviceService;
+import net.ddns.dimag.cobhamrunning.utils.MsgBox;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import javax.persistence.*;
+import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
 @Table(name = "device", uniqueConstraints = { @UniqueConstraint(columnNames = "asis_id"),
         @UniqueConstraint(columnNames = "sn") })
 public class Device {
+    private static final Logger LOGGER = LogManager.getLogger(Device.class.getName());
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,11 +38,76 @@ public class Device {
     private String sn;
 
     public Device() {
+        this.dateCreate = new Date();
     }
 
     public Device(Asis asis, String sn) {
         this.asis = asis;
         this.sn = sn;
+        this.dateCreate = new Date();
+    }
+
+    public Device getDeviceByAsisSn(){
+        try {
+            List<String> currSys = MsgBox.msgScanSystemBarcode();
+            if (currSys == null) {
+                return null;
+            }
+            String articleString = currSys.get(0);
+            String asisString = currSys.get(1);
+            DeviceService deviceService = new DeviceService();
+            Device dbDeviceByAsis = deviceService.findDeviceByAsis(asisString);
+            if (dbDeviceByAsis != null){
+                return dbDeviceByAsis;
+            }
+            String snString = MsgBox.msgInputSN();
+            if (snString == null){
+                return null;
+            }
+            Device dbDeviceBySn = deviceService.findDeviceBySn(snString);
+            if (dbDeviceByAsis == null && dbDeviceBySn == null) {
+                AsisService asisService = new AsisService();
+                Asis currAsis = asisService.findByName(asisString);
+                if (currAsis == null) {
+                    ArticleHeadersService articleHeadersService = new ArticleHeadersService();
+                    ArticleHeaders currArticleHeaders = articleHeadersService.findArticleByName(articleString);
+                    if (currArticleHeaders == null){
+                        MsgBox.msgWarning("Warning", String.format("Article %s not found", articleString));
+                        return null;
+                    }
+                    currAsis = new Asis(asisString, currArticleHeaders);
+                    asisService.saveAsis(currAsis);
+                }
+                this.setAsis(currAsis);
+                this.setSn(snString);
+                deviceService.saveDevice(this);
+                return this;
+            } else if (dbDeviceByAsis != null && dbDeviceBySn != null){
+                return dbDeviceBySn;
+            } else if (dbDeviceByAsis != null){
+                MsgBox.msgWarning("Warning", String.format("Found device with ASIS: %s\n" +
+                        "that have SN: %s", asisString, dbDeviceByAsis.getSn()));
+            } else if (dbDeviceBySn != null){
+                MsgBox.msgWarning("Warning", String.format("Found device with SN: %s\n" +
+                        "that have ASIS: %s", snString, dbDeviceBySn.getAsis().getAsis()));
+            }
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage());
+            MsgBox.msgException(e);
+        }
+        return null;
+    }
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "datecreate")
+    private Date dateCreate;
+
+    public Date getDateCreate() {
+        return dateCreate;
+    }
+
+    public void setDateCreate(Date dateCreate) {
+        this.dateCreate = dateCreate;
     }
 
     @OneToOne(fetch = FetchType.LAZY, orphanRemoval = true, optional = true)
@@ -104,31 +179,6 @@ public class Device {
     public void setShippingSystem(ShippingSystem shippingSystem) {
         this.shippingSystem = shippingSystem;
     }
-
-//************** Assembly device ***********************************************
-//******************************************************************************
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-//    @JoinColumn(name = "device_id", nullable = false)
-//    private Device device;
-//
-//    @Column
-//    @ElementCollection(targetClass = Long.class)
-//    private Set<Device> assembly = new HashSet<Device>();
-//
-//    @OneToMany(mappedBy = "assembly", orphanRemoval = true)
-//    public Set<Device> getAssembly() {
-//        return this.assembly;
-//    }
-//
-//    public void setAssembly(Set<Device> assembly) {
-//        this.assembly = assembly;
-//    }
-//
-//    public void addAssembly(Tests tests) {
-//        tests.setDevice(this);
-//        getTests().add(tests);
-//    }
-//******************************************************************************
 
     public StringProperty commonVerProperty() {
         try {

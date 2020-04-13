@@ -5,6 +5,7 @@ import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 import org.hibernate.Session;
 
+import java.util.Date;
 import java.util.List;
 
 public class DeviceDao implements UniversalDao {
@@ -29,6 +30,31 @@ public class DeviceDao implements UniversalDao {
 				.addEntity(Device.class).setParameter("sn", sn).getSingleResult();
 		session.close();
 		return device;
+	}
+
+	public List findDeviceByDateCreate(Date dateFrom, Date dateTo) throws CobhamRunningException{
+		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+		Date startDate = convertDatePeriod(dateFrom, 0);
+		Date stopDate = convertDatePeriod(dateTo, 1);
+		List journal = session.createSQLQuery("SELECT * FROM public.device WHERE datecreate BETWEEN :from AND :to")
+				.addEntity(Device.class)
+				.setParameter("from", startDate)
+				.setParameter("to", stopDate).list();
+		session.close();
+		return journal;
+	}
+
+	public List findDeviceByTestDate(Date dateFrom, Date dateTo) throws CobhamRunningException{
+		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+		Date startDate = convertDatePeriod(dateFrom, 0);
+		Date stopDate = convertDatePeriod(dateTo, 1);
+		List journal = session.createSQLQuery("select * from public.device where id in " +
+				"(select device_id from public.tests where testdate between :from and :to)")
+				.addEntity(Device.class)
+				.setParameter("from", startDate)
+				.setParameter("to", stopDate).list();
+		session.close();
+		return journal;
 	}
 
 	public List findAll() throws CobhamRunningException{

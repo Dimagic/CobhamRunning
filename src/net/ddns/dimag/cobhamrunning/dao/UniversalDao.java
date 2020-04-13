@@ -13,6 +13,9 @@ import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 import org.postgresql.util.PSQLException;
 
 import javax.persistence.PersistenceException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Set;
 
 public interface UniversalDao {
@@ -71,5 +74,22 @@ public interface UniversalDao {
             MsgBox.msgWarning("Delete operation", "Can't delete this object.\nFor more information see log file");
         }
         session.close();
+    }
+
+    default Date convertDatePeriod(Date date, int format){
+        SimpleDateFormat formatter =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            if (format == 0){
+                return formatter.parse(String.format("%s 00:00:00", date));
+            } else if (format == 1){
+                return formatter.parse(String.format("%s 23:59:59", date));
+            } else {
+                throw new CobhamRunningException("Incorrect format number");
+            }
+        } catch (ParseException | CobhamRunningException e) {
+            LOGGER.error(e);
+            MsgBox.msgException(e);
+            return null;
+        }
     }
 }

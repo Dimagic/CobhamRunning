@@ -65,18 +65,8 @@ public class ShippingJournalDao implements UniversalDao {
 
     public List getJournalByDate(Date dateFrom, Date dateTo) throws CobhamRunningException {
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
-        SimpleDateFormat formatter =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date startDate;
-        Date stopDate;
-        try {
-            startDate = formatter.parse(String.format("%s 00:00:00", dateFrom));
-            stopDate = formatter.parse(String.format("%s 23:59:59", dateTo));
-        } catch (ParseException e) {
-            LOGGER.error(e);
-            MsgBox.msgException(e);
-            return null;
-        }
-
+        Date startDate = convertDatePeriod(dateFrom, 0);
+        Date stopDate = convertDatePeriod(dateTo, 1);
         List journal = session.createSQLQuery("SELECT * FROM public.shippingjournal WHERE dateship BETWEEN :from AND :to")
                 .addEntity(ShippingSystem.class)
                 .setParameter("from", startDate)

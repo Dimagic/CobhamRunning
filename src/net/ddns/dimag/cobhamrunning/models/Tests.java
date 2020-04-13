@@ -1,28 +1,15 @@
 package net.ddns.dimag.cobhamrunning.models;
 
+import javafx.beans.property.SimpleStringProperty;
+import net.ddns.dimag.cobhamrunning.services.MeasurementsService;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
+
+import javax.persistence.*;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
-import javafx.beans.property.SimpleStringProperty;
-import org.hibernate.annotations.OnDelete;
-import org.hibernate.annotations.OnDeleteAction;
 
 @Entity
 @Table(name = "tests")
@@ -109,6 +96,24 @@ public class Tests {
 			return new SimpleStringProperty(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(getDateTest()));
 		} catch (NullPointerException e) {}
 		return new SimpleStringProperty("");
+	}
+
+	public SimpleStringProperty testStatusProperty(){
+		try {
+			MeasurementsService measurementsService = new MeasurementsService();
+			List<Measurements> measList = measurementsService.getMeasureSetByTest(this);
+			if (measList.size() == 0){
+				return null;
+			}
+			for (Measurements meas: measList){
+				if(!meas.measStatusProperty().getValue().equals("PASS")){
+					return new SimpleStringProperty("FAIL");
+				}
+			}
+		} catch (CobhamRunningException e){
+			return null;
+		}
+		return new SimpleStringProperty("PASS");
 	}
 
 	@Override
