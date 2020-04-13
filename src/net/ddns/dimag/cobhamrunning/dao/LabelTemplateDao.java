@@ -12,7 +12,7 @@ import net.ddns.dimag.cobhamrunning.models.LabelTemplate;
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 
 public class LabelTemplateDao implements UniversalDao{
-	public LabelTemplate findById(Long id) throws CobhamRunningException {
+	public LabelTemplate findById(Long id) {
 		LabelTemplate labelTemplate = null;
 		Session session = null;
 		Transaction transaction = null;

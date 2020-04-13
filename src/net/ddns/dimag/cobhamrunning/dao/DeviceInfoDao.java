@@ -1,12 +1,11 @@
 package net.ddns.dimag.cobhamrunning.dao;
 
-import java.util.List;
-
-import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.DeviceInfo;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 import org.hibernate.Session;
+
+import java.util.List;
 
 public class DeviceInfoDao implements UniversalDao {
 	public DeviceInfo findById(Long id) throws CobhamRunningException {

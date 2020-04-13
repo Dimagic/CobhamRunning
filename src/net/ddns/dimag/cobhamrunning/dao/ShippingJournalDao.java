@@ -1,16 +1,13 @@
 package net.ddns.dimag.cobhamrunning.dao;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.ShippingSystem;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
-import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import org.hibernate.Session;
+
+import java.util.Date;
+import java.util.List;
 
 public class ShippingJournalDao implements UniversalDao {
     public ShippingSystem findById(int id) throws CobhamRunningException {
@@ -35,31 +32,24 @@ public class ShippingJournalDao implements UniversalDao {
 
     public List getJournalByFilter(String filter, Date dateFrom, Date dateTo) throws CobhamRunningException {
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
-        SimpleDateFormat formatter =new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        try {
-            Date startDate = formatter.parse(String.format("%s 00:00:00", dateFrom));
-            Date stopDate = formatter.parse(String.format("%s 23:59:59", dateTo));
-            List journal = session.createSQLQuery("select * from public.shippingjournal where " +
-                    "(device_id in (select id from public.device where asis_id " +
-                    "in (select id from public.asis where articleheaders_id " +
-                    "in (select id from public.articleheaders where article like :article))) or " +
-                    "device_id in (select id from public.device where asis_id " +
-                    "in (select id from public.asis where asis like :asis)) or " +
-                    "device_id in (select id from public.device where sn like :sn)) and " +
-                    "dateship BETWEEN :from AND :to")
-                    .addEntity(ShippingSystem.class)
-                    .setParameter("article", String.format("%%%s%%", filter.toUpperCase()))
-                    .setParameter("asis", String.format("%%%s%%", filter.toUpperCase()))
-                    .setParameter("sn", String.format("%%%s%%", filter.toUpperCase()))
-                    .setParameter("from", startDate)
-                    .setParameter("to", stopDate).list();
-            session.close();
-            return journal;
-        } catch (ParseException e) {
-            LOGGER.error(e);
-            MsgBox.msgException(e);
-            return null;
-        }
+        Date startDate = convertDatePeriod(dateFrom, 0);
+        Date stopDate = convertDatePeriod(dateTo, 1);
+        List journal = session.createSQLQuery("select * from public.shippingjournal where " +
+                "(device_id in (select id from public.device where asis_id " +
+                "in (select id from public.asis where articleheaders_id " +
+                "in (select id from public.articleheaders where article like :article))) or " +
+                "device_id in (select id from public.device where asis_id " +
+                "in (select id from public.asis where asis like :asis)) or " +
+                "device_id in (select id from public.device where sn like :sn)) and " +
+                "dateship BETWEEN :from AND :to")
+                .addEntity(ShippingSystem.class)
+                .setParameter("article", String.format("%%%s%%", filter.toUpperCase()))
+                .setParameter("asis", String.format("%%%s%%", filter.toUpperCase()))
+                .setParameter("sn", String.format("%%%s%%", filter.toUpperCase()))
+                .setParameter("from", startDate)
+                .setParameter("to", stopDate).list();
+        session.close();
+        return journal;
 
     }
 
