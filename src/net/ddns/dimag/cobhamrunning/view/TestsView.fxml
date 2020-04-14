@@ -30,5 +30,10 @@
             <Font name="System Bold" size="18.0" />
          </font>
       </Button>
+      <Button layoutX="320.0" layoutY="240.0" mnemonicParsing="false" onAction="#handleEnvJournal" prefHeight="75.0" prefWidth="250.0" text="Environment journal" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="240.0">
+         <font>
+            <Font name="System Bold" size="18.0" />
+         </font>
+      </Button>
    </children>
 </AnchorPane>

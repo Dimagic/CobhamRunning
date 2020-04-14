@@ -112,6 +112,11 @@ public class TestsViewController implements MsgBox {
 	}
 
 	@FXML
+	private void handleEnvJournal(){
+		mainApp.showEnvJournalView();
+	}
+
+	@FXML
 	private void handlePrintCustomLabel(){
 		mainApp.showPrintCustomLabelView();
 	}

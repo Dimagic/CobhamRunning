@@ -35,6 +35,7 @@ public class MainApp extends Application implements MsgBox {
     private Stage articlesStage;
     private Stage shippingStage;
     private Stage devicesJournalStage;
+    private Stage envJournalStage;
     private BorderPane rootLayout;
     private Settings currentSettings;
     private TestsViewController testsViewController;
@@ -65,7 +66,7 @@ public class MainApp extends Application implements MsgBox {
     public void start(Stage primaryStage) {
 //        LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
         this.primaryStage = primaryStage;
-        String VERSION = "0.0.30";
+        String VERSION = "0.0.31";
         this.primaryStage.setTitle(String.format("CobhamRunning %s", VERSION));
         this.primaryStage.getIcons().add(favicon);
         try {
@@ -136,6 +137,29 @@ public class MainApp extends Application implements MsgBox {
             controller.setMainApp(this);
             controller.setDialogStage(devicesJournalStage);
             devicesJournalStage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOGGER.error(e.toString());
+            MsgBox.msgException(e);
+        }
+    }
+
+    public void showEnvJournalView() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getClassLoader().getResource("EnvJournalView.fxml"));
+            BorderPane page = loader.load();
+            envJournalStage = new Stage();
+            envJournalStage.setTitle("Environment journal");
+            envJournalStage.getIcons().add(favicon);
+            envJournalStage.initModality(Modality.WINDOW_MODAL);
+            envJournalStage.initOwner(primaryStage);
+            Scene scene = new Scene(page);
+            envJournalStage.setScene(scene);
+            EnvJournalController controller = loader.getController();
+            controller.setMainApp(this);
+            controller.setDialogStage(envJournalStage);
+            envJournalStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
             LOGGER.error(e.toString());
