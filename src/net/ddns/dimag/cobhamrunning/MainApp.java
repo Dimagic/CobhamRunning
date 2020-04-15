@@ -13,6 +13,7 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import net.ddns.dimag.cobhamrunning.models.ArticleHeaders;
 import net.ddns.dimag.cobhamrunning.models.Device;
+import net.ddns.dimag.cobhamrunning.models.EnvDevice;
 import net.ddns.dimag.cobhamrunning.models.Settings;
 import net.ddns.dimag.cobhamrunning.utils.*;
 import net.ddns.dimag.cobhamrunning.view.*;
@@ -36,6 +37,7 @@ public class MainApp extends Application implements MsgBox {
     private Stage shippingStage;
     private Stage devicesJournalStage;
     private Stage envJournalStage;
+    private Stage envDeviceStage;
     private BorderPane rootLayout;
     private Settings currentSettings;
     private TestsViewController testsViewController;
@@ -269,6 +271,39 @@ public class MainApp extends Application implements MsgBox {
                 }
             });
             articleEditStage.showAndWait();
+            return controller.isSaveClicked();
+        } catch (IOException | IllegalStateException e) {
+            e.printStackTrace();
+            MsgBox.msgException(e);
+        }
+        return false;
+    }
+
+    public boolean showEnvDeviceView(EnvDevice envDevice) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getClassLoader().getResource("EnvDeviceView.fxml"));
+            AnchorPane page = loader.load();
+            envDeviceStage = new Stage();
+            if (envDevice == null) {
+                envDeviceStage.setTitle("New device");
+            } else {
+//                if (articleHeaders.getArticle() != null && articleHeaders.getRevision() == null) {
+//                    articleEditStage.setTitle(String.format("New revision for %s", articleHeaders.getArticle()));
+//                } else {
+//                    articleEditStage.setTitle(articleHeaders.getArticle());
+//                }
+            }
+            envDeviceStage.getIcons().add(favicon);
+            envDeviceStage.initModality(Modality.WINDOW_MODAL);
+            envDeviceStage.initOwner(envJournalStage);
+            envDeviceStage.setResizable(false);
+            Scene scene = new Scene(page);
+            envDeviceStage.setScene(scene);
+            EnvDeviceViewController controller = loader.getController();
+            controller.setMainApp(this);
+            controller.setDialogStage(envDeviceStage);
+            envDeviceStage.showAndWait();
             return controller.isSaveClicked();
         } catch (IOException | IllegalStateException e) {
             e.printStackTrace();

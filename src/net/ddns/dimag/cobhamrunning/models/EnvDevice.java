@@ -14,10 +14,10 @@ import javax.persistence.*;
 public class EnvDevice {
     private static final Logger LOGGER = LogManager.getLogger(Device.class.getName());
 
-    public EnvDevice(){
+    public EnvDevice() {
     }
 
-    public EnvDevice(String sn){
+    public EnvDevice(String sn) {
         this.sn = sn;
     }
 
@@ -43,6 +43,19 @@ public class EnvDevice {
 
     public void setSn(String sn) {
         this.sn = sn;
+    }
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "envtype_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private EnvType envType;
+
+    public EnvType getEnvType() {
+        return envType;
+    }
+
+    public void setEnvType(EnvType envType) {
+        this.envType = envType;
     }
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -103,13 +116,14 @@ public class EnvDevice {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("EnvDevice{");
-        sb.append("id=").append(id);
-        sb.append(", sn='").append(sn).append('\'');
-        sb.append(", envManuf=").append(envManuf);
-        sb.append(", envLocation=").append(envLocation);
-        sb.append(", envStatus=").append(envStatus);
-        sb.append('}');
-        return sb.toString();
+        return "EnvDevice{" +
+                "id=" + id +
+                ", sn='" + sn + '\'' +
+                ", envType=" + envType +
+                ", envManuf=" + envManuf +
+                ", envLocation=" + envLocation +
+                ", envStatus=" + envStatus +
+                ", envHistory=" + envHistory +
+                '}';
     }
 }

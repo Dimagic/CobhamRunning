@@ -10,7 +10,9 @@ import javafx.scene.control.cell.TreeItemPropertyValueFactory;
 import javafx.stage.Stage;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.EnvDevice;
+import net.ddns.dimag.cobhamrunning.models.EnvType;
 import net.ddns.dimag.cobhamrunning.services.EnvDeviceService;
+import net.ddns.dimag.cobhamrunning.services.EnvTypeService;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,15 +54,17 @@ public class EnvJournalController {
 
     @FXML
     public void handleAddButton(){
-        try {
-            EnvDevice envDevice = new EnvDevice("12345678");
-            System.out.println(envDevice);
-            EnvDeviceService envDeviceService = new EnvDeviceService();
-            envDeviceService.saveEnvDevice(envDevice);
-
-        } catch (CobhamRunningException e) {
-            e.printStackTrace();
-        }
+        mainApp.showEnvDeviceView(null);
+//        try {
+//            EnvDevice envDevice = new EnvDevice("12345678");
+//            System.out.println(envDevice);
+//            EnvDeviceService envDeviceService = new EnvDeviceService();
+//            envDeviceService.saveEnvDevice(envDevice);
+//
+//
+//        } catch (CobhamRunningException e) {
+//            e.printStackTrace();
+//        }
 
     }
 

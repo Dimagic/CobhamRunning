@@ -10,12 +10,16 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
+import org.hibernate.annotations.Table;
+import org.hibernate.metadata.ClassMetadata;
+import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.postgresql.util.PSQLException;
 
 import javax.persistence.PersistenceException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 public interface UniversalDao {
@@ -92,4 +96,5 @@ public interface UniversalDao {
             return null;
         }
     }
+
 }

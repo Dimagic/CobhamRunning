@@ -51,6 +51,7 @@ public class HibernateSessionFactoryUtil implements MsgBox {
                         .addAnnotatedClass(EnvLocation.class)
                         .addAnnotatedClass(EnvModel.class)
                         .addAnnotatedClass(EnvStatus.class)
+                        .addAnnotatedClass(EnvType.class)
                         .setProperty("hibernate.connection.driver_class", "org.postgresql.Driver")
                         .setProperty("hibernate.dialect", "org.hibernate.dialect.PostgreSQLDialect")
                         .setProperty("hibernate.connection.url", String.format("jdbc:postgresql://%s:%s/%s",
