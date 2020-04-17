@@ -1,6 +1,7 @@
 package net.ddns.dimag.cobhamrunning.utils;
 
 import net.ddns.dimag.cobhamrunning.models.*;
+import net.ddns.dimag.cobhamrunning.models.environment.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.Session;
@@ -8,20 +9,14 @@ import org.hibernate.SessionFactory;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 
-import org.hibernate.engine.jdbc.spi.SqlExceptionHelper;
 import org.hibernate.internal.util.config.ConfigurationException;
-import org.hibernate.jdbc.Work;
 import org.hibernate.service.spi.ServiceException;
 import org.hibernate.stat.Statistics;
-import sun.awt.CausedFocusEvent;
 
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Unmarshaller;
 import java.io.File;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Properties;
 
 public class HibernateSessionFactoryUtil implements MsgBox {
     private static final Logger LOGGER = LogManager.getLogger(HibernateSessionFactoryUtil.class.getName());

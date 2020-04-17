@@ -1,7 +1,8 @@
-package net.ddns.dimag.cobhamrunning.services;
+package net.ddns.dimag.cobhamrunning.services.environment;
 
-import net.ddns.dimag.cobhamrunning.dao.EnvDeviceDao;
-import net.ddns.dimag.cobhamrunning.models.EnvDevice;
+import net.ddns.dimag.cobhamrunning.dao.environment.EnvDeviceDao;
+import net.ddns.dimag.cobhamrunning.models.environment.EnvDevice;
+import net.ddns.dimag.cobhamrunning.models.environment.EnvLocation;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 
 import java.util.List;
@@ -23,6 +24,10 @@ public class EnvDeviceService {
 
     public void updateEnvDevice(EnvDevice envDevice) throws CobhamRunningException {
         envDeviceDao.update(envDevice);
+    }
+
+    public List<EnvDevice> findAllByLocation(EnvLocation envLocation) throws CobhamRunningException {
+        return envDeviceDao.findAllByLocation(envLocation);
     }
 
     public List<EnvDevice> findAllEnvDevice() throws CobhamRunningException {

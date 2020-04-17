@@ -1,5 +1,6 @@
-package net.ddns.dimag.cobhamrunning.models;
+package net.ddns.dimag.cobhamrunning.models.environment;
 
+import net.ddns.dimag.cobhamrunning.models.Device;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -9,6 +10,13 @@ import javax.persistence.*;
 @Table(name = "envstatus", uniqueConstraints = { @UniqueConstraint(columnNames = "status")})
 public class EnvStatus {
     private static final Logger LOGGER = LogManager.getLogger(Device.class.getName());
+
+    public EnvStatus() {
+    }
+
+    public EnvStatus(String status) {
+        this.status = status;
+    }
 
     @Id
     @Column(name = "id")

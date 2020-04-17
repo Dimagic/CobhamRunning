@@ -2,20 +2,19 @@
 
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.DatePicker?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="295.0" prefWidth="340.0" xmlns="http://javafx.com/javafx/8.0.241" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.ddns.dimag.cobhamrunning.view.EnvDeviceViewController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="329.0" prefWidth="340.0" xmlns="http://javafx.com/javafx/8.0.231" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.ddns.dimag.cobhamrunning.view.EnvDeviceViewController">
    <children>
       <Button layoutX="200.0" layoutY="256.0" mnemonicParsing="false" onAction="#handleSaveBtn" prefHeight="25.0" prefWidth="125.0" text="Save" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="15.0" />
       <TextField fx:id="serialField" layoutX="125.0" layoutY="126.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="130.0" />
-      <ComboBox fx:id="typeBox" layoutX="111.0" layoutY="27.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="10.0" />
       <ComboBox fx:id="statusBox" layoutX="121.0" layoutY="175.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="170.0" />
-      <ComboBox fx:id="manufBox" layoutX="121.0" layoutY="69.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="50.0" />
-      <ComboBox fx:id="modelBox" layoutX="144.0" layoutY="124.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="90.0" />
-      <Label alignment="CENTER_RIGHT" layoutX="39.0" layoutY="14.0" prefHeight="25.0" prefWidth="100.0" text="Type:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
+      <ComboBox fx:id="modelBox" layoutX="144.0" layoutY="124.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="10.0" />
+      <Label alignment="CENTER_RIGHT" layoutX="39.0" layoutY="14.0" prefHeight="25.0" prefWidth="100.0" text="Type:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="90.0">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>
@@ -25,7 +24,7 @@
             <Font name="System Bold" size="14.0" />
          </font>
       </Label>
-      <Label alignment="CENTER_RIGHT" layoutX="59.0" layoutY="34.0" prefHeight="25.0" prefWidth="100.0" text="Model:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="90.0">
+      <Label alignment="CENTER_RIGHT" layoutX="59.0" layoutY="34.0" prefHeight="25.0" prefWidth="100.0" text="Model:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
          <font>
             <Font name="System Bold" size="14.0" />
          </font>
@@ -46,5 +45,23 @@
             <Font name="System Bold" size="14.0" />
          </font>
       </Label>
+      <Label fx:id="manufLbl" layoutX="131.0" layoutY="54.0" prefHeight="25.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="50.0">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <Label fx:id="typeLbl" layoutX="141.0" layoutY="64.0" prefHeight="25.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="90.0">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <Label alignment="CENTER_RIGHT" layoutX="99.0" layoutY="74.0" prefHeight="25.0" prefWidth="100.0" text="Calibration:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="250.0">
+         <font>
+            <Font name="System Bold" size="14.0" />
+         </font>
+      </Label>
+      <DatePicker fx:id="calibrDate" layoutX="113.0" layoutY="250.0" prefHeight="25.0" prefWidth="110.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="250.0" />
+      <Button fx:id="plus1Y" layoutX="237.0" layoutY="250.0" mnemonicParsing="false" onAction="#addOneYear" prefHeight="25.0" prefWidth="40.0" text="+Y" AnchorPane.leftAnchor="240.0" AnchorPane.topAnchor="250.0" />
+      <Button fx:id="plus2Y" layoutX="270.0" layoutY="260.0" mnemonicParsing="false" onAction="#addTwoYears" prefHeight="25.0" prefWidth="40.0" text="+2Y" AnchorPane.leftAnchor="285.0" AnchorPane.topAnchor="250.0" />
    </children>
 </AnchorPane>

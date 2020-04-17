@@ -1,13 +1,19 @@
-package net.ddns.dimag.cobhamrunning.models;
+package net.ddns.dimag.cobhamrunning.models.environment;
 
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
+import javafx.scene.control.DatePicker;
+import javafx.util.StringConverter;
+import net.ddns.dimag.cobhamrunning.models.Device;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 
 @Entity
 @Table(name = "envdevice", uniqueConstraints = { @UniqueConstraint(columnNames = "sn")})
@@ -17,8 +23,23 @@ public class EnvDevice {
     public EnvDevice() {
     }
 
-    public EnvDevice(String sn) {
+    public EnvDevice(EnvLocation location){
+        this.envLocation = location;
+    }
+
+    public EnvDevice(String sn, EnvModel envModel, EnvLocation envLocation, EnvStatus envStatus) {
         this.sn = sn;
+        this.envModel = envModel;
+        this.envLocation = envLocation;
+        this.envStatus = envStatus;
+    }
+
+    public EnvDevice(String sn, EnvModel envModel, EnvLocation envLocation, EnvStatus envStatus, Date calibrDate) {
+        this.sn = sn;
+        this.envModel = envModel;
+        this.envLocation = envLocation;
+        this.envStatus = envStatus;
+        this.calibrDate = calibrDate;
     }
 
     @Id
@@ -46,29 +67,16 @@ public class EnvDevice {
     }
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "envtype_id")
+    @JoinColumn(name = "envmodel_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    private EnvType envType;
+    private EnvModel envModel;
 
-    public EnvType getEnvType() {
-        return envType;
+    public EnvModel getEnvModel() {
+        return envModel;
     }
 
-    public void setEnvType(EnvType envType) {
-        this.envType = envType;
-    }
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "envmanuf_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private EnvManuf envManuf;
-
-    public EnvManuf getEnvManuf() {
-        return envManuf;
-    }
-
-    public void setEnvManuf(EnvManuf envManuf) {
-        this.envManuf = envManuf;
+    public void setEnvModel(EnvModel envModel) {
+        this.envModel = envModel;
     }
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -97,6 +105,18 @@ public class EnvDevice {
         this.envStatus = envStatus;
     }
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "calibrdate")
+    private Date calibrDate;
+
+    public Date getCalibrDate() {
+        return calibrDate;
+    }
+
+    public void setCalibrDate(Date calibrDate) {
+        this.calibrDate = calibrDate;
+    }
+
     @ManyToOne(fetch = FetchType.LAZY, optional = true)
     @JoinColumn(name = "envhistory_id")
     @OnDelete(action = OnDeleteAction.CASCADE)
@@ -110,20 +130,16 @@ public class EnvDevice {
         this.envHistory = envHistory;
     }
 
-    public StringProperty snProperty() {
-        return new SimpleStringProperty(getSn());
-    }
-
     @Override
     public String toString() {
-        return "EnvDevice{" +
-                "id=" + id +
-                ", sn='" + sn + '\'' +
-                ", envType=" + envType +
-                ", envManuf=" + envManuf +
-                ", envLocation=" + envLocation +
-                ", envStatus=" + envStatus +
-                ", envHistory=" + envHistory +
-                '}';
+        final StringBuilder sb = new StringBuilder("EnvDevice{");
+        sb.append("id=").append(id);
+        sb.append(", sn='").append(sn).append('\'');
+        sb.append(", envModel=").append(envModel);
+        sb.append(", envLocation=").append(envLocation);
+        sb.append(", envStatus=").append(envStatus);
+        sb.append(", envHistory=").append(envHistory);
+        sb.append('}');
+        return sb.toString();
     }
 }
