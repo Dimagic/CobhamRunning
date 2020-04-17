@@ -151,7 +151,7 @@ public class Measurements {
 				double measValTmp = Double.parseDouble(measVal);
 				double measMinTmp = Double.parseDouble(measMin);
 				double measMaxTmp = Double.parseDouble(measMax);
-				if (measMinTmp <= measValTmp || measValTmp <= measMaxTmp){
+				if (measMinTmp <= measValTmp && measValTmp <= measMaxTmp){
 					status = "PASS";
 				}
 			} catch (Exception e){
