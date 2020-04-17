@@ -1,26 +1,30 @@
 package net.ddns.dimag.cobhamrunning.utils;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.scene.control.*;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.image.Image;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
 import javafx.stage.Stage;
-import net.ddns.dimag.cobhamrunning.view.TestsViewController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public interface MsgBox {
+	Logger LOGGER = LogManager.getLogger(MsgBox.class.getName());
+
 	Image favicon = new Image("file:src/resources/images/cobham_C_64x64.png");
 
 	String IPADDRESS_PATTERN_INNER = "(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.){3}(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d))";
@@ -75,14 +79,28 @@ public interface MsgBox {
 	}
 
 	static boolean msgConfirm(String title, String content) {
-		Alert alert = new Alert(AlertType.CONFIRMATION);
-		alert.setTitle(title);
-		Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
-		stage.getIcons().add(favicon);
-		alert.setHeaderText(null);
-		alert.setContentText(content);
-		Optional<ButtonType> result = alert.showAndWait();
-        return result.get() == ButtonType.OK;
+		CountDownLatch latch = new CountDownLatch(1);
+		BooleanProperty resultProperty = new SimpleBooleanProperty();
+		Platform.runLater(new Runnable() {
+			@Override public void run() {
+				Alert alert = new Alert(AlertType.CONFIRMATION);
+				alert.setTitle(title);
+				Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+				stage.getIcons().add(favicon);
+				alert.setHeaderText(null);
+				alert.setContentText(content);
+				Optional<ButtonType> result = alert.showAndWait();
+				resultProperty.setValue(result.get() == ButtonType.OK);
+				latch.countDown();
+			}
+		});
+		try {
+			latch.await();
+		} catch (InterruptedException e) {
+			LOGGER.error(e);
+			msgException(e);
+		}
+		return resultProperty.getValue();
 	}
 
 	static void msgError(String title, String content) {
@@ -296,7 +314,6 @@ public interface MsgBox {
     }
 
 	static String msgIntutText(String content) {
-
 		Alert alert = new Alert(AlertType.CONFIRMATION);
 		alert.setTitle("Input text");
 		Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
