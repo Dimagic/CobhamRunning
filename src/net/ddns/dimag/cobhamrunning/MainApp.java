@@ -288,11 +288,9 @@ public class MainApp extends Application implements MsgBox {
             if (envDevice == null) {
                 envDeviceStage.setTitle("New device");
             } else {
-//                if (articleHeaders.getArticle() != null && articleHeaders.getRevision() == null) {
-//                    articleEditStage.setTitle(String.format("New revision for %s", articleHeaders.getArticle()));
-//                } else {
-//                    articleEditStage.setTitle(articleHeaders.getArticle());
-//                }
+                envDeviceStage.setTitle(String.format("%s %s %s SN: %s",
+                        envDevice.getTypeDev(), envDevice.getManuf(),
+                        envDevice.getModel(), envDevice.getSn()));
             }
             envDeviceStage.getIcons().add(favicon);
             envDeviceStage.initModality(Modality.WINDOW_MODAL);
@@ -303,13 +301,39 @@ public class MainApp extends Application implements MsgBox {
             EnvDeviceViewController controller = loader.getController();
             controller.setMainApp(this);
             controller.setDialogStage(envDeviceStage);
+            controller.setEnvDevice(envDevice);
             envDeviceStage.showAndWait();
+
             return controller.isSaveClicked();
         } catch (IOException | IllegalStateException e) {
             e.printStackTrace();
             MsgBox.msgException(e);
         }
         return false;
+    }
+
+    public void showEnvHistoryView(EnvDevice envDevice) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getClassLoader().getResource("EnvHistoryView.fxml"));
+            AnchorPane page = loader.load();
+            Stage envHistoryStage = new Stage();
+            envHistoryStage.setTitle("History");
+            envHistoryStage.getIcons().add(favicon);
+            envHistoryStage.initModality(Modality.WINDOW_MODAL);
+            envHistoryStage.initOwner(envJournalStage);
+            envHistoryStage.setResizable(false);
+            Scene scene = new Scene(page);
+            envHistoryStage.setScene(scene);
+            EnvHistoryViewController controller = loader.getController();
+            controller.setMainApp(this);
+            controller.setDialogStage(envHistoryStage);
+            controller.setEnvDevice(envDevice);
+            envHistoryStage.showAndWait();
+        } catch (IOException | IllegalStateException | CobhamRunningException e) {
+            e.printStackTrace();
+            MsgBox.msgException(e);
+        }
     }
 
     public void showPrintAsisView() {

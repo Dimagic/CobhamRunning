@@ -30,6 +30,10 @@
       </AnchorPane>
    </center>
    <bottom>
-      <Button mnemonicParsing="false" onAction="#handleAddButton" text="Add" BorderPane.alignment="CENTER" />
+      <AnchorPane prefHeight="45.0" BorderPane.alignment="CENTER">
+         <children>
+            <Button mnemonicParsing="false" onAction="#handleAddButton" prefHeight="25.0" prefWidth="100.0" text="Add new" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
+         </children>
+      </AnchorPane>
    </bottom>
 </BorderPane>

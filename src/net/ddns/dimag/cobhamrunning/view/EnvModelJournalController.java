@@ -70,6 +70,8 @@ public class EnvModelJournalController {
         typeCombo.valueProperty().addListener((ChangeListener<String>) (observable, oldValue, newValue) -> {
             addModelBtn.setDisable(newValue == null);
         });
+
+
     }
 
     @FXML

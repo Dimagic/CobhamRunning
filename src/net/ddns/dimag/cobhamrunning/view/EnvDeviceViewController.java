@@ -5,16 +5,11 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import javafx.util.StringConverter;
 import net.ddns.dimag.cobhamrunning.MainApp;
-import net.ddns.dimag.cobhamrunning.models.environment.EnvDevice;
-import net.ddns.dimag.cobhamrunning.models.environment.EnvLocation;
-import net.ddns.dimag.cobhamrunning.models.environment.EnvModel;
-import net.ddns.dimag.cobhamrunning.models.environment.EnvStatus;
-import net.ddns.dimag.cobhamrunning.services.environment.EnvDeviceService;
-import net.ddns.dimag.cobhamrunning.services.environment.EnvLocationService;
-import net.ddns.dimag.cobhamrunning.services.environment.EnvModelService;
-import net.ddns.dimag.cobhamrunning.services.environment.EnvStatusService;
+import net.ddns.dimag.cobhamrunning.models.environment.*;
+import net.ddns.dimag.cobhamrunning.services.environment.*;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import org.apache.logging.log4j.LogManager;
@@ -24,7 +19,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
-import java.util.Date;
 
 public class EnvDeviceViewController {
     private static final Logger LOGGER = LogManager.getLogger(EnvDeviceViewController.class.getName());
@@ -32,10 +26,14 @@ public class EnvDeviceViewController {
     private final EnvModelService envModelService = new EnvModelService();
     private final EnvStatusService envStatusService = new EnvStatusService();
     private final EnvLocationService envLocationService = new EnvLocationService();
+    private final EnvHistoryService envHistoryService = new EnvHistoryService();
     private Stage dialogStage;
     private MainApp mainApp;
     private EnvDevice envDevice;
     private boolean saveClicked = false;
+    private boolean locationChanged = false;
+    private boolean statusChanged = false;
+    private boolean dateChanged = false;
 
     @FXML
     private Label typeLbl;
@@ -55,13 +53,11 @@ public class EnvDeviceViewController {
     private Button plus1Y;
     @FXML
     private Button plus2Y;
+    @FXML
+    private Button saveBtn;
 
     public EnvDeviceViewController() {
 
-    }
-
-    public EnvDeviceViewController(EnvDevice envDevice) {
-        this.envDevice = envDevice;
     }
 
     @FXML
@@ -72,6 +68,7 @@ public class EnvDeviceViewController {
         locationBox.setItems(getLocationList());
 
         modelBox.valueProperty().addListener((observable, oldValue, newValue) -> {
+            setSaveEnable();
             try {
                 EnvModel envModel = envModelService.findEnvModelByName(newValue);
                 manufLbl.setText(envModel.getName());
@@ -83,15 +80,26 @@ public class EnvDeviceViewController {
         });
 
         statusBox.valueProperty().addListener((observable, oldValue, newValue) ->
-                System.out.println("Selected value : " + newValue));
+                setSaveEnable());
 
         locationBox.valueProperty().addListener((observable, oldValue, newValue) ->
-                System.out.println("Selected value : " + newValue));
-    }
+                setSaveEnable());
 
+        serialField.textProperty().addListener((observable, oldValue, newValue) ->
+                setSaveEnable());
+
+    }
 
     private int getComboIndex(ComboBox combo){
         return combo.getSelectionModel().getSelectedIndex();
+    }
+
+    private void setSaveEnable(){
+        boolean model = modelBox.getSelectionModel().isEmpty();
+        boolean status = statusBox.getSelectionModel().isEmpty();
+        boolean location = locationBox.getSelectionModel().isEmpty();
+        boolean serial = serialField.getText().isEmpty();
+        saveBtn.setDisable(model && status && location && serial);
     }
 
     private ObservableList<String> getModelList() throws CobhamRunningException {
@@ -129,14 +137,28 @@ public class EnvDeviceViewController {
                 EnvDevice envDevice = new EnvDevice(serialField.getText(),
                         envModel, envLocation, envStatus, java.sql.Date.valueOf(calibrDate.getValue()));
                 envDeviceService.saveEnvDevice(envDevice);
-                saveClicked = true;
-                this.dialogStage.close();
+            } else {
+                this.envDevice.setEnvModel(envModelService.findEnvModelByName(modelBox.valueProperty().getValue()));
+                this.envDevice.setEnvStatus(envStatusService.findEnvStatusByName(statusBox.valueProperty().getValue()));
+                this.envDevice.setEnvLocation(envLocationService.findEnvLocationByName(locationBox.valueProperty().getValue()));
+                this.envDevice.setEnvCalibrDate(java.sql.Date.valueOf(calibrDate.getValue()));
+                envDeviceService.updateEnvDevice(this.envDevice);
+
+                if (locationChanged){
+                    EnvHistory envHistory = new EnvHistory(this.envDevice, "Location", this.envDevice.getLocation());
+                    envHistoryService.saveEnvHistory(envHistory);
+                }
+                if (statusChanged){
+                    EnvHistory envHistory = new EnvHistory(this.envDevice, "Status", this.envDevice.getStatus());
+                    envHistoryService.saveEnvHistory(envHistory);
+                }
             }
+            saveClicked = true;
+            this.dialogStage.close();
         } catch (Exception e){
             LOGGER.error(e);
             MsgBox.msgException(e);
         }
-
     }
 
     @FXML
@@ -146,6 +168,7 @@ public class EnvDeviceViewController {
         } else {
             calibrDate.setValue(calibrDate.getValue().plusYears(1).minusDays(1));
         }
+        dateChanged = true;
     }
 
     @FXML
@@ -155,6 +178,7 @@ public class EnvDeviceViewController {
         } else {
             calibrDate.setValue(calibrDate.getValue().plusYears(2).minusDays(1));
         }
+        dateChanged = true;
     }
 
     private void setDatePickerFormat(DatePicker picker){
@@ -186,6 +210,19 @@ public class EnvDeviceViewController {
         });
     }
 
+    public void setEnvDevice(EnvDevice envDevice){
+        if (envDevice != null){
+            this.envDevice = envDevice;
+            modelBox.getSelectionModel().select(envDevice.getModel());
+            serialField.setText(envDevice.getSn());
+            statusBox.getSelectionModel().select(envDevice.getStatus());
+            locationBox.getSelectionModel().select(envDevice.getLocation());
+            calibrDate.setValue(LocalDate.parse(envDevice.getCalibrDate()));
+            modelBox.setDisable(true);
+            serialField.setDisable(true);
+        }
+    }
+
     private LocalDate getDateNow(){
         String pattern = "yyyy-MM-dd";
         String date = new SimpleDateFormat(pattern).format(Calendar.getInstance().getTime());
@@ -198,8 +235,33 @@ public class EnvDeviceViewController {
         return saveClicked;
     }
 
+    private void closeWindowEvent(WindowEvent event) {
+        if (wasChanged()){
+            if(MsgBox.msgCloseWindow(dialogStage, dialogStage.getTitle(), "Current device was changed.\n" +
+                    "Close without saving?")) {
+                event.consume();
+            }
+        }
+    }
+
+    @FXML
+    private void locationChanged(){
+        this.locationChanged = true;
+    }
+
+    @FXML
+    private void statusChanged(){
+        this.statusChanged = true;
+    }
+
+    @FXML
+    private boolean wasChanged(){
+        return locationChanged || statusChanged || dateChanged;
+    }
+
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
+        this.dialogStage.getScene().getWindow().addEventFilter(WindowEvent.WINDOW_CLOSE_REQUEST, this::closeWindowEvent);
     }
 
     public void setMainApp(MainApp mainApp) {

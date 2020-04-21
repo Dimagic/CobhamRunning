@@ -10,9 +10,9 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="329.0" prefWidth="340.0" xmlns="http://javafx.com/javafx/8.0.231" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.ddns.dimag.cobhamrunning.view.EnvDeviceViewController">
    <children>
-      <Button layoutX="200.0" layoutY="256.0" mnemonicParsing="false" onAction="#handleSaveBtn" prefHeight="25.0" prefWidth="125.0" text="Save" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="15.0" />
+      <Button fx:id="saveBtn" layoutX="200.0" layoutY="256.0" mnemonicParsing="false" onAction="#handleSaveBtn" prefHeight="25.0" prefWidth="125.0" text="Save" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="15.0" />
       <TextField fx:id="serialField" layoutX="125.0" layoutY="126.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="130.0" />
-      <ComboBox fx:id="statusBox" layoutX="121.0" layoutY="175.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="170.0" />
+      <ComboBox fx:id="statusBox" layoutX="121.0" layoutY="175.0" onAction="#statusChanged" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="170.0" />
       <ComboBox fx:id="modelBox" layoutX="144.0" layoutY="124.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="10.0" />
       <Label alignment="CENTER_RIGHT" layoutX="39.0" layoutY="14.0" prefHeight="25.0" prefWidth="100.0" text="Type:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="90.0">
          <font>
@@ -39,7 +39,7 @@
             <Font name="System Bold" size="14.0" />
          </font>
       </Label>
-      <ComboBox fx:id="locationBox" layoutX="131.0" layoutY="185.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="210.0" />
+      <ComboBox fx:id="locationBox" layoutX="131.0" layoutY="185.0" onAction="#locationChanged" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="210.0" />
       <Label alignment="CENTER_RIGHT" layoutX="89.0" layoutY="64.0" prefHeight="25.0" prefWidth="100.0" text="Location:" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="210.0">
          <font>
             <Font name="System Bold" size="14.0" />
@@ -60,7 +60,7 @@
             <Font name="System Bold" size="14.0" />
          </font>
       </Label>
-      <DatePicker fx:id="calibrDate" layoutX="113.0" layoutY="250.0" prefHeight="25.0" prefWidth="110.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="250.0" />
+      <DatePicker fx:id="calibrDate" layoutX="113.0" layoutY="250.0" onAction="#wasChanged" prefHeight="25.0" prefWidth="110.0" AnchorPane.leftAnchor="125.0" AnchorPane.topAnchor="250.0" />
       <Button fx:id="plus1Y" layoutX="237.0" layoutY="250.0" mnemonicParsing="false" onAction="#addOneYear" prefHeight="25.0" prefWidth="40.0" text="+Y" AnchorPane.leftAnchor="240.0" AnchorPane.topAnchor="250.0" />
       <Button fx:id="plus2Y" layoutX="270.0" layoutY="260.0" mnemonicParsing="false" onAction="#addTwoYears" prefHeight="25.0" prefWidth="40.0" text="+2Y" AnchorPane.leftAnchor="285.0" AnchorPane.topAnchor="250.0" />
    </children>

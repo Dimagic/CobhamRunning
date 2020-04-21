@@ -1,9 +1,5 @@
 package net.ddns.dimag.cobhamrunning.models.environment;
 
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.scene.control.DatePicker;
-import javafx.util.StringConverter;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -11,8 +7,8 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @Entity
@@ -24,6 +20,7 @@ public class EnvDevice {
     }
 
     public EnvDevice(EnvLocation location){
+        this.sn = "";
         this.envLocation = location;
     }
 
@@ -39,7 +36,7 @@ public class EnvDevice {
         this.envModel = envModel;
         this.envLocation = envLocation;
         this.envStatus = envStatus;
-        this.calibrDate = calibrDate;
+        this.envCalibrDate = calibrDate;
     }
 
     @Id
@@ -107,39 +104,51 @@ public class EnvDevice {
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "calibrdate")
-    private Date calibrDate;
+    private Date envCalibrDate;
 
-    public Date getCalibrDate() {
-        return calibrDate;
+    public Date getEnvCalibrDate() {
+        return envCalibrDate;
     }
 
-    public void setCalibrDate(Date calibrDate) {
-        this.calibrDate = calibrDate;
+    public void setEnvCalibrDate(Date envCalibrDate) {
+        this.envCalibrDate = envCalibrDate;
     }
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "envhistory_id")
-    @OnDelete(action = OnDeleteAction.CASCADE)
-    private EnvHistory envHistory;
-
-    public EnvHistory getEnvHistory() {
-        return envHistory;
+    public String getLocation(){
+        return getEnvLocation().getLocation();
     }
 
-    public void setEnvHistory(EnvHistory envHistory) {
-        this.envHistory = envHistory;
+    public String getManuf(){
+        return getEnvModel().getEnvManuf().getName();
     }
 
-    @Override
-    public String toString() {
-        final StringBuilder sb = new StringBuilder("EnvDevice{");
-        sb.append("id=").append(id);
-        sb.append(", sn='").append(sn).append('\'');
-        sb.append(", envModel=").append(envModel);
-        sb.append(", envLocation=").append(envLocation);
-        sb.append(", envStatus=").append(envStatus);
-        sb.append(", envHistory=").append(envHistory);
-        sb.append('}');
-        return sb.toString();
+    public String getModel(){
+        return getEnvModel().getName();
     }
+
+    public String getTypeDev(){
+        return getEnvModel().getEnvType().getName();
+    }
+
+    public String getCalibrDate(){
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return dateFormat.format(getEnvCalibrDate());
+    }
+
+    public String getStatus(){
+        return getEnvStatus().getStatus();
+    }
+
+//    @Override
+//    public String toString() {
+//        final StringBuilder sb = new StringBuilder("EnvDevice{");
+//        sb.append("id=").append(id);
+//        sb.append(", sn='").append(sn).append('\'');
+//        sb.append(", envModel=").append(getModel());
+//        sb.append(", envLocation=").append(getLocation());
+//        sb.append(", envStatus=").append(getStatus());
+//        sb.append(", envHistory=").append(envHistory);
+//        sb.append('}');
+//        return sb.toString();
+//    }
 }
