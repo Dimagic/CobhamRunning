@@ -5,7 +5,6 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 
@@ -26,7 +25,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.TitledPane;
 import javafx.stage.Stage;
 import net.ddns.dimag.cobhamrunning.MainApp;
-import net.ddns.dimag.cobhamrunning.models.Settings;
+import net.ddns.dimag.cobhamrunning.utils.Settings;
 
 public class SettingsViewController implements MsgBox {
 	boolean saveClicked = false;

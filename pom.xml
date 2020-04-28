@@ -15,20 +15,6 @@
 		<sourceDirectory>src</sourceDirectory>
 		<resources>
 			<resource>
-				<directory>src/resources</directory>
-				<filtering>true</filtering>
-				<includes>
-					<include>*.properties</include>
-				</includes>
-			</resource>
-			<resource>
-				<directory>src/resources</directory>
-				<filtering>false</filtering>
-				<includes>
-					<include>**/*.*</include>
-				</includes>
-			</resource>
-			<resource>
 				<directory>src/net/ddns/dimag/cobhamrunning/view</directory>
 				<filtering>true</filtering>
 				<includes>
@@ -36,90 +22,47 @@
 				</includes>
 			</resource>
 			<resource>
-				<directory>src</directory>
+				<directory>src/resources</directory>
 				<filtering>false</filtering>
 				<includes>
 					<include>**/*.*</include>
 				</includes>
 			</resource>
 		</resources>
-		<pluginManagement>
-			<plugins>
-				<plugin>
-					<artifactId>maven-jar-plugin</artifactId>
-					<version>2.3</version>
-					<configuration>
-						<archive>
-							<manifest>
-								<addClasspath>true</addClasspath>
-								<classpathPrefix>lib/</classpathPrefix>
-								<classpathLayoutType>repository</classpathLayoutType>
-							</manifest>
-						</archive>
-					</configuration>
-				</plugin>
-				<plugin>
-					<artifactId>maven-assembly-plugin</artifactId>
-					<executions>
-						<execution>
-							<phase>package</phase>
-							<goals>
-								<goal>single</goal>
-							</goals>
-						</execution>
-					</executions>
-					<configuration>
-						<archive>
-							<manifest>
-								<addClasspath>true</addClasspath>
-								<mainClass>net.ddns.dimag.cobhamrunning.MainApp</mainClass>
-							</manifest>
-						</archive>
-						<descriptorRefs>
-							<descriptorRef>jar-with-dependencies</descriptorRef>
-						</descriptorRefs>
-					</configuration>
-				</plugin>
-				<plugin>
-					<artifactId>maven-compiler-plugin</artifactId>
-					<version>3.6.0</version>
-					<configuration>
-						<source>1.8</source>
-						<target>1.8</target>
-						<fork>true</fork>
-						<executable>C:\Drivers\Application\JDK\bin\javac</executable>
-					</configuration>
-				</plugin>
-				<plugin>
-					<groupId>org.liquibase</groupId>
-					<artifactId>liquibase-maven-plugin</artifactId>
-					<version>3.8.1</version>
-					<configuration>
-						<propertyFile>liquibase.properties</propertyFile>
-						<propertyFile>${project.basedir}/liquibase-maven-plugin.properties</propertyFile>
-						<systemProperties>
-							<user.name>pcb.user</user.name>
-						</systemProperties>
-						<logging>info</logging>
-					</configuration>
-					<dependencies>
-						<dependency>
-							<groupId>org.postgresql</groupId>
-							<artifactId>postgresql</artifactId>
-							<version>42.2.5</version>
-						</dependency>
-					</dependencies>
-				</plugin>
-				<plugin>
-					<groupId>org.apache.maven.plugins</groupId>
-					<artifactId>maven-resources-plugin</artifactId>
-					<version>3.1.0</version>
-					<configuration>
-						<encoding>${project.encoding}</encoding>
-					</configuration>
-				</plugin>
-			</plugins>
-		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>3.1.1</version>
+				<configuration>
+					<archive>
+						<manifest>
+							<mainClass>net.ddns.dimag.cobhamrunning.MainApp</mainClass>
+						</manifest>
+					</archive>
+					<descriptorRefs>
+						<descriptorRef>jar-with-dependencies</descriptorRef>
+					</descriptorRefs>
+				</configuration>
+				<executions>
+					<execution>
+						<id>make-assembly</id>
+						<phase>package</phase>
+						<goals>
+							<goal>single</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>8</source>
+					<target>8</target>
+				</configuration>
+			</plugin>
+		</plugins>
 	</build>
 
 	<dependencies>
@@ -273,11 +216,36 @@
 		</dependency>
 
 		<!-- https://mvnrepository.com/artifact/com.sun.jna/jna -->
+<!--		<dependency>-->
+<!--			<groupId>com.sun.jna</groupId>-->
+<!--			<artifactId>jna</artifactId>-->
+<!--			<version>3.0.9</version>-->
+<!--		</dependency>-->
+
 		<dependency>
-			<groupId>com.sun.jna</groupId>
+			<groupId>net.java.dev.jna</groupId>
 			<artifactId>jna</artifactId>
-			<version>3.0.9</version>
+			<version>4.5.1</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/net.java.dev.jna/jna-platform -->
+		<dependency>
+			<groupId>net.java.dev.jna</groupId>
+			<artifactId>jna-platform</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+
+        <!-- https://mvnrepository.com/artifact/commons-net/commons-net -->
+        <dependency>
+            <groupId>commons-net</groupId>
+            <artifactId>commons-net</artifactId>
+            <version>3.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
 	</dependencies>
 </project>

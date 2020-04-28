@@ -89,21 +89,25 @@ public class EnvModelJournalController {
     @FXML
     private void addEnvManuf() throws CobhamRunningException {
         String manufName = MsgBox.msgInputString("Add new manufacturer");
-        if (!manufName.isEmpty() && manufName != null){
-            EnvManuf envManuf = new EnvManuf(manufName);
-            envManufService.saveEnvManuf(envManuf);
+        if (manufName != null){
+            if (!manufName.isEmpty()){
+                EnvManuf envManuf = new EnvManuf(manufName);
+                envManufService.saveEnvManuf(envManuf);
+            }
+            manufCombo.setItems(getManufList());
         }
-        manufCombo.setItems(getManufList());
     }
 
     @FXML
     private void addEnvType() throws CobhamRunningException {
         String typeName = MsgBox.msgInputString("Add new type");
-        if (!typeName.isEmpty() && typeName != null){
-            EnvType envType = new EnvType(typeName) ;
-            envTypeService.saveEnvType(envType);
+        if (typeName != null){
+            if (!typeName.isEmpty()){
+                EnvType envType = new EnvType(typeName) ;
+                envTypeService.saveEnvType(envType);
+            }
+            typeCombo.setItems(getTypeList());
         }
-        typeCombo.setItems(getTypeList());
     }
 
     private void fillTable() throws CobhamRunningException {

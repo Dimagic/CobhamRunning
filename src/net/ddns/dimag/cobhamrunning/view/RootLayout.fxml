@@ -15,6 +15,7 @@
           <Menu mnemonicParsing="false" text="File">
             <items>
                   <MenuItem mnemonicParsing="false" onAction="#handleSettings" text="Settings" />
+                  <MenuItem mnemonicParsing="false" onAction="#handleUpdate" text="Update" />
               <MenuItem mnemonicParsing="false" onAction="#handleExit" text="Close" />
             </items>
           </Menu>

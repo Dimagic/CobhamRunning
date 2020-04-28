@@ -17,8 +17,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
+import java.util.Date;
 
 public class EnvDeviceViewController {
     private static final Logger LOGGER = LogManager.getLogger(EnvDeviceViewController.class.getName());
@@ -66,6 +68,7 @@ public class EnvDeviceViewController {
         modelBox.setItems(getModelList());
         statusBox.setItems(getStatusList());
         locationBox.setItems(getLocationList());
+        setSaveEnable();
 
         modelBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             setSaveEnable();
@@ -99,7 +102,15 @@ public class EnvDeviceViewController {
         boolean status = statusBox.getSelectionModel().isEmpty();
         boolean location = locationBox.getSelectionModel().isEmpty();
         boolean serial = serialField.getText().isEmpty();
-        saveBtn.setDisable(model && status && location && serial);
+        saveBtn.setDisable(!allTrue(new boolean[]{!model, !status, !location, !serial}));
+    }
+
+    private  boolean allTrue (boolean[] values) {
+        for (boolean value : values) {
+            if (!value)
+                return false;
+        }
+        return true;
     }
 
     private ObservableList<String> getModelList() throws CobhamRunningException {
@@ -130,18 +141,24 @@ public class EnvDeviceViewController {
     @FXML
     private void handleSaveBtn() {
         try {
+            Date tmpDate;
+            if (calibrDate.getValue() == null){
+                tmpDate = null;
+            } else {
+                tmpDate = java.sql.Date.valueOf(calibrDate.getValue());
+            }
             if (this.envDevice == null){
                 EnvModel envModel = envModelService.findEnvModelByName(modelBox.valueProperty().getValue());
                 EnvStatus envStatus = envStatusService.findEnvStatusByName(statusBox.valueProperty().getValue());
                 EnvLocation envLocation = envLocationService.findEnvLocationByName(locationBox.valueProperty().getValue());
                 EnvDevice envDevice = new EnvDevice(serialField.getText(),
-                        envModel, envLocation, envStatus, java.sql.Date.valueOf(calibrDate.getValue()));
+                        envModel, envLocation, envStatus, tmpDate);
                 envDeviceService.saveEnvDevice(envDevice);
             } else {
                 this.envDevice.setEnvModel(envModelService.findEnvModelByName(modelBox.valueProperty().getValue()));
                 this.envDevice.setEnvStatus(envStatusService.findEnvStatusByName(statusBox.valueProperty().getValue()));
                 this.envDevice.setEnvLocation(envLocationService.findEnvLocationByName(locationBox.valueProperty().getValue()));
-                this.envDevice.setEnvCalibrDate(java.sql.Date.valueOf(calibrDate.getValue()));
+                this.envDevice.setEnvCalibrDate(tmpDate);
                 envDeviceService.updateEnvDevice(this.envDevice);
 
                 if (locationChanged){
@@ -217,7 +234,9 @@ public class EnvDeviceViewController {
             serialField.setText(envDevice.getSn());
             statusBox.getSelectionModel().select(envDevice.getStatus());
             locationBox.getSelectionModel().select(envDevice.getLocation());
-            calibrDate.setValue(LocalDate.parse(envDevice.getCalibrDate()));
+            try {
+                calibrDate.setValue(dateToLocalDate(envDevice.getEnvCalibrDate()));
+            } catch (NullPointerException e){ }
             modelBox.setDisable(true);
             serialField.setDisable(true);
         }
@@ -257,6 +276,12 @@ public class EnvDeviceViewController {
     @FXML
     private boolean wasChanged(){
         return locationChanged || statusChanged || dateChanged;
+    }
+
+    public LocalDate dateToLocalDate(Date dateToConvert) {
+        return dateToConvert.toInstant()
+                .atZone(ZoneId.systemDefault())
+                .toLocalDate();
     }
 
     public void setDialogStage(Stage dialogStage) {

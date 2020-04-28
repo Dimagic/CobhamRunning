@@ -34,11 +34,13 @@ public ShippingJournalData(ShippingViewController controller, Device device) {
             DeviceService deviceService = new DeviceService();
             TestsService testsService = new TestsService();
             Asis asis = device.getAsis();
-            if (shippingJournalService.isDeviceInJournal(device)) {
-                MsgBox.msgInfo("Warning", String.format("System with ASIS: %s article: %s\n" +
-                                "and SN:%s already shipped.",
-                        asis.getAsis(), asis.getArticleHeaders().getArticle(), device.getSn()));
-                return;
+            boolean isShippingSistemPresent = shippingJournalService.isDeviceInJournal(device);
+            if (isShippingSistemPresent) {
+                if (!MsgBox.msgConfirm("Warning", String.format("System with ASIS: %s article: %s\n" +
+                                "and SN:%s already shipped.\nDo you want update test results?",
+                        asis.getAsis(), asis.getArticleHeaders().getArticle(), device.getSn()))){
+                    return;
+                }
             }
             isSystemInRmv(asis);
             HashMap<String, String> testMap = rmvUtils.getTestsMapWithDate(asis.getAsis());
@@ -93,13 +95,17 @@ public ShippingJournalData(ShippingViewController controller, Device device) {
             }
             device.setTests(setTests);
 
+//            ToDo: update tests in found system
             ShippingSystem shippingSystem = new ShippingSystem();
             shippingSystem.setDevice(device);
             shippingSystem.setDateShip(new Date());
-            shippingJournalService.saveShippingJournal(shippingSystem);
+            shippingJournalService.saveOrUpdateShippingJournal(shippingSystem);
+
+
 
             controller.setShippingSystems(shippingSystem);
             writeConsole("Done");
+            MsgBox.msgInfo("Add new shipping system", "Done");
         } catch (SQLException | ClassNotFoundException e) {
             MsgBox.msgException(e);
             return;

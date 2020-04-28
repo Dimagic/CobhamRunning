@@ -31,6 +31,7 @@ public interface UniversalDao {
         try {
             session.save(obj);
             tx1.commit();
+            session.close();
         } catch (Exception e){
             tx1.rollback();
             session.close();

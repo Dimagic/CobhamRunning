@@ -4,7 +4,6 @@ import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.DeviceInfo;
 import net.ddns.dimag.cobhamrunning.models.Measurements;
-import net.ddns.dimag.cobhamrunning.models.Settings;
 
 import java.lang.reflect.Field;
 import java.sql.*;

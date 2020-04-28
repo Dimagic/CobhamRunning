@@ -4,12 +4,17 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import net.ddns.dimag.cobhamrunning.MainApp;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import net.ddns.dimag.cobhamrunning.utils.ProcessDeamon;
+import net.ddns.dimag.cobhamrunning.utils.Updater;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 
 public class RootLayoutController {
+    private static final Logger LOGGER = LogManager.getLogger(RootLayoutController.class.getName());
     private MainApp mainApp;
 
     @FXML
@@ -26,6 +31,17 @@ public class RootLayoutController {
     @FXML
     private void handleSettings() {
         boolean saveClicked = mainApp.showSettingsDialog();
+    }
+
+    @FXML
+    private void handleUpdate() {
+        try{
+            Updater updater = new Updater();
+            updater.isNeedUpdate();
+        } catch (CobhamRunningException e) {
+            MsgBox.msgException(e);
+        }
+
     }
 
     @FXML

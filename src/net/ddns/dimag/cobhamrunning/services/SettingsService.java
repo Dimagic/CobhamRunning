@@ -3,7 +3,7 @@ package net.ddns.dimag.cobhamrunning.services;
 import java.util.List;
 
 import net.ddns.dimag.cobhamrunning.dao.SettingsDao;
-import net.ddns.dimag.cobhamrunning.models.Settings;
+import net.ddns.dimag.cobhamrunning.utils.Settings;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 
 public class SettingsService {

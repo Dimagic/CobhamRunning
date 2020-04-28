@@ -19,7 +19,11 @@ private ShippingJournalDao shippingJournalDao = new ShippingJournalDao();
     }
 	
     public void saveShippingJournal(ShippingSystem shippingJournal) throws CobhamRunningException {
-    	shippingJournalDao.save(shippingJournal);    	
+    	shippingJournalDao.save(shippingJournal);
+    }
+
+    public void saveOrUpdateShippingJournal(ShippingSystem shippingJournal) throws CobhamRunningException {
+        shippingJournalDao.saveOrUpdate(shippingJournal);
     }
 
     public void deleteShippingJournal(ShippingSystem shippingJournal) throws CobhamRunningException {

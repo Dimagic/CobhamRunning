@@ -132,7 +132,11 @@ public class EnvDevice {
 
     public String getCalibrDate(){
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        return dateFormat.format(getEnvCalibrDate());
+        try {
+            return dateFormat.format(getEnvCalibrDate());
+        } catch (NullPointerException e){
+            return "";
+        }
     }
 
     public String getStatus(){

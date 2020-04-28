@@ -5,9 +5,7 @@ import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import jssc.SerialPortList;
-import jssc.SerialPortTimeoutException;
 import net.ddns.dimag.cobhamrunning.MainApp;
-import net.ddns.dimag.cobhamrunning.models.Settings;
 
 public class JComClient implements MsgBox{
 	private static SerialPort serialPort;

@@ -13,8 +13,8 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import net.ddns.dimag.cobhamrunning.models.ArticleHeaders;
 import net.ddns.dimag.cobhamrunning.models.Device;
-import net.ddns.dimag.cobhamrunning.models.EnvDevice;
-import net.ddns.dimag.cobhamrunning.models.Settings;
+import net.ddns.dimag.cobhamrunning.utils.Settings;
+import net.ddns.dimag.cobhamrunning.models.environment.EnvDevice;
 import net.ddns.dimag.cobhamrunning.utils.*;
 import net.ddns.dimag.cobhamrunning.view.*;
 import org.apache.logging.log4j.LogManager;
@@ -26,9 +26,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
+    private final String VERSION = "0.0.34.1";
     private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
@@ -38,6 +40,7 @@ public class MainApp extends Application implements MsgBox {
     private Stage devicesJournalStage;
     private Stage envJournalStage;
     private Stage envDeviceStage;
+    private Stage envModelJournalStage;
     private BorderPane rootLayout;
     private Settings currentSettings;
     private TestsViewController testsViewController;
@@ -66,10 +69,8 @@ public class MainApp extends Application implements MsgBox {
 
     @Override
     public void start(Stage primaryStage) {
-//        LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
         this.primaryStage = primaryStage;
-        String VERSION = "0.0.31";
-        this.primaryStage.setTitle(String.format("CobhamRunning %s", VERSION));
+        this.primaryStage.setTitle(String.format("CobhamRunning %s %s", VERSION, getComputerName()));
         this.primaryStage.getIcons().add(favicon);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("RootLayout.fxml"));
@@ -162,6 +163,29 @@ public class MainApp extends Application implements MsgBox {
             controller.setMainApp(this);
             controller.setDialogStage(envJournalStage);
             envJournalStage.showAndWait();
+        } catch (IOException | CobhamRunningException e) {
+            e.printStackTrace();
+            LOGGER.error(e.toString());
+            MsgBox.msgException(e);
+        }
+    }
+
+    public void showEnvModelJournalView() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getClassLoader().getResource("EnvModelJournalView.fxml"));
+            AnchorPane page = loader.load();
+            envModelJournalStage = new Stage();
+            envModelJournalStage.setTitle("Model journal");
+            envModelJournalStage.getIcons().add(favicon);
+            envModelJournalStage.initModality(Modality.WINDOW_MODAL);
+            envModelJournalStage.initOwner(envJournalStage);
+            Scene scene = new Scene(page);
+            envModelJournalStage.setScene(scene);
+            EnvModelJournalController controller = loader.getController();
+            controller.setMainApp(this);
+            controller.setDialogStage(envModelJournalStage);
+            envModelJournalStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
             LOGGER.error(e.toString());
@@ -226,12 +250,10 @@ public class MainApp extends Application implements MsgBox {
             measureStage.initOwner(shippingStage);
             Scene scene = new Scene(page);
             measureStage.setScene(scene);
-
             MeasureViewController controller = loader.getController();
             controller.setMainApp(this);
             controller.setDevice(device);
             controller.setDialogStage(measureStage);
-
             measureStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -346,7 +368,6 @@ public class MainApp extends Application implements MsgBox {
             printAsisStage.getIcons().add(favicon);
             printAsisStage.initModality(Modality.WINDOW_MODAL);
             printAsisStage.initOwner(asisCreatorStage);
-//            printAsisStage.setResizable(false);
             Scene scene = new Scene(page);
             printAsisStage.setScene(scene);
             PrintAsisViewController printAsisController = loader.getController();
@@ -379,7 +400,6 @@ public class MainApp extends Application implements MsgBox {
             printCustomLabelStage.setScene(scene);
             PrintCustomLabelViewController printCustomLabelViewController = loader.getController();
             printCustomLabelViewController.setMainApp(this);
-//            printCustomLabelViewController.setDialogStage(printCustomLabelStage);
             printCustomLabelStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -434,7 +454,6 @@ public class MainApp extends Application implements MsgBox {
             runningTestStage = new Stage();
             runningTestStage.setTitle("Running test");
             runningTestStage.initModality(Modality.WINDOW_MODAL);
-//            dialogStage.initOwner(primaryStage);
             Scene scene = new Scene(page);
             runningTestStage.setScene(scene);
 
@@ -485,9 +504,7 @@ public class MainApp extends Application implements MsgBox {
             settingsViewController.setMainApp(this);
             settingsViewController.fillSettings();
             settingsViewController.setDialogStage(settingsStage);
-
             settingsStage.showAndWait();
-
             return settingsViewController.isSaveClicked();
         } catch (IOException e) {
             e.printStackTrace();
@@ -506,18 +523,12 @@ public class MainApp extends Application implements MsgBox {
             calibrationStage.initOwner(primaryStage);
             Scene scene = new Scene(page);
             calibrationStage.setScene(scene);
-
-            // Set the person into the controller
             CalibrationViewController controller = loader.getController();
             controller.setMainApp(this);
             controller.setDialogStage(calibrationStage);
-
             calibrationStage.showAndWait();
-
             return false;
-
         } catch (IOException e) {
-            // Exception gets thrown if the fxml file could not be loaded
             e.printStackTrace();
             return false;
         }
@@ -542,12 +553,13 @@ public class MainApp extends Application implements MsgBox {
                     return false;
                 }
             }
-
             JAXBContext context = JAXBContext.newInstance(Settings.class);
             Unmarshaller um = context.createUnmarshaller();
             setCurrentSettings((Settings) um.unmarshal(file));
             currUrl = HibernateSessionFactoryUtil.getConnectionInfo().get("DataBaseUrl");
             return true;
+        } catch (CobhamRunningException e){
+            MsgBox.msgWarning("Load settings", e.getMessage());
         } catch (Exception e) {
             MsgBox.msgException(e);
         }
@@ -579,5 +591,16 @@ public class MainApp extends Application implements MsgBox {
 
     public TestsViewController getController() {
         return testsViewController;
+    }
+
+    private String getComputerName()
+    {
+        Map<String, String> env = System.getenv();
+        if (env.containsKey("COMPUTERNAME"))
+            return env.get("COMPUTERNAME");
+        else if (env.containsKey("HOSTNAME"))
+            return env.get("HOSTNAME");
+        else
+            return "Unknown Computer";
     }
 }

@@ -10,7 +10,7 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.Device;
-import net.ddns.dimag.cobhamrunning.models.Settings;
+import net.ddns.dimag.cobhamrunning.utils.Settings;
 import net.ddns.dimag.cobhamrunning.models.Tests;
 import net.ddns.dimag.cobhamrunning.services.DeviceService;
 import net.ddns.dimag.cobhamrunning.services.TestsService;

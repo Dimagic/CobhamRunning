@@ -67,8 +67,9 @@ public class EnvJournalController {
     }
 
     @FXML
-    public void handleAddButton(){
-        mainApp.showEnvDeviceView(null);
+    public void handleAddButton() throws CobhamRunningException {
+        if (mainApp.showEnvDeviceView(null))
+            setupData();
     }
 
     @FXML
@@ -166,18 +167,23 @@ public class EnvJournalController {
     @FXML
     private void menuAddStatus() throws CobhamRunningException {
         String statusName = MsgBox.msgInputString("Add new status");
-        if (!statusName.isEmpty() && statusName != null) {
-            EnvStatus envStatus = new EnvStatus(statusName);
-            envStatusService.saveEnvStatus(envStatus);
+        if (statusName != null) {
+            if (!statusName.isEmpty()) {
+                EnvStatus envStatus = new EnvStatus(statusName);
+                envStatusService.saveEnvStatus(envStatus);
+            }
         }
+
     }
 
     @FXML
     private void menuAddLocation() throws CobhamRunningException {
         String locationName = MsgBox.msgInputString("Add new location");
-        if (!locationName.isEmpty() && locationName != null) {
-            EnvLocation envLocation = new EnvLocation(locationName);
-            envLocationService.saveEnvLocation(envLocation);
+        if (locationName != null) {
+            if (!locationName.isEmpty()) {
+                EnvLocation envLocation = new EnvLocation(locationName);
+                envLocationService.saveEnvLocation(envLocation);
+            }
         }
     }
 

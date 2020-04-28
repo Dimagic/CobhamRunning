@@ -1,17 +1,5 @@
 package net.ddns.dimag.cobhamrunning.utils;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-
-import net.ddns.dimag.cobhamrunning.MainApp;
-import net.ddns.dimag.cobhamrunning.models.Settings;
-
 public class DbHandlerPostgre {
 //	private static final Settings currentSettings = Settings.loadSettings();
 //	private static final String CON_STR = String.format("jdbc:postgresql://%s:45432/%s", currentSettings.getPass_db(), currentSettings.getName_db());

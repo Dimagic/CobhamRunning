@@ -6,7 +6,7 @@ import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
-import net.ddns.dimag.cobhamrunning.models.Settings;
+import net.ddns.dimag.cobhamrunning.utils.Settings;
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 
 public class SettingsDao {
