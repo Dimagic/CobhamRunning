@@ -13,7 +13,6 @@ import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import net.ddns.dimag.cobhamrunning.models.ArticleHeaders;
 import net.ddns.dimag.cobhamrunning.models.Device;
-import net.ddns.dimag.cobhamrunning.utils.Settings;
 import net.ddns.dimag.cobhamrunning.models.environment.EnvDevice;
 import net.ddns.dimag.cobhamrunning.utils.*;
 import net.ddns.dimag.cobhamrunning.view.*;
@@ -30,17 +29,14 @@ import java.util.Map;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
-    private final String VERSION = "0.0.34.1";
+    private final String VERSION = "0.1.1.1";
     private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
     private Stage asisCreatorStage;
     private Stage articlesStage;
     private Stage shippingStage;
-    private Stage devicesJournalStage;
     private Stage envJournalStage;
-    private Stage envDeviceStage;
-    private Stage envModelJournalStage;
     private BorderPane rootLayout;
     private Settings currentSettings;
     private TestsViewController testsViewController;
@@ -52,12 +48,14 @@ public class MainApp extends Application implements MsgBox {
     private Image favicon = new Image("file:src/resources/images/cobham_C_64x64.png");
 
     public MainApp() {
+
     }
 
     @Override
     public void init() {
         /** test DB connection*/
         LOGGER.info("Start init");
+        LOGGER.info(String.format("Current program version: %s", VERSION));
         loadSettings();
         LOGGER.info("Finish init");
     }
@@ -86,6 +84,19 @@ public class MainApp extends Application implements MsgBox {
             e.printStackTrace();
         }
         showTestsView();
+        try {
+            Updater updater = new Updater(this, testsViewController);
+            if (updater.hasNewVersion()){
+               String title = "Program update";
+               String msg = String.format("Found new version: %s\nPress Ok for update", updater.getRemoteVersion());
+                if (MsgBox.msgConfirm2(title, msg)){
+                    updater.isNeedUpdate();
+                }
+            }
+        } catch (CobhamRunningException e) {
+            LOGGER.error(e);
+            MsgBox.msgException(e);
+        }
     }
 
     public void showTestsView() {
@@ -129,7 +140,7 @@ public class MainApp extends Application implements MsgBox {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("DeviceJournal.fxml"));
             AnchorPane page = loader.load();
-            devicesJournalStage = new Stage();
+            Stage devicesJournalStage = new Stage();
             devicesJournalStage.setTitle("Devices journal");
             devicesJournalStage.getIcons().add(favicon);
             devicesJournalStage.initModality(Modality.WINDOW_MODAL);
@@ -165,7 +176,7 @@ public class MainApp extends Application implements MsgBox {
             envJournalStage.showAndWait();
         } catch (IOException | CobhamRunningException e) {
             e.printStackTrace();
-            LOGGER.error(e.toString());
+            LOGGER.error(e);
             MsgBox.msgException(e);
         }
     }
@@ -175,7 +186,7 @@ public class MainApp extends Application implements MsgBox {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("EnvModelJournalView.fxml"));
             AnchorPane page = loader.load();
-            envModelJournalStage = new Stage();
+            Stage envModelJournalStage = new Stage();
             envModelJournalStage.setTitle("Model journal");
             envModelJournalStage.getIcons().add(favicon);
             envModelJournalStage.initModality(Modality.WINDOW_MODAL);
@@ -188,7 +199,7 @@ public class MainApp extends Application implements MsgBox {
             envModelJournalStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
-            LOGGER.error(e.toString());
+            LOGGER.error(e);
             MsgBox.msgException(e);
         }
     }
@@ -306,7 +317,7 @@ public class MainApp extends Application implements MsgBox {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("EnvDeviceView.fxml"));
             AnchorPane page = loader.load();
-            envDeviceStage = new Stage();
+            Stage envDeviceStage = new Stage();
             if (envDevice == null) {
                 envDeviceStage.setTitle("New device");
             } else {
@@ -470,13 +481,12 @@ public class MainApp extends Application implements MsgBox {
                 controller.stopTestFlag = true;
                 Set<Thread> threads = Thread.getAllStackTraces().keySet();
                 List<String> items = new ArrayList<String>();
-//            	systemData.forEach(item -> items.add(item.getDevice().getAsis().getAsis()));
                 for (Thread t : threads) {
                     if (items.contains(t.getName())) {
                         if (t.isAlive()) {
                             t.stop();
                         }
-                        System.out.println(String.format("Thread %d _. Status: %s", t.getName(), t.getState()));
+                        System.out.println(String.format("Thread %s _. Status: %s", t.getName(), t.getState()));
                     }
                 }
             });
@@ -585,10 +595,6 @@ public class MainApp extends Application implements MsgBox {
         return currentSettings;
     }
 
-    public static void main(String[] args) {
-        LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
-    }
-
     public TestsViewController getController() {
         return testsViewController;
     }
@@ -602,5 +608,9 @@ public class MainApp extends Application implements MsgBox {
             return env.get("HOSTNAME");
         else
             return "Unknown Computer";
+    }
+
+    public static void main(String[] args) {
+        LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
     }
 }

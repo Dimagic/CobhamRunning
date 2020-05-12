@@ -23,7 +23,14 @@ public class TestsDao implements UniversalDao{
                 .setParameter("dev_id", device.getId()).list();
         session.close();
         return testsList;
+    }
 
+    public void deleteTestsByDevice(Device device) throws CobhamRunningException{
+        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        session.createSQLQuery("delete from public.tests where device_id = :dev_id")
+                .addEntity(Tests.class)
+                .setParameter("dev_id", device.getId());
+        session.close();
     }
 
 	public List<Tests> findAll() throws CobhamRunningException{

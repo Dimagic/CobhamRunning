@@ -3,6 +3,7 @@ package net.ddns.dimag.cobhamrunning.view;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
+import javafx.scene.control.TextArea;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.utils.JComClient;
 import net.ddns.dimag.cobhamrunning.utils.JTelnetClient;
@@ -15,7 +16,9 @@ public class TestsViewController implements MsgBox {
 	private static final Logger LOGGER = LogManager.getLogger(TestsViewController.class.getName());
 
 	private MainApp mainApp;
-	
+
+	@FXML
+	private TextArea console;
 		
 	public TestsViewController(){
 
@@ -23,16 +26,9 @@ public class TestsViewController implements MsgBox {
 
 	@FXML
     private void initialize() {
-//		EventHandler<MouseEvent> eventHandler = new EventHandler<MouseEvent>() {
-//	        @Override
-//	        public void handle(MouseEvent e) {
-//	           System.out.println("Hello World");
-//	        }
-//	     };
-	     //Registering the event filter 
-//	     console.addEventFilter(MouseEvent.MOUSE_CLICKED, eventHandler);
+		console.setEditable(false);
     }
-	
+
 	@FXML
 	private void handleNewTest(){
 
@@ -42,21 +38,21 @@ public class TestsViewController implements MsgBox {
 //			for(String addr: pvc.getInstrumentAddressList()){
 //				writeConsole(String.format("%s >> %s", addr, pvc.getInstumentName(addr)));
 //			}
-//			
+//
 //			Generator gen = new Generator("GPIB0::19::INSTR", "Hewlett-Packard, ESG-D4000B, GB40051087, B.03.60");
 //			gen.setVisa(pvc);
 //			for(int i = 850; i < 2000; i+=5){
 //				gen.setFreq((float) i);
 ////				writeConsole(Float.toString(gen.getAmpl()));
-//				
+//
 //			}
 //		} catch (Exception e) {
 //			MsgBox.msgException(e);
 //		}
-		
+
 //    	pvc.sendCmd(cmd.getText());
 	}
-	
+
 	@FXML
     private void handleComPort() {
 		try {
@@ -188,6 +184,11 @@ public class TestsViewController implements MsgBox {
 			MsgBox.msgException(e);
 		}	
     }
+
+	public void writeConsole(String val) {
+		console.appendText(val + "\n");
+		console.selectPositionCaret(console.getLength());
+	}
 
 	public TestsViewController getController() {
 		return this;

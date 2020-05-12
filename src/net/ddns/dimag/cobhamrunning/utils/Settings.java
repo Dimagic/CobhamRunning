@@ -30,6 +30,7 @@ public class Settings extends SettingsViewController implements MsgBox {
 	private String name_rmv;
 	private String user_rmv;
 	private String pass_rmv;
+	private String update_path;
 	
 	public Settings(){	
 	}
@@ -208,6 +209,14 @@ public class Settings extends SettingsViewController implements MsgBox {
 		this.pass_rmv = pass_rmv;
 	}
 
+	public String getUpdate_path() {
+		return update_path;
+	}
+
+	public void setUpdate_path(String update_path) {
+		this.update_path = update_path;
+	}
+
 	@Override
 	public String toString() {
 		final StringBuilder sb = new StringBuilder("Settings{");
@@ -231,6 +240,7 @@ public class Settings extends SettingsViewController implements MsgBox {
 		sb.append(", name_rmv='").append(name_rmv).append('\'');
 		sb.append(", user_rmv='").append(user_rmv).append('\'');
 		sb.append(", pass_rmv='").append(pass_rmv).append('\'');
+		sb.append(", update_path='").append(update_path).append('\'');
 		sb.append('}');
 		return sb.toString();
 	}

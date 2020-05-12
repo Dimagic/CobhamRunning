@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.CheckMenuItem?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
@@ -17,8 +18,14 @@
               <MenuItem mnemonicParsing="false" onAction="#menuAddModel" text="Add model" />
                   <MenuItem mnemonicParsing="false" onAction="#menuAddStatus" text="Add status" />
                   <MenuItem mnemonicParsing="false" onAction="#menuAddLocation" text="Add location" />
+                  <MenuItem mnemonicParsing="false" onAction="#menuAddService" text="Add service" />
             </items>
           </Menu>
+            <Menu mnemonicParsing="false" text="Settings">
+              <items>
+                  <CheckMenuItem fx:id="confirmMove" mnemonicParsing="false" text="Confirm move" />
+              </items>
+            </Menu>
         </menus>
       </MenuBar>
    </top>

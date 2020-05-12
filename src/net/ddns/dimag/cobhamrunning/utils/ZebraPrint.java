@@ -1,52 +1,15 @@
 package net.ddns.dimag.cobhamrunning.utils;
 
-import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Set;
-
-import javax.imageio.ImageIO;
-import javax.print.Doc;
-import javax.print.DocFlavor;
-import javax.print.DocPrintJob;
-import javax.print.MultiDoc;
-import javax.print.MultiDocPrintJob;
-import javax.print.PrintException;
-import javax.print.PrintService;
-import javax.print.PrintServiceLookup;
-import javax.print.SimpleDoc;
-import javax.print.event.PrintJobAdapter;
-import javax.print.event.PrintJobEvent;
-
-import org.krysalis.barcode4j.impl.code39.Code39Bean;
-import org.krysalis.barcode4j.output.bitmap.BitmapCanvasProvider;
-import org.krysalis.barcode4j.tools.UnitConv;
-
-import fr.w3blog.zpl.constant.ZebraFont;
-import fr.w3blog.zpl.model.ZebraLabel;
-import fr.w3blog.zpl.model.ZebraPrintException;
-import fr.w3blog.zpl.model.element.ZebraBarCode39;
-import fr.w3blog.zpl.model.element.ZebraText;
-import fr.w3blog.zpl.utils.ZebraUtils;
-import fr.w3blog.zpl.utils.ZplUtils;
-import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.Asis;
 import net.ddns.dimag.cobhamrunning.models.AsisPrintJob;
 import net.ddns.dimag.cobhamrunning.models.LabelTemplate;
+
+import javax.print.*;
+import javax.print.event.PrintJobAdapter;
+import javax.print.event.PrintJobEvent;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 public class ZebraPrint {
 	private PrintService printService;
@@ -162,42 +125,6 @@ public class ZebraPrint {
 			}
 		}
 		return null;
-	}
-
-	public void stringToBarcode() {
-		try {
-			// Create the barcode bean
-			Code39Bean bean = new Code39Bean();
-
-			final int dpi = 150;
-
-			// Configure the barcode generator
-			bean.setModuleWidth(UnitConv.in2mm(1.0f / dpi)); // makes the narrow
-																// bar
-																// width exactly
-																// one pixel
-			bean.setWideFactor(3);
-			bean.doQuietZone(false);
-
-			// Open output file
-			File outputFile = new File("out.jpg");
-			OutputStream out = new FileOutputStream(outputFile);
-			try {
-				// Set up the canvas provider for monochrome JPEG output
-				BitmapCanvasProvider canvas = new BitmapCanvasProvider(out, "image/jpeg", dpi,
-						BufferedImage.TYPE_BYTE_BINARY, false, 0);
-
-				// Generate the barcode
-				bean.generateBarcode(canvas, "RRU00431/PHTZ");
-
-				// Signal end of generation
-				canvas.finish();
-			} finally {
-				out.close();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
 	}
 
 	private static class JobCompleteMonitor extends PrintJobAdapter {

@@ -1,18 +1,15 @@
 package net.ddns.dimag.cobhamrunning.services;
 
-import java.util.Date;
-import java.util.List;
-
 import net.ddns.dimag.cobhamrunning.dao.DeviceDao;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
-import org.apache.log4j.LogManager;
-import org.apache.log4j.Logger;
 
 import javax.persistence.NoResultException;
+import java.util.Date;
+import java.util.List;
 
 public class DeviceService {
-    private final Logger LOGGER = LogManager.getLogger(this.getClass().getName());
+//    private final Logger LOGGER = LogManager.getLogger(this.getClass().getName());
 	private DeviceDao deviceDao = new DeviceDao();
 	
 	public DeviceService() {	

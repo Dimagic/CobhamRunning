@@ -65,6 +65,16 @@ public class ShippingJournalDao implements UniversalDao {
         return journal;
     }
 
+    public ShippingSystem getShippingSystemByDevice(Device device) throws CobhamRunningException {
+        Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
+        ShippingSystem shippingSystem = (ShippingSystem) session.createSQLQuery(
+                "SELECT * FROM public.shippingjournal WHERE device_id = :device")
+                .addEntity(ShippingSystem.class)
+                .setParameter("device", device.getId()).getSingleResult();
+        session.close();
+        return shippingSystem;
+    }
+
     public List<ShippingSystem> findAll() throws CobhamRunningException {
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
         List<ShippingSystem> journal = (List<ShippingSystem>) session.createQuery("From shippingjournal").list();

@@ -26,3 +26,14 @@ settings.xml
 /!old/
 /target/
 /Reports/
+/log/JVisaLog.txt
+/src/META-INF/MANIFEST.MF
+/src/test/TestTest.java
+/src/resources/images/cobham_C_64x64.ico
+/src/resources/images/cobham_logo.png
+/src/resources/images/print_asis.png
+/src/resources/images/process_64x64.gif
+/src/resources/images/process_256x256.gif
+/src/resources/JVisaOneJar.jar
+/src/resources/nivisa64.dll
+/src/net/ddns/dimag/cobhamrunning/view/TreeTableViewDragAndDropDemo.java

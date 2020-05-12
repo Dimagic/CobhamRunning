@@ -36,12 +36,11 @@ public class RootLayoutController {
     @FXML
     private void handleUpdate() {
         try{
-            Updater updater = new Updater();
+            Updater updater = new Updater(mainApp, mainApp.getController());
             updater.isNeedUpdate();
         } catch (CobhamRunningException e) {
             MsgBox.msgException(e);
         }
-
     }
 
     @FXML

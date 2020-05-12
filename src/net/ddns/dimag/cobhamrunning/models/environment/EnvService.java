@@ -1,22 +1,19 @@
 package net.ddns.dimag.cobhamrunning.models.environment;
 
 import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import net.ddns.dimag.cobhamrunning.models.Device;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
 @Entity
-@Table(name = "envmanuf", uniqueConstraints = { @UniqueConstraint(columnNames = "name")})
-public class EnvManuf {
-    private static final Logger LOGGER = LogManager.getLogger(Device.class.getName());
+@Table(name = "envservice", uniqueConstraints = { @UniqueConstraint(columnNames = "name")})
+public class EnvService {
 
-    public EnvManuf() {
+    public EnvService() {
     }
 
-    public EnvManuf(String name) {
+    public EnvService(String name) {
         this.name = name;
     }
 
@@ -44,7 +41,7 @@ public class EnvManuf {
         this.name = name;
     }
 
-    public SimpleStringProperty nameProperty() {
+    public SimpleStringProperty nameProperty(){
         return new SimpleStringProperty(getName());
     }
 }

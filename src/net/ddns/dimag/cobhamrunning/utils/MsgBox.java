@@ -103,6 +103,17 @@ public interface MsgBox {
 		return resultProperty.getValue();
 	}
 
+	static boolean msgConfirm2(String title, String content) {
+		Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+		alert.setTitle(title);
+		Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+		stage.getIcons().add(favicon);
+		alert.setHeaderText(null);
+		alert.setContentText(content);
+		Optional<ButtonType> result = alert.showAndWait();
+		return result.filter(buttonType -> (buttonType == ButtonType.OK)).isPresent();
+	}
+
 	static boolean msgCloseWindow(Stage stage, String title, String content){
 		Alert alert = new Alert(Alert.AlertType.INFORMATION);
 		alert.getButtonTypes().remove(ButtonType.OK);

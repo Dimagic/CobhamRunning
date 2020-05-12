@@ -46,6 +46,10 @@ private ShippingJournalDao shippingJournalDao = new ShippingJournalDao();
 	    return shippingJournalDao.isDeviceInJournal(device);
     }
 
+    public ShippingSystem getShippingSystemByDevice(Device device) throws CobhamRunningException {
+	    return shippingJournalDao.getShippingSystemByDevice(device);
+    }
+
     public List<ShippingSystem> findAllDevice() throws CobhamRunningException {
         return shippingJournalDao.findAll();
     }

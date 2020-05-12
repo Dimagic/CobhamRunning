@@ -1,5 +1,6 @@
 package net.ddns.dimag.cobhamrunning.models;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashSet;
@@ -24,6 +25,8 @@ import javafx.beans.property.SimpleStringProperty;
 @Entity
 @Table(name = "asisPrintJob")
 public class AsisPrintJob {
+	private final DateFormat formatter = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -141,12 +144,12 @@ public class AsisPrintJob {
 	}
 	
 	public SimpleStringProperty dateCreateProperty() {
-		return new SimpleStringProperty(new SimpleDateFormat("yyyy-MM-DD HH:mm:ss").format(getDateCreate()));
+		return new SimpleStringProperty(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(getDateCreate()));
 	}
 	
 	public SimpleStringProperty datePrintProperty() {
 		try {
-			return new SimpleStringProperty(new SimpleDateFormat("yyyy-MM-DD HH:mm:ss").format(getDatePrint()));
+			return new SimpleStringProperty(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(getDatePrint()));
 		} catch (NullPointerException e) {}
 		return new SimpleStringProperty("");	
 	}

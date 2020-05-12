@@ -24,18 +24,20 @@ public class EnvDevice {
         this.envLocation = location;
     }
 
-    public EnvDevice(String sn, EnvModel envModel, EnvLocation envLocation, EnvStatus envStatus) {
+    public EnvDevice(String sn, EnvModel envModel, EnvLocation envLocation, EnvStatus envStatus, EnvService envService) {
         this.sn = sn;
         this.envModel = envModel;
         this.envLocation = envLocation;
         this.envStatus = envStatus;
+        this.envService = envService;
     }
 
-    public EnvDevice(String sn, EnvModel envModel, EnvLocation envLocation, EnvStatus envStatus, Date calibrDate) {
+    public EnvDevice(String sn, EnvModel envModel, EnvLocation envLocation, EnvStatus envStatus, EnvService envService, Date calibrDate) {
         this.sn = sn;
         this.envModel = envModel;
         this.envLocation = envLocation;
         this.envStatus = envStatus;
+        this.envService = envService;
         this.envCalibrDate = calibrDate;
     }
 
@@ -102,6 +104,19 @@ public class EnvDevice {
         this.envStatus = envStatus;
     }
 
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "envservice_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    private EnvService envService;
+
+    public EnvService getEnvService() {
+        return envService;
+    }
+
+    public void setEnvService(EnvService envService) {
+        this.envService = envService;
+    }
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "calibrdate")
     private Date envCalibrDate;
@@ -129,6 +144,8 @@ public class EnvDevice {
     public String getTypeDev(){
         return getEnvModel().getEnvType().getName();
     }
+
+    public String getService() {return  getEnvService().getName();}
 
     public String getCalibrDate(){
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");

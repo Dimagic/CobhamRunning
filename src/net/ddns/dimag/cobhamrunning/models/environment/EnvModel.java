@@ -75,4 +75,12 @@ public class EnvModel {
     public SimpleStringProperty nameProperty(){
         return new SimpleStringProperty(getName());
     }
+
+    public SimpleStringProperty typeProperty(){
+        return getEnvType().nameProperty();
+    }
+
+    public SimpleStringProperty manufProperty(){
+        return getEnvManuf().nameProperty();
+    }
 }

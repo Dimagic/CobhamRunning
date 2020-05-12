@@ -145,6 +145,7 @@ public class ShippingViewController implements MsgBox {
             Thread thread = new ShippingJournalData(this, device);
             thread.start();
         } catch (NullPointerException e) {
+            LOGGER.error(e.getMessage());
             return;
         } catch (Exception e) {
             LOGGER.error(e.getMessage());

@@ -9,6 +9,7 @@ import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
 import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.DataFormat;
 import javafx.scene.input.Dragboard;
@@ -16,14 +17,8 @@ import javafx.scene.input.TransferMode;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import net.ddns.dimag.cobhamrunning.MainApp;
-import net.ddns.dimag.cobhamrunning.models.environment.EnvDevice;
-import net.ddns.dimag.cobhamrunning.models.environment.EnvHistory;
-import net.ddns.dimag.cobhamrunning.models.environment.EnvLocation;
-import net.ddns.dimag.cobhamrunning.models.environment.EnvStatus;
-import net.ddns.dimag.cobhamrunning.services.environment.EnvDeviceService;
-import net.ddns.dimag.cobhamrunning.services.environment.EnvHistoryService;
-import net.ddns.dimag.cobhamrunning.services.environment.EnvLocationService;
-import net.ddns.dimag.cobhamrunning.services.environment.EnvStatusService;
+import net.ddns.dimag.cobhamrunning.models.environment.*;
+import net.ddns.dimag.cobhamrunning.services.environment.*;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import org.apache.logging.log4j.LogManager;
@@ -32,6 +27,7 @@ import org.apache.logging.log4j.Logger;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Optional;
 
 public class EnvJournalController {
     private static final Logger LOGGER = LogManager.getLogger(EnvJournalController.class.getName());
@@ -39,6 +35,7 @@ public class EnvJournalController {
     private final EnvLocationService envLocationService = new EnvLocationService();
     private final EnvStatusService envStatusService = new EnvStatusService();
     private final EnvHistoryService envHistoryService = new EnvHistoryService();
+    private final EnvServiceService envServiceService = new EnvServiceService();
 
     private Stage dialogStage;
     private MainApp mainApp;
@@ -52,12 +49,16 @@ public class EnvJournalController {
 
     @FXML
     private TreeTableView<EnvDevice> tEnv;
+    @FXML
+    private CheckMenuItem confirmMove;
 
     @FXML
     private void initialize() throws CobhamRunningException {
+        confirmMove.setSelected(true);
         tEnv.setShowRoot(false);
         tEnv.setRowFactory(this::rowFactory);
         addColumn("Location", "getLocation");
+        addColumn("Service", "getService");
         addColumn("Manufacturer", "getManuf");
         addColumn("Model", "getModel");
         addColumn("Serial", "getSn");
@@ -187,6 +188,17 @@ public class EnvJournalController {
         }
     }
 
+    @FXML
+    private void menuAddService() throws CobhamRunningException {
+        String serviceName = MsgBox.msgInputString("Add new service");
+        if (serviceName != null) {
+            if (!serviceName.isEmpty()) {
+                EnvService envService  = new EnvService(serviceName);
+                envServiceService.saveEnvService(envService);
+            }
+        }
+    }
+
     private TreeTableRow<EnvDevice> rowFactory(TreeTableView<EnvDevice> view) {
         TreeTableRow<EnvDevice> row = new TreeTableRow<>();
         row.setOnDragDetected(event -> {
@@ -211,13 +223,28 @@ public class EnvJournalController {
         row.setOnDragDropped(event -> {
             Dragboard db = event.getDragboard();
             if (acceptable(db, row)) {
+                Image favicon = new Image("file:src/resources/images/cobham_C_64x64.png");
+
                 int index = (Integer) db.getContent(SERIALIZED_MIME_TYPE);
                 TreeItem item = tEnv.getTreeItem(index);
-                item.getParent().getChildren().remove(item);
-                getTarget(row).getChildren().add(item);
                 try {
                     EnvDevice envTarget = (EnvDevice) getTarget(row).getValue();
                     EnvDevice envSource = (EnvDevice) item.getValue();
+                    if (confirmMove.isSelected()){
+                        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+                        alert.setTitle("Change location");
+                        Stage stage = (Stage) alert.getDialogPane().getScene().getWindow();
+                        stage.getIcons().add(favicon);
+                        alert.setHeaderText(null);
+                        alert.setContentText(String.format("Move device to %s?", envTarget.getLocation()));
+                        Optional<ButtonType> result = alert.showAndWait();
+                        if (result.get() != ButtonType.OK){
+                            return;
+                        };
+                    }
+
+                    item.getParent().getChildren().remove(item);
+                    getTarget(row).getChildren().add(item);
                     EnvLocation envLocation = envLocationService.findEnvLocationByName(envTarget.getLocation());
                     EnvHistory envHistory = new EnvHistory(envSource, "Location", envLocation.getLocation());
                     envHistoryService.saveEnvHistory(envHistory);

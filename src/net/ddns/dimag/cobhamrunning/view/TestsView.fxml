@@ -1,39 +1,41 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextArea?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane minHeight="400.0" minWidth="600.0" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.231" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.ddns.dimag.cobhamrunning.view.TestsViewController">
+<AnchorPane minHeight="-Infinity" minWidth="-Infinity" prefHeight="565.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.231" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.ddns.dimag.cobhamrunning.view.TestsViewController">
    <children>
       <HBox layoutX="250.0" layoutY="361.0" AnchorPane.bottomAnchor="14.0" AnchorPane.rightAnchor="14.0" />
-      <Button fx:id="runninTestBtn" layoutX="336.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleRunningTest" prefHeight="75.0" prefWidth="250.0" text="Running test" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="30.0">
+      <Button fx:id="runninTestBtn" layoutX="540.0" layoutY="100.0" mnemonicParsing="false" onAction="#handleRunningTest" prefHeight="75.0" prefWidth="250.0" text="Running test" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="100.0">
          <font>
             <Font name="System Bold" size="18.0" />
          </font></Button>
-      <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleShipping" prefHeight="75.0" prefWidth="250.0" text="Shipping journal" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="30.0">
+      <Button layoutX="275.0" layoutY="26.0" mnemonicParsing="false" onAction="#handleShipping" prefHeight="75.0" prefWidth="250.0" text="Shipping journal" AnchorPane.topAnchor="10.0">
          <font>
             <Font name="System Bold" size="18.0" />
          </font></Button>
-      <Button layoutX="14.0" layoutY="101.0" mnemonicParsing="false" onAction="#handleAsisCreator" prefHeight="75.0" prefWidth="250.0" text="Print ASIS" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="135.0">
+      <Button layoutX="14.0" layoutY="98.0" mnemonicParsing="false" onAction="#handleAsisCreator" prefHeight="75.0" prefWidth="250.0" text="Print ASIS" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="100.0">
          <font>
             <Font name="System Bold" size="18.0" />
          </font></Button>
-      <Button layoutX="320.0" layoutY="125.0" mnemonicParsing="false" onAction="#handlePrintCustomLabel" prefHeight="75.0" prefWidth="250.0" text="Print custom label" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="135.0">
+      <Button layoutX="275.0" layoutY="100.0" mnemonicParsing="false" onAction="#handlePrintCustomLabel" prefHeight="75.0" prefWidth="250.0" text="Print custom label" AnchorPane.topAnchor="100.0">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
       </Button>
-      <Button layoutX="24.0" layoutY="230.0" mnemonicParsing="false" onAction="#handleDevicesJournal" prefHeight="75.0" prefWidth="250.0" text="Devices journal" AnchorPane.leftAnchor="30.0" AnchorPane.topAnchor="240.0">
+      <Button layoutX="14.0" layoutY="14.0" mnemonicParsing="false" onAction="#handleDevicesJournal" prefHeight="75.0" prefWidth="250.0" text="Devices journal" AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="10.0">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
       </Button>
-      <Button layoutX="320.0" layoutY="240.0" mnemonicParsing="false" onAction="#handleEnvJournal" prefHeight="75.0" prefWidth="250.0" text="Environment journal" AnchorPane.rightAnchor="30.0" AnchorPane.topAnchor="240.0">
+      <Button layoutX="540.0" layoutY="10.0" mnemonicParsing="false" onAction="#handleEnvJournal" prefHeight="75.0" prefWidth="250.0" text="Environment journal" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="10.0">
          <font>
             <Font name="System Bold" size="18.0" />
          </font>
       </Button>
+      <TextArea fx:id="console" layoutX="30.0" layoutY="332.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" />
    </children>
 </AnchorPane>

@@ -35,12 +35,14 @@ public ShippingJournalData(ShippingViewController controller, Device device) {
             TestsService testsService = new TestsService();
             Asis asis = device.getAsis();
             boolean isShippingSistemPresent = shippingJournalService.isDeviceInJournal(device);
+            boolean isUpdateSystem = false;
             if (isShippingSistemPresent) {
                 if (!MsgBox.msgConfirm("Warning", String.format("System with ASIS: %s article: %s\n" +
                                 "and SN:%s already shipped.\nDo you want update test results?",
                         asis.getAsis(), asis.getArticleHeaders().getArticle(), device.getSn()))){
                     return;
                 }
+                isUpdateSystem = true;
             }
             isSystemInRmv(asis);
             HashMap<String, String> testMap = rmvUtils.getTestsMapWithDate(asis.getAsis());
@@ -81,12 +83,21 @@ public ShippingJournalData(ShippingViewController controller, Device device) {
                 }
                 testMeasMap.put(tests, setMeas);
             }
+            ShippingSystem shippingSystem;
+
             DeviceInfo deviceInfo = getDeviseInfo(device);
             DeviceInfoService deviceInfoService = new DeviceInfoService();
             deviceInfoService.saveOrUpdateDeviceInfo(deviceInfo);
             device.setDeviceInfo(deviceInfo);
             deviceService.updateDevice(device);
             MeasurementsService measurementsService = new MeasurementsService();
+            if (isUpdateSystem){
+                shippingSystem = shippingJournalService.getShippingSystemByDevice(device);
+                testsService.deleteTestsByDevice(device);
+            } else {
+                shippingSystem = new ShippingSystem();
+            }
+
             for (Tests tests: testMeasMap.keySet()){
                 testsService.saveTest(tests);
                 measurementsService.saveSet(testMeasMap.get(tests));
@@ -96,14 +107,14 @@ public ShippingJournalData(ShippingViewController controller, Device device) {
             device.setTests(setTests);
 
 //            ToDo: update tests in found system
-            ShippingSystem shippingSystem = new ShippingSystem();
+
             shippingSystem.setDevice(device);
             shippingSystem.setDateShip(new Date());
             shippingJournalService.saveOrUpdateShippingJournal(shippingSystem);
 
-
-
-            controller.setShippingSystems(shippingSystem);
+            if (!isUpdateSystem){
+                controller.setShippingSystems(shippingSystem);
+            }
             writeConsole("Done");
             MsgBox.msgInfo("Add new shipping system", "Done");
         } catch (SQLException | ClassNotFoundException e) {

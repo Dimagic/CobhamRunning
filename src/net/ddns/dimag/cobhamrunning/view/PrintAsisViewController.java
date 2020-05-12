@@ -28,7 +28,6 @@ import net.ddns.dimag.cobhamrunning.utils.ZebraPrint;
 public class PrintAsisViewController implements MsgBox {
     private Stage dialogStage;
     private MainApp mainApp;
-    private DateFormat formatter = new SimpleDateFormat("yyyy-MM-DD hh:mm:ss");
     private ObservableList<AsisPrintJob> tableJob = FXCollections.observableArrayList();
     private AsisPrintJob selectedJob;
     private AsisPrintJobService asisPrintJobService;

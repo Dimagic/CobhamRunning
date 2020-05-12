@@ -5,6 +5,7 @@ import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.List;
 
@@ -13,6 +14,7 @@ import javax.print.PrintServiceLookup;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 
+import javafx.stage.DirectoryChooser;
 import net.ddns.dimag.cobhamrunning.utils.*;
 import org.apache.commons.codec.digest.DigestUtils;
 
@@ -78,6 +80,8 @@ public class SettingsViewController implements MsgBox {
 	private TextField name_rmv;
 	@FXML
 	private TextField user_rmv;
+	@FXML
+	private TextField update_path;
 	
 	@FXML
 	private PasswordField pass_db;
@@ -183,11 +187,20 @@ public class SettingsViewController implements MsgBox {
     		name_rmv.setText(currSet.getName_rmv());
     		user_rmv.setText(currSet.getUser_rmv());
     		pass_rmv.setText(currSet.getPass_rmv());
+    		update_path.setText(currSet.getUpdate_path());
     	} catch (NullPointerException e) {
 			return;
 		}
-    	
     }
+
+    @FXML
+	private void selectDir(){
+		DirectoryChooser dir_chooser = new DirectoryChooser();
+		File file = dir_chooser.showDialog(dialogStage);
+		if (file != null) {
+			update_path.setText(file.getAbsolutePath());
+		}
+	}
 	
 	public boolean isSaveClicked() {
 		return saveClicked;
@@ -237,24 +250,18 @@ public class SettingsViewController implements MsgBox {
 		for(Field field: fields) {
 			try {
 				if (field.getType() == javafx.scene.control.TextField.class) {
-					System.out.println(field.getName() + " >>> " + field.toString());
 					TextField textField = (TextField) field.get(this);
 					sett.put(field.getName(), textField.getText());
-//					Settings set = new Settings(field.getName(), textField.getText());
-//			    	settingsService.updateSetting(set);
 				}
 				else if (field.getType() == javafx.scene.control.PasswordField.class) {
 					System.out.println(field.getName() + " >>> " + field.toString());
 					PasswordField passwordField = (PasswordField) field.get(this);
-					System.out.println(md5Apache(passwordField.getText()));
 					sett.put(field.getName(), passwordField.getText());
 				}
 				else if (field.getType() == javafx.scene.control.ComboBox.class) {
 					System.out.println(field.getName() + " >>> " + field.toString());
 					ComboBox<String> comboField = (ComboBox<String>) field.get(this);
 					sett.put(field.getName(), comboField.getValue());
-//					Settings set = new Settings(field.getName(), comboField.getValue());
-//			    	settingsService.updateSetting(set);
 				}
 
 				/**
@@ -289,9 +296,8 @@ public class SettingsViewController implements MsgBox {
 	    	MsgBox.msgException(e);
 	        return false;
 	    }
-	    
 	}
-	
+
 	private String md5Apache(String st) {
 	    String md5Hex = DigestUtils.md5Hex(st);
 	    return md5Hex;

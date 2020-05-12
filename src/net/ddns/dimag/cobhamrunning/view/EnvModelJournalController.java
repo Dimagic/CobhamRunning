@@ -32,6 +32,8 @@ public class EnvModelJournalController {
     @FXML
     private TableView<EnvModel> tEnvMod;
     @FXML
+    private TableColumn<EnvModel, String> manufColumn;
+    @FXML
     private TableColumn<EnvModel, String> typeColumn;
     @FXML
     private TableColumn<EnvModel, String> modelColumn;
@@ -54,10 +56,12 @@ public class EnvModelJournalController {
         typeCombo.setDisable(true);
         addTypeBtn.setDisable(true);
 
-        typeColumn.prefWidthProperty().bind(tEnvMod.widthProperty().divide(2));
-        modelColumn.prefWidthProperty().bind(tEnvMod.widthProperty().divide(2));
+        manufColumn.prefWidthProperty().bind(tEnvMod.widthProperty().divide(3));
+        typeColumn.prefWidthProperty().bind(tEnvMod.widthProperty().divide(3));
+        modelColumn.prefWidthProperty().bind(tEnvMod.widthProperty().divide(3));
 
-        typeColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
+        manufColumn.setCellValueFactory(cellData -> cellData.getValue().manufProperty());
+        typeColumn.setCellValueFactory(cellData -> cellData.getValue().typeProperty());
         modelColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
 
         manufCombo.valueProperty().addListener((ChangeListener<String>) (observable, oldValue, newValue) -> {

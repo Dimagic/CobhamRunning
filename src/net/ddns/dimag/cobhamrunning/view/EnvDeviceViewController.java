@@ -29,11 +29,13 @@ public class EnvDeviceViewController {
     private final EnvStatusService envStatusService = new EnvStatusService();
     private final EnvLocationService envLocationService = new EnvLocationService();
     private final EnvHistoryService envHistoryService = new EnvHistoryService();
+    private final EnvServiceService envServiceService = new EnvServiceService();
     private Stage dialogStage;
     private MainApp mainApp;
     private EnvDevice envDevice;
     private boolean saveClicked = false;
     private boolean locationChanged = false;
+    private boolean serviceChanged = false;
     private boolean statusChanged = false;
     private boolean dateChanged = false;
 
@@ -47,6 +49,8 @@ public class EnvDeviceViewController {
     private ComboBox<String> statusBox;
     @FXML
     private ComboBox<String> locationBox;
+    @FXML
+    private ComboBox<String> serviceBox;
     @FXML
     private TextField serialField;
     @FXML
@@ -68,13 +72,14 @@ public class EnvDeviceViewController {
         modelBox.setItems(getModelList());
         statusBox.setItems(getStatusList());
         locationBox.setItems(getLocationList());
+        serviceBox.setItems(getServiceList());
         setSaveEnable();
 
         modelBox.valueProperty().addListener((observable, oldValue, newValue) -> {
             setSaveEnable();
             try {
                 EnvModel envModel = envModelService.findEnvModelByName(newValue);
-                manufLbl.setText(envModel.getName());
+                manufLbl.setText(envModel.getEnvManuf().getName());
                 typeLbl.setText(envModel.getEnvType().getName());
             } catch (CobhamRunningException e) {
                 LOGGER.error(e);
@@ -86,6 +91,9 @@ public class EnvDeviceViewController {
                 setSaveEnable());
 
         locationBox.valueProperty().addListener((observable, oldValue, newValue) ->
+                setSaveEnable());
+
+        serviceBox.valueProperty().addListener((observable, oldValue, newValue) ->
                 setSaveEnable());
 
         serialField.textProperty().addListener((observable, oldValue, newValue) ->
@@ -102,7 +110,8 @@ public class EnvDeviceViewController {
         boolean status = statusBox.getSelectionModel().isEmpty();
         boolean location = locationBox.getSelectionModel().isEmpty();
         boolean serial = serialField.getText().isEmpty();
-        saveBtn.setDisable(!allTrue(new boolean[]{!model, !status, !location, !serial}));
+        boolean service = serviceBox.getSelectionModel().isEmpty();
+        saveBtn.setDisable(!allTrue(new boolean[]{!model, !status, !location, !serial, !service}));
     }
 
     private  boolean allTrue (boolean[] values) {
@@ -138,6 +147,14 @@ public class EnvDeviceViewController {
         return locationList;
     }
 
+    private ObservableList<String> getServiceList() throws CobhamRunningException {
+        ObservableList<String> serviceList = FXCollections.observableArrayList();
+        for (EnvService envService: envServiceService.findAllEnvService()){
+            serviceList.add(envService.getName());
+        }
+        return serviceList;
+    }
+
     @FXML
     private void handleSaveBtn() {
         try {
@@ -151,13 +168,15 @@ public class EnvDeviceViewController {
                 EnvModel envModel = envModelService.findEnvModelByName(modelBox.valueProperty().getValue());
                 EnvStatus envStatus = envStatusService.findEnvStatusByName(statusBox.valueProperty().getValue());
                 EnvLocation envLocation = envLocationService.findEnvLocationByName(locationBox.valueProperty().getValue());
+                EnvService envService = envServiceService.findEnvServiceByName(serviceBox.valueProperty().getValue());
                 EnvDevice envDevice = new EnvDevice(serialField.getText(),
-                        envModel, envLocation, envStatus, tmpDate);
+                        envModel, envLocation, envStatus, envService, tmpDate);
                 envDeviceService.saveEnvDevice(envDevice);
             } else {
                 this.envDevice.setEnvModel(envModelService.findEnvModelByName(modelBox.valueProperty().getValue()));
                 this.envDevice.setEnvStatus(envStatusService.findEnvStatusByName(statusBox.valueProperty().getValue()));
                 this.envDevice.setEnvLocation(envLocationService.findEnvLocationByName(locationBox.valueProperty().getValue()));
+                this.envDevice.setEnvService(envServiceService.findEnvServiceByName(serviceBox.valueProperty().getValue()));
                 this.envDevice.setEnvCalibrDate(tmpDate);
                 envDeviceService.updateEnvDevice(this.envDevice);
 
@@ -167,6 +186,10 @@ public class EnvDeviceViewController {
                 }
                 if (statusChanged){
                     EnvHistory envHistory = new EnvHistory(this.envDevice, "Status", this.envDevice.getStatus());
+                    envHistoryService.saveEnvHistory(envHistory);
+                }
+                if (serviceChanged){
+                    EnvHistory envHistory = new EnvHistory(this.envDevice, "Service", this.envDevice.getService());
                     envHistoryService.saveEnvHistory(envHistory);
                 }
             }
@@ -236,6 +259,7 @@ public class EnvDeviceViewController {
             locationBox.getSelectionModel().select(envDevice.getLocation());
             try {
                 calibrDate.setValue(dateToLocalDate(envDevice.getEnvCalibrDate()));
+                serviceBox.getSelectionModel().select(envDevice.getService());
             } catch (NullPointerException e){ }
             modelBox.setDisable(true);
             serialField.setDisable(true);
@@ -271,6 +295,11 @@ public class EnvDeviceViewController {
     @FXML
     private void statusChanged(){
         this.statusChanged = true;
+    }
+
+    @FXML
+    private void serviceChanged(){
+        this.serviceChanged = true;
     }
 
     @FXML

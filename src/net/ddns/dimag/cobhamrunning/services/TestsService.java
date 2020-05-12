@@ -34,6 +34,10 @@ public class TestsService {
     	testsDao.update(tests);
     }
 
+    public void deleteTestsByDevice(Device device) throws CobhamRunningException {
+	    testsDao.deleteTestsByDevice(device);
+    }
+
     public List<Tests> findAllTests() throws CobhamRunningException {
         return testsDao.findAll();
     }
