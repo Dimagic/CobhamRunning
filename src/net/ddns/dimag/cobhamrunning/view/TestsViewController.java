@@ -1,14 +1,14 @@
 package net.ddns.dimag.cobhamrunning.view;
 
+import javafx.application.Platform;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextArea;
 import net.ddns.dimag.cobhamrunning.MainApp;
-import net.ddns.dimag.cobhamrunning.utils.JComClient;
-import net.ddns.dimag.cobhamrunning.utils.JTelnetClient;
-import net.ddns.dimag.cobhamrunning.utils.MsgBox;
-import net.ddns.dimag.cobhamrunning.utils.ZebraPrint;
+import net.ddns.dimag.cobhamrunning.utils.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -159,6 +159,7 @@ public class TestsViewController implements MsgBox {
 		JComClient comClient = new JComClient();
 		comClient.setMainApp(mainApp);
 		String[] portList = comClient.getComPortList();
+
 		for (int i = 0; i < portList.length; i++){
 		    System.out.println(portList[i]);
 
@@ -196,6 +197,5 @@ public class TestsViewController implements MsgBox {
 	
 	public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
-        
     }
 }

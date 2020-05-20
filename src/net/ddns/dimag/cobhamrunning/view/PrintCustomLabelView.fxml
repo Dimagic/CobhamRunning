@@ -17,7 +17,7 @@
          </font>
       </Label>
       <ChoiceBox fx:id="templatesBox" layoutX="71.0" layoutY="10.0" prefHeight="25.0" prefWidth="200.0" AnchorPane.leftAnchor="75.0" AnchorPane.topAnchor="10.0" />
-      <TableView fx:id="tPrintJob" layoutX="15.0" layoutY="49.0" prefHeight="200.0" prefWidth="263.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="75.0">
+      <TableView fx:id="tPrintJob" layoutX="15.0" layoutY="49.0" prefHeight="200.0" prefWidth="263.0" AnchorPane.bottomAnchor="40.0" AnchorPane.leftAnchor="10.0" AnchorPane.rightAnchor="10.0" AnchorPane.topAnchor="100.0">
         <columns>
           <TableColumn fx:id="fieldColumn" prefWidth="75.0" text="Field" />
           <TableColumn fx:id="dataColumn" prefWidth="75.0" text="Data" />
@@ -25,5 +25,6 @@
       </TableView>
       <Button fx:id="printBtn" layoutX="223.0" layoutY="258.0" mnemonicParsing="false" onAction="#printLabel" prefWidth="100.0" text="Print" AnchorPane.bottomAnchor="10.0" AnchorPane.rightAnchor="10.0" />
       <CheckBox fx:id="useRmvData" layoutX="75.0" layoutY="47.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="146.0" text="use RMV tests data" AnchorPane.leftAnchor="75.0" AnchorPane.rightAnchor="79.0" AnchorPane.topAnchor="45.0" />
+      <CheckBox fx:id="svwViaIp" layoutX="75.0" layoutY="68.0" mnemonicParsing="false" prefHeight="17.0" prefWidth="146.0" text="SWV via IP address" AnchorPane.topAnchor="70.0" />
    </children>
 </AnchorPane>

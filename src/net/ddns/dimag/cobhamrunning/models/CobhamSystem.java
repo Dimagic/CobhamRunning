@@ -141,7 +141,7 @@ public class CobhamSystem extends Task<Void> implements SystemCommands {
 		try {
 			this.updateMessage("Starting...");
 			jssh = new JSSHClient(this.ip.getValue(), mainApp.getCurrentSettings().getLogin_ssh(),
-					mainApp.getCurrentSettings().getPass_ssh());		
+					mainApp.getCurrentSettings().getPass_ssh(), mainApp);
 				
 			testRunning();
 		} catch (ConnectException e) {

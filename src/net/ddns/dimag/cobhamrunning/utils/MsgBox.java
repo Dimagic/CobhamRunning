@@ -22,17 +22,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public interface MsgBox {
+import static net.ddns.dimag.cobhamrunning.utils.SystemCommands.*;
+
+public interface MsgBox  {
 	Logger LOGGER = LogManager.getLogger(MsgBox.class.getName());
 
 	Image favicon = new Image("file:src/resources/images/cobham_C_64x64.png");
 
-	String IPADDRESS_PATTERN_INNER = "(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.){3}(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d))";
-	String IPADDRESS_PATTERN = String.format("^%s$", IPADDRESS_PATTERN_INNER);
-	String NETWORK_PATTERN = "(?:(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]?\\d)\\.){3}";
 
-	String MACADDRESS_PATTERN = "^([0-9a-fA-F]{2}[:.-]?){5}[0-9a-fA-F]{2}$";
-	String MACADDRESS_PATTERN_INNER = "([0-9a-fA-F]{2}[:.-]?){5}[0-9a-fA-F]{2}";
 
 	Pattern patternArt = Pattern.compile("([a-zA-Z0-9]+)", Pattern.CASE_INSENSITIVE);
 	Pattern patternMac = Pattern.compile(MACADDRESS_PATTERN, Pattern.CASE_INSENSITIVE);
@@ -378,6 +375,21 @@ public interface MsgBox {
 			return null;
 		}
 		return sn;
+	}
+
+	static String msgInputIP() {
+		String ip = msgInputString("Enter IP address");
+		try {
+			ip = ip.toUpperCase();
+			Matcher matcherIp = patternIp.matcher(ip);
+			if (!matcherIp.find()) {
+				msgError("Input error", "Incorrect IP address");
+				return msgInputIP();
+			}
+		} catch (NullPointerException e){
+			return null;
+		}
+		return ip;
 	}
 
 	static List<String> msgScanSystemBarcode() {

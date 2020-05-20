@@ -7,6 +7,7 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -15,10 +16,8 @@ import javafx.scene.control.cell.TextFieldTableCell;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.LabelTemplate;
 import net.ddns.dimag.cobhamrunning.services.LabelTemplateService;
-import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
-import net.ddns.dimag.cobhamrunning.utils.MsgBox;
-import net.ddns.dimag.cobhamrunning.utils.RmvUtils;
-import net.ddns.dimag.cobhamrunning.utils.ZebraPrint;
+import net.ddns.dimag.cobhamrunning.utils.*;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -26,16 +25,14 @@ import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class PrintCustomLabelViewController implements MsgBox {
+public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
     private static final Logger LOGGER = LogManager.getLogger(ShippingViewController.class.getName());
     private MainApp mainApp;
+    private TestsViewController controller;
     private LabelTemplateService labelTemplateService = new LabelTemplateService();
     private List<LabelTemplate> labelList = new ArrayList<>();
     private final ObservableList<RowData> rowDataList = FXCollections.observableArrayList();
@@ -43,6 +40,8 @@ public class PrintCustomLabelViewController implements MsgBox {
     private ChoiceBox<String> templatesBox;
     @FXML
     private CheckBox useRmvData;
+    @FXML
+    private CheckBox svwViaIp;
     @FXML
     private Button printBtn;
     @FXML
@@ -85,12 +84,23 @@ public class PrintCustomLabelViewController implements MsgBox {
 
         useRmvData.selectedProperty().addListener((observable, oldValue, newValue) -> {
             rowDataList.clear();
+            if (svwViaIp.isSelected())
+                svwViaIp.setSelected(!newValue);
             templatesBox.getSelectionModel().clearSelection();
             templatesBox.setDisable(newValue);
             printBtn.setDisable(!newValue);
             if (newValue){
                 printLabel();
             }
+        });
+
+        svwViaIp.selectedProperty().addListener((observable, oldValue, newValue) -> {
+            rowDataList.clear();
+            if (useRmvData.isSelected())
+                useRmvData.setSelected(false);
+            templatesBox.getSelectionModel().clearSelection();
+            templatesBox.setDisable(newValue);
+            printBtn.setDisable(!newValue);
         });
 
         templatesBox.getSelectionModel().selectedIndexProperty().addListener((ChangeListener) (observable, oldValue, newValue) -> {
@@ -102,6 +112,36 @@ public class PrintCustomLabelViewController implements MsgBox {
         });
 
         tPrintJob.setItems(rowDataList);
+    }
+
+    private void printSwv(){
+        controller = mainApp.getController();
+        Settings settings = mainApp.getCurrentSettings();
+        String user = settings.getLogin_ssh();
+        String pass = settings.getPass_ssh();
+        if (user == null || pass == null){
+            MsgBox.msgInfo("SSH connection", "Not all settings are filling");
+            return;
+        }
+        String host = MsgBox.msgInputIP();
+        if (host == null){
+            return;
+        }
+        JSSHClient jsshClient = new JSSHClient(host, user, pass, mainApp);
+        try {
+            if (jsshClient.isSshConected()){
+                String asis = jsshClient.cobhamGetAsis();
+                Map<String, String> swv = jsshClient.cobhamGetSwv();
+                String swvTemplate = String.format(swvTemplateCmd, asis, swv.get("target"),
+                        swv.get("common"), swv.get("system"));
+                ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
+                zebraPrint.printTemplate(swvTemplate);
+            } else {
+                controller.writeConsole("Not connected");
+            }
+        } catch (CobhamRunningException e) {
+            MsgBox.msgException(e);
+        }
     }
 
     @FXML
@@ -143,20 +183,14 @@ public class PrintCustomLabelViewController implements MsgBox {
                     }
                 }
                 HashMap<String, Object> currTest = (HashMap<String, Object>) rmvRes.get(testName);
-                String rmvTemplate = String.format("^XA\n" +
-                        "^LH20,3\n" +
-                        "^FO5,5^A0N,30,30^FDSystem:^FS\n" +
-                        "^FO135,5^A0N,30,30^FD%s^FS\n" +
-                        "^FO5,40^A0N,30,30^FDTest:^FS\n" +
-                        "^FO135,40^A0N,30,30^FD%s PASS^FS\n" +
-                        "^FO5,75^A0N,30,30^FDRMV date:^FS\n" +
-                        "^FO135,75^A0N,30,30^FD%s^FS\n" +
-                            "^XZ", String.format("%s/%s", articleString, asisString), currTest.get("Configuration"),
+                String rmvTemplate = String.format(rmvTemplateCmd, String.format("%s/%s", articleString, asisString), currTest.get("Configuration"),
                         dateToString((Date) currTest.get("TestDate")));
                 ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
                 zebraPrint.printTemplate(rmvTemplate);
             }
-        } else {
+        } else if (svwViaIp.isSelected()) {
+            printSwv();
+        }else {
             LabelTemplate labelTemplate = null;
             try {
                 labelTemplate = labelTemplateService.findByName(templatesBox.getValue());

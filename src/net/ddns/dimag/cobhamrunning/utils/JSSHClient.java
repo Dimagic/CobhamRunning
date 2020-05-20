@@ -2,8 +2,14 @@ package net.ddns.dimag.cobhamrunning.utils;
 
 import java.io.InputStream;
 import java.net.ConnectException;
-import java.util.HashMap;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import javafx.application.Platform;
+import net.ddns.dimag.cobhamrunning.MainApp;
+import net.ddns.dimag.cobhamrunning.view.TestsViewController;
+import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -15,25 +21,28 @@ import com.jcraft.jsch.Session;
 
 public class JSSHClient implements MsgBox, SystemCommands {
 	private static final Logger LOGGER = LogManager.getLogger(JSSHClient.class.getName());
+	private MainApp mainApp;
 	private String host;
 	private String user;
 	private String password;
 	private JSch jsch;
 	private Session session;
+	private TestsViewController controller;
 	private Channel channel;
 
-	public JSSHClient(String host, String user, String password) {
+	public JSSHClient(String host, String user, String password, MainApp mainApp) {
 		this.host = host;
 		this.user = user;
 		this.password = password;
+		this.controller = mainApp.getController();
 	}
 
-	public HashMap<String, String> send(String command) throws Exception {
+	public HashMap<String, String> send(String command) throws CobhamRunningException {
 		HashMap<String, String> result = new HashMap<String, String>();
 		try {
 			command = findPathCmd(command);
 			session = getSession();
-			System.out.println(command);
+			writeConsole(command);
 			if (!session.isConnected()) {
 				return null;
 			}
@@ -63,9 +72,9 @@ public class JSSHClient implements MsgBox, SystemCommands {
 			}
 			channel.disconnect();
 			session.disconnect();
-		} catch (ConnectException | InterruptedException e) {
+		} catch (Exception e) {
 			LOGGER.error(e);
-			throw e;
+			throw new CobhamRunningException(e);
 		} 
 		return result;
 	}
@@ -99,8 +108,37 @@ public class JSSHClient implements MsgBox, SystemCommands {
 		return cmd.replace(cmdForSearch, cmdPathArr[cmdPathArr.length - 1]);
 	}
 
-	public boolean isSshConected() throws NullPointerException{
+	public boolean isSshConected() throws CobhamRunningException {
+		try {
+			session = getSession();
+		} catch (JSchException e) {
+			throw new CobhamRunningException(e);
+		}
 		return session.isConnected();
+	}
+
+	public <K, V> Map<K, V> cobhamGetSwv() throws CobhamRunningException {
+		List<String> keys = Arrays.asList("system", "common", "target");
+		String tmp = send(swvCmd).get("result");
+		List<String> resList = Arrays.asList(tmp.replace("\" \"", "_")
+				.replace("\"", "").split("_"));
+		return (Map<K, V>) zipToMap(keys, resList);
+	}
+
+	public String cobhamGetAsis() throws CobhamRunningException {
+		String tmp = send("serialdump").get("result");
+		return StringUtils.substringBetween(tmp, "TARGET=", " ");
+	}
+
+	private <K, V> Map<K, V> zipToMap(List<K> keys, List<V> values) {
+		return IntStream.range(0, keys.size()).boxed()
+				.collect(Collectors.toMap(keys::get, values::get));
+	}
+
+	public void writeConsole(String val) {
+		Platform.runLater(() -> {
+			controller.writeConsole(val);
+		});
 	}
 
 	@Override
