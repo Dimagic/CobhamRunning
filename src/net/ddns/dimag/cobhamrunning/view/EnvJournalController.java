@@ -3,7 +3,10 @@ package net.ddns.dimag.cobhamrunning.view;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Orientation;
@@ -24,8 +27,11 @@ import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.xml.stream.Location;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,6 +47,7 @@ public class EnvJournalController {
     private MainApp mainApp;
 
     private static final DataFormat SERIALIZED_MIME_TYPE = new DataFormat("application/x-java-serialized-object");
+    private ObservableList<String> locationList;
 
     private Method method;
     private TreeItem<EnvDevice> root;
@@ -51,9 +58,13 @@ public class EnvJournalController {
     private TreeTableView<EnvDevice> tEnv;
     @FXML
     private CheckMenuItem confirmMove;
+    @FXML
+    private ComboBox<String> locationBox;
 
     @FXML
     private void initialize() throws CobhamRunningException {
+        locationList = FXCollections.observableArrayList(getLocationNameList());
+        locationBox.setItems(locationList);
         confirmMove.setSelected(true);
         tEnv.setShowRoot(false);
         tEnv.setRowFactory(this::rowFactory);
@@ -65,6 +76,17 @@ public class EnvJournalController {
         addColumn("Status", "getStatus");
         addColumn("Next calibr.", "getCalibrDate");
         setupData();
+
+        locationBox.getSelectionModel().selectedIndexProperty().addListener((ChangeListener) (observable, oldValue, newValue) -> {
+            if (!locationBox.getSelectionModel().isEmpty()){
+                try {
+                    locationBox.getSelectionModel().select((Integer) newValue);
+                    setupData();
+                } catch (CobhamRunningException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     @FXML
@@ -95,6 +117,12 @@ public class EnvJournalController {
         for (TreeTableColumn column: tEnv.getColumns()){
             column.prefWidthProperty().bind(tEnv.widthProperty().divide(columnSize));
         }
+    }
+
+    @FXML
+    private void clearLocationBox() throws CobhamRunningException {
+        locationBox.getSelectionModel().clearSelection();
+        setupData();
     }
 
     private void addColumn(String label, String dataIndex) {
@@ -330,7 +358,18 @@ public class EnvJournalController {
     }
 
     private List<EnvLocation> getLocationList() throws CobhamRunningException{
-        return envLocationService.findAllEnvLocation();
+        if (locationBox.getSelectionModel().isEmpty()){
+            return envLocationService.findAllEnvLocation();
+        }
+        return Arrays.asList(envLocationService.findEnvLocationByName(locationBox.getValue()));
+    }
+
+    private List<String> getLocationNameList() throws CobhamRunningException{
+        List<String> locationNameList = new ArrayList<>();
+        for (EnvLocation location: getLocationList()){
+            locationNameList.add(location.getLocation());
+        }
+        return locationNameList;
     }
 
     private List<EnvDevice> getDeviceList() throws CobhamRunningException{

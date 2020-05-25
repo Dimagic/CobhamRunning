@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
-    private final String VERSION = "0.1.1.6";
+    private final String VERSION = "0.1.1.7";
     private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
