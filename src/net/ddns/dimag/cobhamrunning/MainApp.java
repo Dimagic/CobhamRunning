@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
-    private final String VERSION = "0.1.1.5";
+    private final String VERSION = "0.1.1.6";
     private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
@@ -400,7 +400,7 @@ public class MainApp extends Application implements MsgBox {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("PrintCustomLabelView.fxml"));
-            AnchorPane page = loader.load();
+            BorderPane page = loader.load();
             Stage printCustomLabelStage = new Stage();
             printCustomLabelStage.setTitle("Print custom label");
             printCustomLabelStage.getIcons().add(favicon);
@@ -411,6 +411,7 @@ public class MainApp extends Application implements MsgBox {
             printCustomLabelStage.setScene(scene);
             PrintCustomLabelViewController printCustomLabelViewController = loader.getController();
             printCustomLabelViewController.setMainApp(this);
+            printCustomLabelViewController.setDialogStage(printCustomLabelStage);
             printCustomLabelStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -419,7 +420,7 @@ public class MainApp extends Application implements MsgBox {
         }
     }
 
-    public void showLabelTemplatesView() {
+    public boolean showLabelTemplatesView(Stage parentStage) {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("LabelTemplatesView.fxml"));
@@ -428,7 +429,7 @@ public class MainApp extends Application implements MsgBox {
             labelTemplatesStage.setTitle("Label templates");
             labelTemplatesStage.getIcons().add(favicon);
             labelTemplatesStage.initModality(Modality.WINDOW_MODAL);
-            labelTemplatesStage.initOwner(asisCreatorStage);
+            labelTemplatesStage.initOwner(parentStage);
             labelTemplatesStage.setResizable(false);
             Scene scene = new Scene(page);
             labelTemplatesStage.setScene(scene);
@@ -436,10 +437,12 @@ public class MainApp extends Application implements MsgBox {
             controller.setMainApp(this);
             controller.setDialogStage(labelTemplatesStage);
             labelTemplatesStage.showAndWait();
+            return controller.isSaveClicked();
         } catch (IOException e) {
             e.printStackTrace();
             MsgBox.msgException(e);
         }
+        return false;
     }
 
     public void showRunningTestView() {

@@ -4,20 +4,18 @@ package net.ddns.dimag.cobhamrunning.view;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.stage.Stage;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.LabelTemplate;
 import net.ddns.dimag.cobhamrunning.services.LabelTemplateService;
 import net.ddns.dimag.cobhamrunning.utils.*;
-import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -32,6 +30,7 @@ import java.util.regex.Pattern;
 public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
     private static final Logger LOGGER = LogManager.getLogger(ShippingViewController.class.getName());
     private MainApp mainApp;
+    private Stage dialogStage;
     private TestsViewController controller;
     private LabelTemplateService labelTemplateService = new LabelTemplateService();
     private List<LabelTemplate> labelList = new ArrayList<>();
@@ -197,7 +196,6 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
                 String templ = labelTemplate.getTemplate();
                 for (RowData row : rowDataList) {
                     templ = templ.replaceAll(String.format("<:%s:>", row.getFieldName()), row.getFieldValue());
-                    System.out.println(String.format("%s : %s", row.getFieldName(), row.getFieldValue()));
                 }
                 ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
                 zebraPrint.printTemplate(templ);
@@ -207,10 +205,17 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
         }
     }
 
+    @FXML
+    private void openEditLabelTemplateView(){
+        if (mainApp.showLabelTemplatesView(this.dialogStage)){
+            fillLabelBox();
+            rowDataList.clear();
+        }
+    }
+
     private void fillLabelBox() {
         try {
             labelList = labelTemplateService.findAllLabelTemplate();
-
             List<String> namesList = new ArrayList<>();
             for (LabelTemplate template : labelList) {
                 namesList.add(template.getName());
@@ -234,14 +239,27 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
 
     private void fillTable(String template) {
         Matcher m = Pattern.compile("(?<=\\<:)(.*?)(?=\\:>)").matcher(template);
+        System.out.println(template);
         while (m.find()) {
-            rowDataList.add(new RowData(m.group()));
+            String val = m.group();
+            boolean isPresent = false;
+            for (RowData s: rowDataList){
+                if (s.getFieldName().equals(val))
+                    isPresent = true;
+                    break;
+            }
+            if (!isPresent || rowDataList.size() == 0)
+                rowDataList.add(new RowData(val));
         }
         tPrintJob.setItems(rowDataList);
     }
 
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
+    }
+
+    public void setDialogStage(Stage dialogStage) {
+        this.dialogStage = dialogStage;
     }
 
     private String dateToString(Date date){

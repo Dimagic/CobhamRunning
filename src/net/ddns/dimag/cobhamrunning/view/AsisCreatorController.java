@@ -210,7 +210,7 @@ public class AsisCreatorController implements MsgBox {
 
     @FXML
     private void handleLabelsMenu() {
-        mainApp.showLabelTemplatesView();
+        mainApp.showLabelTemplatesView(this.dialogStage);
     }
 
     @FXML

@@ -24,6 +24,7 @@ public class LabelTemplatesViewController implements MsgBox {
     private ObservableList<LabelTemplate> templateList;
     private LabelTemplateService labelTemplateService = new LabelTemplateService();
     private LabelTemplate currentTemlate = null;
+    private boolean isSaveClicked = false;
 
     @FXML
     private TableView<LabelTemplate> tTemplates;
@@ -131,16 +132,17 @@ public class LabelTemplatesViewController implements MsgBox {
         for (LabelTemplate template : templateList) {
             try {
                 labelTemplateService.updateLabelTemplate(template);
-//				MsgBox.msgInfo(template.getName(), "Save template complete.");
             } catch (Exception e) {
                 try {
                     labelTemplateService.saveLabelTemplate(template);
                 } catch (CobhamRunningException ex) {
                     ex.printStackTrace();
+                    isSaveClicked = false;
                 }
             }
         }
         dialogStage.close();
+        isSaveClicked = true;
     }
 
     private void initItemMenu() {
@@ -159,6 +161,10 @@ public class LabelTemplatesViewController implements MsgBox {
         });
         menu.getItems().add(mDel);
         tTemplates.setContextMenu(menu);
+    }
+
+    public boolean isSaveClicked() {
+        return isSaveClicked;
     }
 
     public void setDialogStage(Stage dialogStage) {
