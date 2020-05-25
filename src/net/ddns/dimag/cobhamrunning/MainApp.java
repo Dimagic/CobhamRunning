@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
-    private final String VERSION = "0.1.1.4";
+    private final String VERSION = "0.1.1.5";
     private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
@@ -56,7 +56,6 @@ public class MainApp extends Application implements MsgBox {
         /** test DB connection*/
         LOGGER.info("Start init");
         LOGGER.info(String.format("Current program version: %s", VERSION));
-        loadSettings();
         LOGGER.info("Finish init");
     }
 
@@ -84,6 +83,7 @@ public class MainApp extends Application implements MsgBox {
             e.printStackTrace();
         }
         showTestsView();
+        loadSettings();
         try {
             Updater updater = new Updater(this, testsViewController);
             if (updater.hasNewVersion()){
@@ -496,7 +496,7 @@ public class MainApp extends Application implements MsgBox {
         }
     }
 
-    public boolean showSettingsDialog() {
+    public void showSettingsDialog() {
         try {
             FXMLLoader loader = new FXMLLoader();
             loader.setLocation(getClass().getClassLoader().getResource("SettingsView.fxml"));
@@ -515,10 +515,11 @@ public class MainApp extends Application implements MsgBox {
             settingsViewController.fillSettings();
             settingsViewController.setDialogStage(settingsStage);
             settingsStage.showAndWait();
-            return settingsViewController.isSaveClicked();
+            if (settingsViewController.isSaveClicked()){
+                loadSettings();
+            }
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
         }
     }
 
@@ -559,14 +560,12 @@ public class MainApp extends Application implements MsgBox {
             File file = new File("settings.xml");
             if (!file.exists()) {
                 MsgBox.msgWarning("Load settings", "Settings file not found.\nWill create a new settings file.\nPlease fill settings form.");
-                if (!showSettingsDialog()) {
-                    return false;
-                }
             }
             JAXBContext context = JAXBContext.newInstance(Settings.class);
             Unmarshaller um = context.createUnmarshaller();
             setCurrentSettings((Settings) um.unmarshal(file));
             currUrl = HibernateSessionFactoryUtil.getConnectionInfo().get("DataBaseUrl");
+            rootLayoutController.setDbNameLbl(currUrl);
             return true;
         } catch (CobhamRunningException e){
             MsgBox.msgWarning("Load settings", e.getMessage());

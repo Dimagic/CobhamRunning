@@ -30,7 +30,7 @@ public class RootLayoutController {
 
     @FXML
     private void handleSettings() {
-        boolean saveClicked = mainApp.showSettingsDialog();
+        mainApp.showSettingsDialog();
     }
 
     @FXML

@@ -82,10 +82,10 @@ public class TestsViewController implements MsgBox {
 		}
 	}
 	
-	@FXML
-    private void handleSettings() {
-        boolean saveClicked = mainApp.showSettingsDialog();
-    }
+//	@FXML
+//    private void handleSettings() {
+//        boolean saveClicked = mainApp.showSettingsDialog();
+//    }
 	
 	@FXML
     private void handleRunningTest() {
