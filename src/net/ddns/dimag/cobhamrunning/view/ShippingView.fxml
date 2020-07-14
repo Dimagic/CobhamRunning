@@ -42,5 +42,6 @@
       <TextField fx:id="filterField" layoutX="371.0" layoutY="11.0" prefHeight="25.0" prefWidth="110.0" AnchorPane.leftAnchor="405.0" AnchorPane.topAnchor="10.0" />
       <Label layoutX="363.0" layoutY="15.0" text="Filter:" AnchorPane.leftAnchor="370.0" AnchorPane.topAnchor="15.0" />
       <Button layoutX="465.0" layoutY="255.0" mnemonicParsing="false" onAction="#handleExcelReport" prefHeight="25.0" prefWidth="125.0" text="Generate Excel file" AnchorPane.bottomAnchor="120.0" AnchorPane.rightAnchor="10.0" />
+      <Button layoutX="465.0" layoutY="291.0" mnemonicParsing="false" onAction="#temp" prefHeight="25.0" prefWidth="125.0" text="Temp" AnchorPane.bottomAnchor="84.0" AnchorPane.rightAnchor="10.0" />
    </children>
 </AnchorPane>

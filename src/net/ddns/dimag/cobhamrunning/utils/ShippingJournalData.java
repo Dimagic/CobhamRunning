@@ -65,19 +65,22 @@ public ShippingJournalData(ShippingViewController controller, Device device) {
                 tests.setName(testName);
                 tests.setDevice(device);
                 tests.setDateTest(stringToDate(testHeader.get("TestDate").toString()));
+                tests.setHeaderID((Long) testHeader.get("HeaderID"));
+                tests.setTestTime((Integer) testHeader.get("TestTime"));
 
                 writeConsole(String.format("Searching measures for test: %s", testName));
                 Measurements meas;
                 Set<Measurements> setMeas = new HashSet<>();
                 for (HashMap<String, Object> measure: rmvUtils.getMeasuresById(testHeader.get("HeaderID"))){
+                    System.out.println(measure);
                     writeConsole(String.format("Found measure: %s", measure.get("Description")));
                     meas = new Measurements();
-                    meas.setDateMeas(stringToDate(measure.get("MeasureDate").toString()));
                     meas.setMeasName(measure.get("Description").toString());
                     meas.setMeasMax(measure.get("MaxLim").toString());
                     meas.setMeasMin(measure.get("MinLim").toString());
                     meas.setMeasVal(measure.get("Result").toString());
                     meas.setMeasureNumber((int) measure.get("MeasureNumber"));
+                    meas.setMeasDate(stringToDate(measure.get("MeasureDate").toString()));
                     meas.setTest(tests);
                     setMeas.add(meas);
                 }
@@ -96,6 +99,8 @@ public ShippingJournalData(ShippingViewController controller, Device device) {
                 testsService.deleteTestsByDevice(device);
             } else {
                 shippingSystem = new ShippingSystem();
+                shippingSystem.setDevice(device);
+                shippingSystem.setDateShip(new Date());
             }
 
             for (Tests tests: testMeasMap.keySet()){
@@ -105,11 +110,6 @@ public ShippingJournalData(ShippingViewController controller, Device device) {
 
             }
             device.setTests(setTests);
-
-//            ToDo: update tests in found system
-
-            shippingSystem.setDevice(device);
-            shippingSystem.setDateShip(new Date());
             shippingJournalService.saveOrUpdateShippingJournal(shippingSystem);
 
             if (!isUpdateSystem){

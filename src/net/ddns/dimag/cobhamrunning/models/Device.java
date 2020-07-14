@@ -10,10 +10,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import javax.persistence.*;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "device", uniqueConstraints = { @UniqueConstraint(columnNames = "asis_id"),
@@ -226,13 +223,16 @@ public class Device {
     }
 
     @Override
-    public String toString() {
-        return "Device{" +
-                "id=" + id +
-                ", sn='" + sn + '\'' +
-                ", deviceInfo=" + deviceInfo +
-                ", asis=" + asis +
-                ", tests=" + tests +
-                '}';
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Device device = (Device) o;
+        return sn.equals(device.sn) &&
+                asis.getAsis().equals(device.asis.getAsis());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(sn, asis.getAsis());
     }
 }

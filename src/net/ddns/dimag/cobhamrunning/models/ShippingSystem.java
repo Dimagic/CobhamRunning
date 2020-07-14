@@ -77,13 +77,4 @@ public class ShippingSystem {
 		} catch (NullPointerException e) {}
 		return new SimpleStringProperty("");
 	}
-
-	@Override
-	public String toString() {
-		return "ShippingSystem{" +
-				"id=" + id +
-				", device=" + device +
-				", dateShip=" + dateShip +
-				'}';
-	}
 }

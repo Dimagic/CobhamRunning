@@ -11,6 +11,7 @@ import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.Device;
+import net.ddns.dimag.cobhamrunning.services.DeviceService;
 import net.ddns.dimag.cobhamrunning.utils.Settings;
 import net.ddns.dimag.cobhamrunning.models.ShippingSystem;
 import net.ddns.dimag.cobhamrunning.services.ShippingJournalService;
@@ -26,6 +27,8 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
 public class ShippingViewController implements MsgBox {
     private static final Logger LOGGER = LogManager.getLogger(ShippingViewController.class.getName());
@@ -91,7 +94,7 @@ public class ShippingViewController implements MsgBox {
             TableRow<ShippingSystem> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
                 if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                    mainApp.showMeasureView(row.getItem().getDevice());
+                    mainApp.showMeasureView(row.getItem().getDevice(), dialogStage);
                 }
             });
             return row;
@@ -120,13 +123,17 @@ public class ShippingViewController implements MsgBox {
 
     private void initItemMenu() {
         ContextMenu menu = new ContextMenu();
-        MenuItem mEdit = new MenuItem("Edit");
+        MenuItem mEdit = new MenuItem("Update");
         menu.getItems().add(mEdit);
         tSysToShip.setContextMenu(menu);
 
         mEdit.setOnAction((ActionEvent event) -> {
             try {
-                System.out.println(tSysToShip.getSelectionModel().getSelectedItem().toString());
+                if (tSysToShip.getSelectionModel().getSelectedItem().getDevice() != null){
+                    console.clear();
+                    Thread thread = new ShippingJournalData(this, tSysToShip.getSelectionModel().getSelectedItem().getDevice());
+                    thread.start();
+                }
             } catch (Exception e) {
                 LOGGER.error(e.getClass() + ": " + e.getMessage(), e);
                 MsgBox.msgException(e);
@@ -150,6 +157,22 @@ public class ShippingViewController implements MsgBox {
         } catch (Exception e) {
             LOGGER.error(e.getMessage());
             MsgBox.msgException(e);
+        }
+    }
+
+    @FXML
+    private void temp(){
+        DeviceService deviceService = new DeviceService();
+        try {
+            ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(2);
+            for (Device device: deviceService.findAllDevice()){
+                console.clear();
+                Thread thread = new ShippingJournalData(this, device);
+                executor.submit(thread);
+
+            }
+        } catch (CobhamRunningException e) {
+            e.printStackTrace();
         }
     }
 

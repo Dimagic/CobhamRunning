@@ -1,6 +1,6 @@
 package net.ddns.dimag.cobhamrunning.models;
 
-import java.util.Date;
+import java.util.*;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,7 +25,9 @@ public class Measurements {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-//	ToDo: constructor
+	public Measurements(){
+
+	}
 
 	@Column(nullable = false, length = 128)
 	private String measName;
@@ -46,6 +48,9 @@ public class Measurements {
 	@Column(name = "measureNumber")
 	private int measureNumber;
 
+	@Column(name = "measStatus")
+	private int measStatus;
+
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "test_id", nullable = false)
 	@OnDelete(action = OnDeleteAction.CASCADE)
@@ -64,17 +69,23 @@ public class Measurements {
 	}
 
 	public void setMeasName(String measName) {
-		setDateMeas(new Date());
+		setMeasDate(new Date());
 		this.measName = measName;
 	}
 
-	public java.util.Date getDateMeas() {
-		return measDate;
+	public void setMeasName(String measName, int measNum) {
+		setMeasDate(new Date());
+		setMeasureNumber(measNum);
+		this.measName = measName;
 	}
 
-	public void setDateMeas(Date measDate) {
-		this.measDate = measDate;
-	}
+//	public java.util.Date getDateMeas() {
+//		return measDate;
+//	}
+//
+//	public void setDateMeas(Date measDate) {
+//		this.measDate = measDate;
+//	}
 
 	public String getMeasVal() {
 		return measVal;
@@ -124,6 +135,43 @@ public class Measurements {
 		this.measDate = measDate;
 	}
 
+	public int getMeasStatus() {
+		return measStatus;
+	}
+
+	public void setMeasStatus(int status){
+		this.measStatus = status;
+	}
+
+	public void setMeasStatus() {
+		int status = 0;
+		try{
+			if (measVal.equals(measMin) || measVal.equals(measMax)) {
+				status = 1;
+			} else if (measMin.equals("\"\"") &&  measMax.equals("\"\"")) {
+				status = 1;
+			} else if((measMin.isEmpty() &&  measMax.isEmpty())){
+				status = 1;
+			} else {
+				try {
+					double measValTmp = Double.parseDouble(measVal);
+					double measMinTmp = Double.parseDouble(measMin);
+					double measMaxTmp = Double.parseDouble(measMax);
+					if (measMinTmp <= measValTmp && measValTmp <= measMaxTmp){
+						status = 1;
+					}
+				} catch (Exception e){
+					if (measMin.equals(measMax) &&  measMin.equals(measVal)){
+						status = 1;
+					}
+				}
+			}
+		} catch (NullPointerException ignored){
+
+		}
+		this.measStatus = status;
+	}
+
 	public SimpleStringProperty measNameProperty(){
 		return new SimpleStringProperty(getMeasName());
 	}
@@ -141,39 +189,23 @@ public class Measurements {
 	}
 
 	public SimpleStringProperty measStatusProperty(){
-		String status = "FAIL";
-		if (measMin.equals("\"\"") &&  measMax.equals("\"\"")) {
-			status = "PASS";
-		} else if((measMin.isEmpty() &&  measMax.isEmpty())){
-			status = "PASS";
-		} else {
-			try {
-				double measValTmp = Double.parseDouble(measVal);
-				double measMinTmp = Double.parseDouble(measMin);
-				double measMaxTmp = Double.parseDouble(measMax);
-				if (measMinTmp <= measValTmp && measValTmp <= measMaxTmp){
-					status = "PASS";
-				}
-			} catch (Exception e){
-				if (measMin.equals(measMax) &&  measMin.equals(measVal)){
-					status = "PASS";
-				}
-			}
-		}
-		return new SimpleStringProperty(status);
+		return new SimpleStringProperty(getMeasStatus() == 1 ? "PASS" : "FAIL");
+
+
 	}
 
 	@Override
 	public String toString() {
-		return "Measurements{" +
-				"id=" + id +
-				", measName='" + measName + '\'' +
-				", measDate=" + measDate +
-				", measMin='" + measMin + '\'' +
-				", measVal='" + measVal + '\'' +
-				", measMax='" + measMax + '\'' +
-				", measureNumber=" + measureNumber +
-				", test=" + test +
-				'}';
+		final StringBuilder sb = new StringBuilder("Measurements{");
+		sb.append("id=").append(id);
+		sb.append(", measName='").append(measName).append('\'');
+		sb.append(", measDate=").append(measDate);
+		sb.append(", measMin='").append(measMin).append('\'');
+		sb.append(", measVal='").append(measVal).append('\'');
+		sb.append(", measMax='").append(measMax).append('\'');
+		sb.append(", measureNumber=").append(measureNumber);
+		sb.append(", measStatus=").append(measStatus);
+		sb.append('}');
+		return sb.toString();
 	}
 }

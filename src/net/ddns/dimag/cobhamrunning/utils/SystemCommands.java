@@ -32,6 +32,17 @@ public interface SystemCommands {
 			"^FO5,75^A0N,30,30^FDRMV date:^FS\n" +
 			"^FO135,75^A0N,30,30^FD%s^FS\n" +
 			"^XZ";
+
+	String envDeviceTemplate = "^XA\n" +
+			"^LH20,3\n" +
+			"^FO5,5^CF0,35^FDService: ^FS\n" +
+			"^FO150,5^CF0,35^FD%s^FS\n" +
+			"^FO5,45^CF0,35^FDModel: ^FS\n" +
+			"^FO150,45^CF0,35^FD%s^FS\n" +
+			"^FO5,85^CF0,35^FDSerial: ^FS\n" +
+			"^FO150,85^CF0,35^FD%s^FS\n" +
+			"^FO470,6^BQN,2,3^FDQA,%s^FS\n" +
+			"^XZ";
 	
 	
 	

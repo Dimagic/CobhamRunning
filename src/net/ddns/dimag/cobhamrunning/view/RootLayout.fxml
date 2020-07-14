@@ -22,6 +22,7 @@
           <Menu mnemonicParsing="false" text="Edit">
                <items>
                   <MenuItem mnemonicParsing="false" onAction="#handleStartTest" text="Start test" />
+                  <MenuItem mnemonicParsing="false" onAction="#handleFixTestStatus" text="Fix Test status" />
                </items></Menu>
           <Menu mnemonicParsing="false" text="Help">
             <items>

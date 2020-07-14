@@ -1,17 +1,21 @@
 package net.ddns.dimag.cobhamrunning.view;
 
+import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.ProgressBar;
 import net.ddns.dimag.cobhamrunning.MainApp;
-import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
-import net.ddns.dimag.cobhamrunning.utils.MsgBox;
-import net.ddns.dimag.cobhamrunning.utils.ProcessDeamon;
-import net.ddns.dimag.cobhamrunning.utils.Updater;
+import net.ddns.dimag.cobhamrunning.models.Tests;
+import net.ddns.dimag.cobhamrunning.services.TestsService;
+import net.ddns.dimag.cobhamrunning.utils.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 public class RootLayoutController {
     private static final Logger LOGGER = LogManager.getLogger(RootLayoutController.class.getName());
@@ -39,7 +43,7 @@ public class RootLayoutController {
             Updater updater = new Updater(mainApp, mainApp.getController());
             updater.isNeedUpdate();
         } catch (CobhamRunningException e) {
-            MsgBox.msgException(e);
+            MsgBox.msgWarning("CobhamRunning", e.getLocalizedMessage());
         }
     }
 
@@ -62,6 +66,38 @@ public class RootLayoutController {
         } else {
             MsgBox.msgWarning("AdemBurn", "File StormInterface.exe not found");
         }
+    }
+
+    @FXML
+    private void handleFixTestStatus(){
+        Thread thread = new Thread(){
+            public void run(){
+                try {
+                    RmvUtils rmvUtils = new RmvUtils(mainApp);
+                    TestsService testsService = new TestsService();
+                    for (Tests test: testsService.findAllTests()){
+                        Integer testTime = rmvUtils.getTestTimeByDateTest(test.getDateTest());
+                        test.setTestTime(testTime);
+                        testsService.updateTest(test);
+                        writeConsole(String.format("System: %s ASIS: %s\nTest time: %s Test name: %s",
+                                test.getDevice().getAsis().getArticleHeaders().getArticle(),
+                                test.getDevice().getAsis().getAsis(), testTime, test.getName()));
+                    }
+                    writeConsole("Complete");
+                } catch (CobhamRunningException | SQLException | ClassNotFoundException e) {
+                    writeConsole(String.format("ERROR: %s", e.getMessage()));
+                    MsgBox.msgException(e);
+                }
+            }
+        };
+        thread.start();
+
+    }
+
+    private void writeConsole(String s){
+        Platform.runLater(() -> {
+            mainApp.getController().writeConsole(s);
+        });
     }
 
     public RootLayoutController getController() {

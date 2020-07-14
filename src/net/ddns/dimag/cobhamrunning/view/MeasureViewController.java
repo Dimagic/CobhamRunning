@@ -1,6 +1,5 @@
 package net.ddns.dimag.cobhamrunning.view;
 
-import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
@@ -18,8 +17,11 @@ import net.ddns.dimag.cobhamrunning.models.Tests;
 import net.ddns.dimag.cobhamrunning.services.MeasurementsService;
 import net.ddns.dimag.cobhamrunning.services.TestsService;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
+import net.ddns.dimag.cobhamrunning.utils.Utils;
 
+import javax.persistence.PersistenceException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MeasureViewController {
@@ -54,6 +56,8 @@ public class MeasureViewController {
     private Label sn_lbl;
     @FXML
     private Label dateTest_lbl;
+    @FXML
+    private Label testTime_lbl;
 
 
     @FXML
@@ -73,17 +77,31 @@ public class MeasureViewController {
         testsChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-                measList = getMeasureList(testsList.get(testsChoiceBox.getSelectionModel().getSelectedIndex()));
+                try {
+                    measList = getMeasureList(testsList.get(testsChoiceBox.getSelectionModel().getSelectedIndex()));
+                } catch (PersistenceException e) {
+                    measList = FXCollections.observableArrayList(
+                            Utils.asSortedList(device.getTests().iterator().next().getMeas(),
+                                    Utils.COMPARE_BY_MEASNUM));
+                }
+                testTime_lbl.setText(Utils.formatHMSM(measList.get(0).getTest().getTestTime()));
                 tMeasure.setItems(measList);
             }
         });
     }
 
     private void setTableMeasure(Device device){
+        this.device = device;
         testsNameList.clear();
         TestsService testsService = new TestsService();
         try {
             testsList = testsService.getTestsByDevice(device);
+        } catch (PersistenceException e) {
+            testsChoiceBox.setDisable(true);
+            testsList = new ArrayList<>();
+            testsList.addAll(device.getTests());
+            System.out.println(device.getTests());
+
         } catch (CobhamRunningException e) {
             e.printStackTrace();
         }
@@ -104,6 +122,8 @@ public class MeasureViewController {
         ObservableList<Measurements> measList = null;
         try {
             measList = FXCollections.observableArrayList(measurementsService.getMeasureSetByTest(test));
+//            testTime_lbl.setText(Utils.formatHMSM(measurementsService.getTestRunningTime(test)));
+//            testTime_lbl.setText(Utils.formatHMSM(test.getTestTime()));
             return measList;
         } catch (CobhamRunningException e) {
             e.printStackTrace();

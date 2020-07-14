@@ -1,12 +1,17 @@
 package net.ddns.dimag.cobhamrunning.dao;
 
 import java.util.List;
+import java.util.Set;
 
+import com.sun.xml.internal.ws.api.model.wsdl.WSDLPortType;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.Tests;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
+import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import org.hibernate.Session;
+import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 
 public class TestsDao implements UniversalDao{
 	public Tests findById(int id) throws CobhamRunningException {
@@ -27,15 +32,23 @@ public class TestsDao implements UniversalDao{
 
     public void deleteTestsByDevice(Device device) throws CobhamRunningException{
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
-        session.createSQLQuery("delete from public.tests where device_id = :dev_id")
-                .addEntity(Tests.class)
-                .setParameter("dev_id", device.getId());
-        session.close();
+        Transaction transaction = session.beginTransaction();
+        try{
+            for (Tests test: getTestsByDevice(device)){
+                session.delete(test);
+            }
+            transaction.commit();
+        } catch (Throwable t) {
+            transaction.rollback();
+            MsgBox.msgException(t);
+        } finally {
+            session.close();
+        }
     }
 
 	public List<Tests> findAll() throws CobhamRunningException{
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
-        List<Tests> testsList = (List<Tests>)  session.createQuery("From tests").list();
+        List<Tests> testsList = (List<Tests>)  session.createQuery("From Tests").list();
         session.close();
         return testsList;
     }

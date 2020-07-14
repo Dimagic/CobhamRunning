@@ -3,6 +3,10 @@ package net.ddns.dimag.cobhamrunning.models;
 import javafx.beans.property.SimpleStringProperty;
 import net.ddns.dimag.cobhamrunning.services.MeasurementsService;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
+import net.ddns.dimag.cobhamrunning.utils.RmvUtils;
+import net.ddns.dimag.cobhamrunning.utils.Utils;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import java.text.SimpleDateFormat;
@@ -31,6 +35,7 @@ public class Tests {
 
 	@ManyToOne(fetch = FetchType.LAZY, optional = false)
 	@JoinColumn(name = "device_id", nullable = false)
+	@OnDelete(action = OnDeleteAction.CASCADE)
 	private Device device;
 
 	@Id
@@ -51,6 +56,39 @@ public class Tests {
 
 	public void setDateTest(Date testDate) {
 		this.testDate = testDate;
+	}
+
+	@Column(name = "testStatus")
+	private int testStatus;
+
+	public int getTestStatus() {
+		return testStatus;
+	}
+
+	public void setTestStatus(int testStatus) {
+		this.testStatus = testStatus;
+	}
+
+	@Column(name = "testTime")
+	private Integer testTime;
+
+	public Integer getTestTime() {
+		return testTime;
+	}
+
+	public void setTestTime(Integer testTime) {
+		this.testTime = testTime;
+	}
+
+	@Column(name = "HeaderID")
+	private Long HeaderID;
+
+	public Long getHeaderID() {
+		return HeaderID;
+	}
+
+	public void setHeaderID(Long headerID) {
+		HeaderID = headerID;
 	}
 
 	public Device getDevice() {
@@ -98,31 +136,45 @@ public class Tests {
 		return new SimpleStringProperty("");
 	}
 
+	public SimpleStringProperty testTimeProperty() {
+		return new SimpleStringProperty(Utils.formatHMSM(getTestTime()));
+	}
+
 	public SimpleStringProperty testStatusProperty(){
-		try {
-			MeasurementsService measurementsService = new MeasurementsService();
-			List<Measurements> measList = measurementsService.getMeasureSetByTest(this);
-			if (measList.size() == 0){
+		if (getId() != null) {
+			try {
+				MeasurementsService measurementsService = new MeasurementsService();
+				List<Measurements> measList = measurementsService.getMeasureSetByTest(this);
+				if (measList.size() == 0) {
+					return null;
+				}
+				for (Measurements meas : measList) {
+					if (meas.getMeasStatus() == 0){
+						return new SimpleStringProperty("FAIL");
+					}
+				}
+			} catch (CobhamRunningException e) {
 				return null;
 			}
-			for (Measurements meas: measList){
-				if(!meas.measStatusProperty().getValue().equals("PASS")){
-					return new SimpleStringProperty("FAIL");
-				}
-			}
-		} catch (CobhamRunningException e){
-			return null;
+			return new SimpleStringProperty("PASS");
+		} else {
+			return getTestStatus() == 0 ? new SimpleStringProperty("PASS") :
+					new SimpleStringProperty("FAIL");
 		}
-		return new SimpleStringProperty("PASS");
 	}
 
 	@Override
 	public String toString() {
-		return "Tests{" +
-				"name='" + name + '\'' +
-				", testDate=" + testDate +
-				", device=" + device +
-				", id=" + id +
-				'}';
+		final StringBuilder sb = new StringBuilder("Tests{");
+		sb.append("name='").append(name).append('\'');
+		sb.append(", testDate=").append(testDate);
+		sb.append(", device=").append(device);
+		sb.append(", id=").append(id);
+		sb.append(", testStatus=").append(testStatus);
+		sb.append(", testTime=").append(testTime);
+		sb.append(", HeaderID=").append(HeaderID);
+		sb.append(", meas=").append(meas);
+		sb.append('}');
+		return sb.toString();
 	}
 }

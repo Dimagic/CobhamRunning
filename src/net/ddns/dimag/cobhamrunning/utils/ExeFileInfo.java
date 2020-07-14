@@ -37,7 +37,6 @@ public class ExeFileInfo {
         try {
             IntByReference dwDummy = new IntByReference();
             dwDummy.setValue(0);
-
             int versionlength = com.sun.jna.platform.win32.Version.INSTANCE.GetFileVersionInfoSize(path, dwDummy);
 
             byte[] bufferarray = new byte[versionlength];

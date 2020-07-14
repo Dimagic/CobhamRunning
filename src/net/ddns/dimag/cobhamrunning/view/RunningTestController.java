@@ -1,29 +1,30 @@
 package net.ddns.dimag.cobhamrunning.view;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import net.ddns.dimag.cobhamrunning.models.*;
-import net.ddns.dimag.cobhamrunning.services.*;
-import net.ddns.dimag.cobhamrunning.utils.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.ProgressBarTableCell;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import net.ddns.dimag.cobhamrunning.MainApp;
+import net.ddns.dimag.cobhamrunning.models.*;
+import net.ddns.dimag.cobhamrunning.services.ArticleHeadersService;
+import net.ddns.dimag.cobhamrunning.services.AsisService;
+import net.ddns.dimag.cobhamrunning.services.DeviceService;
+import net.ddns.dimag.cobhamrunning.services.MacAddressService;
+import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
+import net.ddns.dimag.cobhamrunning.utils.CobhamSystem;
+import net.ddns.dimag.cobhamrunning.utils.MsgBox;
+import net.ddns.dimag.cobhamrunning.utils.NetworkUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 public class RunningTestController implements MsgBox {
     private ObservableList<Device> systemData = FXCollections.observableArrayList();
@@ -106,6 +107,7 @@ public class RunningTestController implements MsgBox {
             ipMacMap = NetworkUtils.getArpMap(mainApp.getCurrentSettings().getIp_ssh());
             stopTestFlag = false;
 			for (Device deviceObj : tSysToRun.getItems()) {
+			    CobhamSystem cobhamSystem = new CobhamSystem(deviceObj);
 				System.out.println(deviceObj);
 //                deviceObj.setLocalStopTestFlag(stopTestFlag);
 //				DeviceInfoService deviceInfoService = new DeviceInfoService();
@@ -113,7 +115,7 @@ public class RunningTestController implements MsgBox {
 //				System.out.println(devInfo);
 //				cobhamSystem.getDevice().setDeviceInfo(devInfo);
 //				deviceInfoService.saveDeviceInfo(devInfo);
-//				handleRunTest(cobhamSystem);
+				handleRunTest(cobhamSystem);
 			}
         } catch (Exception e) {
             LOGGER.error("handleRunAllTests()", e);

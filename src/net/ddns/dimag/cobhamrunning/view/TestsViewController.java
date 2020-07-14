@@ -1,8 +1,6 @@
 package net.ddns.dimag.cobhamrunning.view;
 
-import javafx.application.Platform;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
+import com.squareup.okhttp.*;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
@@ -11,6 +9,8 @@ import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.utils.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.io.IOException;
 
 public class TestsViewController implements MsgBox {
 	private static final Logger LOGGER = LogManager.getLogger(TestsViewController.class.getName());
@@ -116,27 +116,7 @@ public class TestsViewController implements MsgBox {
 	private void handlePrintCustomLabel(){
 		mainApp.showPrintCustomLabelView();
 	}
-		
-	@FXML 
-	private void handleAsisBtn(){
-	
-//		AsisGenerator aGen = new AsisGenerator();
-//		System.out.println(aGen.getNewAsisRange(5));
-//		getPrinterByName("ZDesigner");
-////		PrintService printService=PrintServiceLookup
-////				   .lookupDefaultPrintService();
-//		stringToBarcode();
-//		PrintService printService = getPrinterByName("ZDesigner");
-//		if (printService != null){
-//			for (String asis: aGen.getNewAsisRange(2))
-//			aGen.printLabel(printService, asis);
-//		} else {
-//			MsgBox.msgWarning("Print label", "Printer not found");
-//		}
-		
-	
-	}
-	
+
 	@FXML
     private void handleHtmlParser() {
 		System.out.println("zebra");
@@ -198,4 +178,40 @@ public class TestsViewController implements MsgBox {
 	public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
     }
+
+	public MainApp getMainApp() {
+		return mainApp;
+	}
+
+	@FXML
+	private void test_btn(){
+		JSSHClient jsshClient = new JSSHClient("11.0.0.240", "root", "CobhamRoot", getMainApp());
+		try {
+			jsshClient.send("ifconfig");
+		} catch (CobhamRunningException e) {
+			e.printStackTrace();
+		}
+//		OkHttpClient client2 = new OkHttpClient();
+//		MediaType mediaType = MediaType.parse("application/json");
+////		RequestBody body = RequestBody.create(mediaType, "{ \"text\" : \"more text\" }");
+//		RequestBody body = RequestBody.create(mediaType, MsgBox.msgInputString("Scan please:"));
+//		Request request2 = new Request.Builder()
+//				.url("https://webhook.site/e3b1d83c-2a92-41e6-8436-9b0f20daf429")
+//				.post(body)
+//				.addHeader("Content-Type", "application/json")
+//				.addHeader("Accept", "*/*")
+//				.addHeader("Cache-Control", "no-cache")
+//				.addHeader("Host", "hooks.slack.com")
+//				.addHeader("accept-encoding", "gzip, deflate")
+//				.addHeader("Connection", "keep-alive")
+//				.addHeader("cache-control", "no-cache")
+//				.build();
+//		try {
+//			Response response2 = client2.newCall(request2).execute();
+//			writeConsole(response2.toString());
+//		} catch (IOException e) {
+//			e.printStackTrace();
+//		}
+
+	}
 }

@@ -25,10 +25,10 @@ public class MeasurementsDao implements UniversalDao{
         session.close();
         return measList;
     }
-	
+
 	public List<Measurements> findAll() throws CobhamRunningException{
         Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
-        List<Measurements> meases = (List<Measurements>)  session.createQuery("From measurements").list();
+        List<Measurements> meases = (List<Measurements>)  session.createQuery("From Measurements").list();
         session.close();
         return meases;
     }

@@ -1,14 +1,14 @@
-package net.ddns.dimag.cobhamrunning.models;
+package net.ddns.dimag.cobhamrunning.utils;
 
 import java.io.IOException;
 import java.net.ConnectException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 
+import net.ddns.dimag.cobhamrunning.models.Device;
+import net.ddns.dimag.cobhamrunning.models.Measurements;
+import net.ddns.dimag.cobhamrunning.models.Tests;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.json.simple.JSONObject;
@@ -16,20 +16,12 @@ import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import com.jcraft.jsch.JSchException;
 
-import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.concurrent.Task;
 import net.ddns.dimag.cobhamrunning.MainApp;
-import net.ddns.dimag.cobhamrunning.services.ArticleHeadersService;
-import net.ddns.dimag.cobhamrunning.services.DeviceService;
 import net.ddns.dimag.cobhamrunning.services.MeasurementsService;
-import net.ddns.dimag.cobhamrunning.services.TestsService;
-import net.ddns.dimag.cobhamrunning.utils.JSSHClient;
-import net.ddns.dimag.cobhamrunning.utils.MsgBox;
-import net.ddns.dimag.cobhamrunning.utils.SystemCommands;
 import net.ddns.dimag.cobhamrunning.view.RunningTestController;
-import net.ddns.dimag.cobhamrunning.view.ShippingViewController;
 
 public class CobhamSystem extends Task<Void> implements SystemCommands {
 	private static final Logger LOGGER = LogManager.getLogger(CobhamSystem.class.getName());

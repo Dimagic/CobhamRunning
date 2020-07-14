@@ -2,7 +2,6 @@ package net.ddns.dimag.cobhamrunning.utils;
 
 import javafx.application.Preloader;
 import javafx.application.Preloader.StateChangeNotification.Type;
-import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -11,18 +10,13 @@ import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 
-import javax.imageio.ImageIO;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-
 public class CobhamPreloader extends Preloader {
     private Stage preloaderStage;
 
     private Image process = new Image("file:src/resources/images/process_64x64.gif");
-
     private static final int SPLASH_WIDTH = 64;
     private static final int SPLASH_HEIGHT = 64;
-    
+
     @Override
     public void start(Stage primaryStage) {
         this.preloaderStage = primaryStage;
@@ -41,9 +35,15 @@ public class CobhamPreloader extends Preloader {
     }
 
     @Override
+    public void stop(){
+        preloaderStage.hide();
+    }
+
+    @Override
     public void handleStateChangeNotification(StateChangeNotification stateChangeNotification) {
         if (stateChangeNotification.getType() == Type.BEFORE_START) {
-            preloaderStage.hide();
+//            preloaderStage.hide();
+            stop();
         }
     }
 }

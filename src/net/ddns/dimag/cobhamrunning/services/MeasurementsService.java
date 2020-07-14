@@ -1,10 +1,9 @@
 package net.ddns.dimag.cobhamrunning.services;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import net.ddns.dimag.cobhamrunning.dao.MeasurementsDao;
+import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.Measurements;
 import net.ddns.dimag.cobhamrunning.models.Tests;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
@@ -32,6 +31,7 @@ public class MeasurementsService {
         Transaction tx = session.beginTransaction();
         try {
             for (Measurements meas: measSet){
+                meas.setMeasStatus();
                 session.save(meas);
             }
             tx.commit();
@@ -49,12 +49,34 @@ public class MeasurementsService {
 	    return measDao.getMeasureSetByTest(test);
     }
 
+//    public long getTestRunningTime(Tests test) throws CobhamRunningException {
+//	    Date minDate = null;
+//	    Date maxDate = null;
+//	    for (Measurements meas: getMeasureSetByTest(test)){
+//	        if (minDate == null){
+//	            minDate = meas.getMeasDate();
+//            } else if (minDate.getTime() > meas.getMeasDate().getTime()) {
+//	            minDate = meas.getMeasDate();
+//            }
+//	        if (maxDate == null){
+//	            maxDate = meas.getMeasDate();
+//            } else if (maxDate.getTime() < meas.getMeasDate().getTime()) {
+//	            maxDate = meas.getMeasDate();
+//            }
+//        }
+//	    if (minDate != null && maxDate != null) {
+//            return maxDate.getTime() - minDate.getTime();
+//        }
+//	    MsgBox.msgWarning("Test running time", "Can`t get test running time");
+//	    return 0;
+//    }
+
     public void deleteMeas(Measurements meas) throws CobhamRunningException {
     	measDao.delete(meas);
     }
 
-    public void updateMeas(Tests tests) throws CobhamRunningException {
-    	measDao.update(tests);
+    public void updateMeas(Measurements meas) throws CobhamRunningException {
+    	measDao.update(meas);
     }
 
     public List<Measurements> findAllMeas() throws CobhamRunningException {

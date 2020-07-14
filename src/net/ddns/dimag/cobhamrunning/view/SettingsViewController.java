@@ -156,12 +156,12 @@ public class SettingsViewController implements MsgBox {
 
     @FXML
 	private void testRmvConn(){
-		RmvUtils rmvUtils = new RmvUtils(addr_rmv.getText(), name_rmv.getText(), user_rmv.getText(), pass_rmv.getText());
 		try {
+			RmvUtils rmvUtils = new RmvUtils(addr_rmv.getText(), name_rmv.getText(), user_rmv.getText(), pass_rmv.getText());
 			Connection conn = rmvUtils.getConnection();
 			conn.close();
 			MsgBox.msgInfo("RMV connection", "Connection established");
-		} catch (SQLException | ClassNotFoundException e) {
+		} catch (SQLException | ClassNotFoundException | CobhamRunningException e) {
 			MsgBox.msgError("RMV connection", e.getLocalizedMessage());
 		}
 	}

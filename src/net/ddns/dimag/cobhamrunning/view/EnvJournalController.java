@@ -24,6 +24,8 @@ import net.ddns.dimag.cobhamrunning.models.environment.*;
 import net.ddns.dimag.cobhamrunning.services.environment.*;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
+import net.ddns.dimag.cobhamrunning.utils.ZebraPrint;
+import net.minidev.json.JSONObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -34,6 +36,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+
+import static net.ddns.dimag.cobhamrunning.utils.SystemCommands.envDeviceTemplate;
 
 public class EnvJournalController {
     private static final Logger LOGGER = LogManager.getLogger(EnvJournalController.class.getName());
@@ -331,8 +335,10 @@ public class EnvJournalController {
         ContextMenu menu = new ContextMenu();
         MenuItem mEdit = new MenuItem("Edit");
         MenuItem mHistory = new MenuItem("History");
+        MenuItem mPrintLabel = new MenuItem("Print label");
         menu.getItems().add(mEdit);
         menu.getItems().add(mHistory);
+        menu.getItems().add(mPrintLabel);
         tEnv.setContextMenu(menu);
 
         mEdit.setOnAction((ActionEvent event) -> {
@@ -354,6 +360,16 @@ public class EnvJournalController {
                 LOGGER.error(e.getClass() + ": " + e.getMessage(), e);
                 MsgBox.msgException(e);
             }
+        });
+        mPrintLabel.setOnAction((ActionEvent event) -> {
+            EnvDevice envDevice = tEnv.getSelectionModel().getSelectedItem().getValue();
+            JSONObject obj = new JSONObject();
+            obj.put("model", envDevice.getModel());
+            obj.put("sn", envDevice.getSn());
+            String template = String.format(envDeviceTemplate, envDevice.getService(),
+                    envDevice.getModel(), envDevice.getSn(), obj.toString());
+            ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
+            zebraPrint.printTemplate(template);
         });
     }
 

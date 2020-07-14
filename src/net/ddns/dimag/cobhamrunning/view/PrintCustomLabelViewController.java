@@ -1,6 +1,7 @@
 package net.ddns.dimag.cobhamrunning.view;
 
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -29,6 +30,7 @@ import java.util.regex.Pattern;
 
 public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
     private static final Logger LOGGER = LogManager.getLogger(ShippingViewController.class.getName());
+    private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
     private MainApp mainApp;
     private Stage dialogStage;
     private TestsViewController controller;
@@ -136,7 +138,7 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
                 ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
                 zebraPrint.printTemplate(swvTemplate);
             } else {
-                controller.writeConsole("Not connected");
+                writeConsole("Not connected");
             }
         } catch (CobhamRunningException e) {
             MsgBox.msgException(e);
@@ -159,7 +161,7 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
             try {
                 RmvUtils rmvUtils = new RmvUtils(mainApp);
                 rmvRes = rmvUtils.getLastTestsStatusWithDate(asisString);
-            } catch (SQLException | ClassNotFoundException | ParseException e) {
+            } catch (SQLException | ClassNotFoundException | ParseException | CobhamRunningException e) {
                 LOGGER.error(e);
                 MsgBox.msgWarning("Print label", e.getLocalizedMessage());
                 return;
@@ -168,12 +170,25 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
                 MsgBox.msgInfo("Print label", String.format("Tests result for system with ASIS: %s not found", asisString));
                 return;
             }
+            String status;
+            String date;
+            HashMap<String, Object> test;
+            for (String k: rmvRes.keySet()){
+                test = (HashMap<String, Object>) rmvRes.get(k);
+                if (test.get("TestStatus") != null && (int) test.get("TestStatus") == 0){
+                    status = "PASS";
+                } else {
+                    status = "FAIL";
+                }
+                date = dateFormat.format(test.get("TestDate"));
+                writeConsole(String.format("Found test: %s Date: %s Status: %s", test.get("Configuration"),
+                        date, status));
+            }
             String testName = MsgBox.msgChoice(String.format("Select test for system with ASIS: %s", asisString),
                     "Tests:", new ArrayList<String>(rmvRes.keySet()));
             if (testName != null){
                 for (String k: rmvRes.keySet()) {
-                    HashMap<String, Object> test = (HashMap<String, Object>) rmvRes.get(k);
-                    System.out.println(test);
+                    test = (HashMap<String, Object>) rmvRes.get(k);
                     if (test.get("Configuration").equals(testName)){
                         if (test.get("TestStatus") == null || Integer.parseInt(String.valueOf(test.get("TestStatus"))) != 0){
                             MsgBox.msgInfo("Print label", String.format("Test: %s has status FAIL", testName));
@@ -184,8 +199,8 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
                 HashMap<String, Object> currTest = (HashMap<String, Object>) rmvRes.get(testName);
                 String rmvTemplate = String.format(rmvTemplateCmd, String.format("%s/%s", articleString, asisString), currTest.get("Configuration"),
                         dateToString((Date) currTest.get("TestDate")));
-                ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
-                zebraPrint.printTemplate(rmvTemplate);
+//                ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
+//                zebraPrint.printTemplate(rmvTemplate);
             }
         } else if (svwViaIp.isSelected()) {
             printSwv();
@@ -265,6 +280,10 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
     private String dateToString(Date date){
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return dateFormat.format(date);
+    }
+
+    private void writeConsole(String val) {
+        mainApp.getController().writeConsole(val);
     }
 
     public static class RowData {

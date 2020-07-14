@@ -25,11 +25,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
-    private final String VERSION = "0.1.1.7";
+    private final String VERSION = "0.1.2.6";
     private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
@@ -43,6 +42,7 @@ public class MainApp extends Application implements MsgBox {
     private ArticlesViewController articlesViewController;
     private AsisCreatorController asisCreatorController;
     private RootLayoutController rootLayoutController;
+    private Thread telebotServer;
     private static final Logger LOGGER = LogManager.getLogger(MainApp.class.getName());
 
     private Image favicon = new Image("file:src/resources/images/cobham_C_64x64.png");
@@ -56,6 +56,7 @@ public class MainApp extends Application implements MsgBox {
         /** test DB connection*/
         LOGGER.info("Start init");
         LOGGER.info(String.format("Current program version: %s", VERSION));
+        loadSettings();
         LOGGER.info("Finish init");
     }
 
@@ -67,7 +68,7 @@ public class MainApp extends Application implements MsgBox {
     @Override
     public void start(Stage primaryStage) {
         this.primaryStage = primaryStage;
-        this.primaryStage.setTitle(String.format("CobhamRunning %s %s", VERSION, getComputerName()));
+        this.primaryStage.setTitle(String.format("CobhamRunning %s %s", VERSION, Utils.getComputerName()));
         this.primaryStage.getIcons().add(favicon);
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("RootLayout.fxml"));
@@ -83,20 +84,6 @@ public class MainApp extends Application implements MsgBox {
             e.printStackTrace();
         }
         showTestsView();
-        loadSettings();
-        try {
-            Updater updater = new Updater(this, testsViewController);
-            if (updater.hasNewVersion()){
-               String title = "Program update";
-               String msg = String.format("Found new version: %s\nPress Ok for update", updater.getRemoteVersion());
-                if (MsgBox.msgConfirm2(title, msg)){
-                    updater.isNeedUpdate();
-                }
-            }
-        } catch (CobhamRunningException e) {
-            LOGGER.error(e);
-            MsgBox.msgException(e);
-        }
     }
 
     public void showTestsView() {
@@ -106,7 +93,29 @@ public class MainApp extends Application implements MsgBox {
             rootLayout.setCenter(overviewPage);
             testsViewController = loader.getController();
             testsViewController.setMainApp(this);
-        } catch (IOException e) {
+
+//            telebotServer = new Thread(new TelebotListenerServer(this));
+//            telebotServer.start();
+            loadSettings();
+
+            if (!new File(currentSettings.getUpdate_path()).exists()) {
+                MsgBox.msgInfo("Update", String.format("Path: %s not available", currentSettings.getUpdate_path()));
+                return;
+            } else {
+                Thread update = new Thread(new Updater(this, testsViewController));
+                update.start();
+            }
+
+//            if (updater.hasNewVersion()) {
+//                String title = "Program update";
+//                String msg = String.format("Found new version: %s\nPress Ok for update", updater.getRemoteVersion());
+//                if (MsgBox.msgConfirm2(title, msg)) {
+//                    updater.isNeedUpdate();
+//                }
+//            }
+        } catch (CobhamRunningException e){
+            MsgBox.msgWarning("CobhamRunning", e.getLocalizedMessage());
+        } catch (Exception e) {
             e.printStackTrace();
             MsgBox.msgException(e);
         }
@@ -250,7 +259,7 @@ public class MainApp extends Application implements MsgBox {
         }
     }
 
-    public void showMeasureView(Device device) {
+    public void showMeasureView(Device device, Stage stage) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getClassLoader().getResource("MeasureView.fxml"));
             AnchorPane page = loader.load();
@@ -258,7 +267,7 @@ public class MainApp extends Application implements MsgBox {
             measureStage.setTitle("Measures");
             measureStage.getIcons().add(favicon);
             measureStage.initModality(Modality.WINDOW_MODAL);
-            measureStage.initOwner(shippingStage);
+            measureStage.initOwner(stage);
             Scene scene = new Scene(page);
             measureStage.setScene(scene);
             MeasureViewController controller = loader.getController();
@@ -405,7 +414,7 @@ public class MainApp extends Application implements MsgBox {
             printCustomLabelStage.setTitle("Print custom label");
             printCustomLabelStage.getIcons().add(favicon);
             printCustomLabelStage.initModality(Modality.WINDOW_MODAL);
-            printCustomLabelStage.initOwner(primaryStage);
+//            printCustomLabelStage.initOwner(primaryStage);
             printCustomLabelStage.setResizable(false);
             Scene scene = new Scene(page);
             printCustomLabelStage.setScene(scene);
@@ -518,7 +527,7 @@ public class MainApp extends Application implements MsgBox {
             settingsViewController.fillSettings();
             settingsViewController.setDialogStage(settingsStage);
             settingsStage.showAndWait();
-            if (settingsViewController.isSaveClicked()){
+            if (settingsViewController.isSaveClicked()) {
                 loadSettings();
             }
         } catch (IOException e) {
@@ -568,25 +577,12 @@ public class MainApp extends Application implements MsgBox {
             Unmarshaller um = context.createUnmarshaller();
             setCurrentSettings((Settings) um.unmarshal(file));
             currUrl = HibernateSessionFactoryUtil.getConnectionInfo().get("DataBaseUrl");
-            rootLayoutController.setDbNameLbl(currUrl);
             return true;
-        } catch (CobhamRunningException e){
-            MsgBox.msgWarning("Load settings", e.getMessage());
         } catch (Exception e) {
-            MsgBox.msgException(e);
+            MsgBox.msgWarning("Load settings", e.getMessage());
         }
 
         return false;
-    }
-
-    public void setDbUrl() {
-        try {
-            HibernateSessionFactoryUtil.restartSessionFactory();
-            rootLayoutController.setDbNameLbl(HibernateSessionFactoryUtil.getConnectionInfo().get("DataBaseUrl"));
-        } catch (CobhamRunningException e) {
-            MsgBox.msgWarning("Warning", e.getMessage());
-        }
-
     }
 
     public void setCurrentSettings(Settings currentSettings) {
@@ -601,18 +597,30 @@ public class MainApp extends Application implements MsgBox {
         return testsViewController;
     }
 
-    private String getComputerName()
-    {
-        Map<String, String> env = System.getenv();
-        if (env.containsKey("COMPUTERNAME"))
-            return env.get("COMPUTERNAME");
-        else if (env.containsKey("HOSTNAME"))
-            return env.get("HOSTNAME");
-        else
-            return "Unknown Computer";
+
+
+    public String getVERSION() {
+        return VERSION;
+    }
+
+    public void setDbUrl() {
+        try {
+            HibernateSessionFactoryUtil.restartSessionFactory();
+            rootLayoutController.setDbNameLbl(HibernateSessionFactoryUtil.getConnectionInfo().get("DataBaseUrl"));
+        } catch (CobhamRunningException e) {
+            MsgBox.msgWarning("Warning", e.getMessage());
+        }
+
+    }
+
+    public void setDbNameLbl(String lbl){
+        System.out.println(lbl);
+        rootLayoutController.setDbNameLbl(lbl);
     }
 
     public static void main(String[] args) {
         LauncherImpl.launchApplication(MainApp.class, CobhamPreloader.class, args);
     }
+
+    /**---------------------------------------------------------------------*/
 }
