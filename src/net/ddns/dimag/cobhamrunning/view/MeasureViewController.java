@@ -79,7 +79,7 @@ public class MeasureViewController {
                     measList = FXCollections.observableArrayList(
                             Utils.asSortedList(device.getTests().iterator().next().getMeas(),
                                     Utils.COMPARE_BY_MEASNUM));
-                }
+                } catch (NullPointerException ignore){}
                 testTime_lbl.setText(Utils.formatHMSM(test.getTestTime()));
                 staticList.addAll(measList);
                 tMeasure.setItems(measList);
@@ -152,7 +152,7 @@ public class MeasureViewController {
                                     setTextFill(Color.RED);
                                     final ContextMenu fMenu = new ContextMenu();
                                     MenuItem mHidePass = hidePass ? new MenuItem("Show all results"):
-                                            new MenuItem("Hide pass results");
+                                                                    new MenuItem("Hide pass results");
                                     mHidePass.setOnAction(new EventHandler<ActionEvent>() {
                                         @Override
                                         public void handle(ActionEvent event) {
@@ -171,6 +171,7 @@ public class MeasureViewController {
                                                 measList.addAll(staticList);
                                                 tMeasure.setItems(measList);
                                             }
+                                            tMeasure.refresh();
                                         }
                                     });
                                     fMenu.getItems().addAll(mHidePass);
