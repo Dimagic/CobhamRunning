@@ -84,7 +84,7 @@ public class RootLayoutController {
                                 test.getDevice().getAsis().getAsis(), testTime, test.getName()));
                     }
                     writeConsole("Complete");
-                } catch (CobhamRunningException | SQLException | ClassNotFoundException e) {
+                } catch (CobhamRunningException e) {
                     writeConsole(String.format("ERROR: %s", e.getMessage()));
                     MsgBox.msgException(e);
                 }

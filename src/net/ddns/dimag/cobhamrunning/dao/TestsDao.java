@@ -1,9 +1,5 @@
 package net.ddns.dimag.cobhamrunning.dao;
 
-import java.util.List;
-import java.util.Set;
-
-import com.sun.xml.internal.ws.api.model.wsdl.WSDLPortType;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.Tests;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
@@ -11,7 +7,8 @@ import net.ddns.dimag.cobhamrunning.utils.HibernateSessionFactoryUtil;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
-import org.hibernate.query.Query;
+
+import java.util.List;
 
 public class TestsDao implements UniversalDao{
 	public Tests findById(int id) throws CobhamRunningException {

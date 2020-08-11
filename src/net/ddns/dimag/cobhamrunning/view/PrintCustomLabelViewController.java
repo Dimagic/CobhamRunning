@@ -161,7 +161,7 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
             try {
                 RmvUtils rmvUtils = new RmvUtils(mainApp);
                 rmvRes = rmvUtils.getLastTestsStatusWithDate(asisString);
-            } catch (SQLException | ClassNotFoundException | ParseException | CobhamRunningException e) {
+            } catch (ParseException | CobhamRunningException e) {
                 LOGGER.error(e);
                 MsgBox.msgWarning("Print label", e.getLocalizedMessage());
                 return;
@@ -199,8 +199,8 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
                 HashMap<String, Object> currTest = (HashMap<String, Object>) rmvRes.get(testName);
                 String rmvTemplate = String.format(rmvTemplateCmd, String.format("%s/%s", articleString, asisString), currTest.get("Configuration"),
                         dateToString((Date) currTest.get("TestDate")));
-//                ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
-//                zebraPrint.printTemplate(rmvTemplate);
+                ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
+                zebraPrint.printTemplate(rmvTemplate);
             }
         } else if (svwViaIp.isSelected()) {
             printSwv();

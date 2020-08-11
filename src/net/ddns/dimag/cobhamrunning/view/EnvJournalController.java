@@ -61,12 +61,22 @@ public class EnvJournalController {
     @FXML
     private TreeTableView<EnvDevice> tEnv;
     @FXML
+    private TableView<EnvDevice> tEnvTab;
+    @FXML
     private CheckMenuItem confirmMove;
     @FXML
     private ComboBox<String> locationBox;
+    @FXML
+    private TextField filterField;
 
     @FXML
     private void initialize() throws CobhamRunningException {
+        tEnv.setVisible(true);
+        tEnvTab.setVisible(false);
+        tEnvTab.getSelectionModel().setSelectionMode(
+                SelectionMode.MULTIPLE
+        );
+
         locationList = FXCollections.observableArrayList(getLocationNameList());
         locationBox.setItems(locationList);
         confirmMove.setSelected(true);
@@ -80,6 +90,15 @@ public class EnvJournalController {
         addColumn("Status", "getStatus");
         addColumn("Next calibr.", "getCalibrDate");
         setupData();
+
+        tEnvTab.setRowFactory(this::rowFactoryTab);
+        addColumnTab("Location", "getLocation");
+        addColumnTab("Service", "getService");
+        addColumnTab("Manufacturer", "getManuf");
+        addColumnTab("Model", "getModel");
+        addColumnTab("Serial", "getSn");
+        addColumnTab("Status", "getStatus");
+        addColumnTab("Next calibr.", "getCalibrDate");
 
         locationBox.getSelectionModel().selectedIndexProperty().addListener((ChangeListener) (observable, oldValue, newValue) -> {
             if (!locationBox.getSelectionModel().isEmpty()){
@@ -121,12 +140,35 @@ public class EnvJournalController {
         for (TreeTableColumn column: tEnv.getColumns()){
             column.prefWidthProperty().bind(tEnv.widthProperty().divide(columnSize));
         }
+        tEnvTab.setItems(FXCollections.observableArrayList(getDeviceList()));
     }
 
     @FXML
     private void clearLocationBox() throws CobhamRunningException {
         locationBox.getSelectionModel().clearSelection();
         setupData();
+    }
+
+    private void addColumnTab(String label, String dataIndex) {
+        TableColumn<EnvDevice, String> column = new TableColumn<>(label);
+        column.prefWidthProperty().bind(tEnvTab.widthProperty().divide(7));
+        System.out.println(tEnvTab.getItems().size());
+
+        column.setCellValueFactory(
+                (TableColumn.CellDataFeatures<EnvDevice, String> param) -> {
+                    ObservableValue<String> result = new ReadOnlyStringWrapper("");
+                    if (param.getValue() != null) {
+                        try {
+                            method = param.getValue().getClass().getMethod(dataIndex);
+                            result = new ReadOnlyStringWrapper("" + method.invoke(param.getValue()));
+                        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                            return result;
+                        }
+                    }
+                    return result;
+                }
+        );
+        tEnvTab.getColumns().add(column);
     }
 
     private void addColumn(String label, String dataIndex) {
@@ -229,6 +271,11 @@ public class EnvJournalController {
                 envServiceService.saveEnvService(envService);
             }
         }
+    }
+
+    private TableRow<EnvDevice> rowFactoryTab(TableView<EnvDevice> view) {
+        TableRow<EnvDevice> row = new TableRow<>();
+        return row;
     }
 
     private TreeTableRow<EnvDevice> rowFactory(TreeTableView<EnvDevice> view) {
@@ -402,5 +449,17 @@ public class EnvJournalController {
 
     public void setMainApp(MainApp mainApp) throws CobhamRunningException {
         this.mainApp = mainApp;
+    }
+
+    @FXML
+    private void switchTable(){
+        if (tEnv.isVisible()){
+            tEnv.setVisible(false);
+            tEnvTab.setVisible(true);
+        } else {
+            tEnv.setVisible(true);
+            tEnvTab.setVisible(false);
+        }
+
     }
 }
