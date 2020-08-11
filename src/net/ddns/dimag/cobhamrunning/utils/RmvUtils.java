@@ -1,9 +1,12 @@
 package net.ddns.dimag.cobhamrunning.utils;
 
+import javafx.application.Platform;
+import javafx.concurrent.Task;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.DeviceInfo;
 import net.ddns.dimag.cobhamrunning.models.Measurements;
+import net.ddns.dimag.cobhamrunning.view.DeviceJournalController;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -13,13 +16,16 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class RmvUtils {
     private final String JDBC_URL;
     private Connection connection;
     private Statement statment;
+    private MainApp mainApp;
 
     public RmvUtils(String rmvAddr, String rmvDbName, String rmvUser, String rmvPassw) throws CobhamRunningException {
         if (!isServerAvailable(rmvAddr))
@@ -29,9 +35,10 @@ public class RmvUtils {
     }
 
     public RmvUtils(MainApp mainApp) throws CobhamRunningException {
+        this.mainApp = mainApp;
         Settings settings = mainApp.getCurrentSettings();
         if (!isServerAvailable(settings.getAddr_rmv()))
-        throw new CobhamRunningException(String.format("Server: %s not available", settings.getAddr_rmv()));
+            throw new CobhamRunningException(String.format("Server: %s not available", settings.getAddr_rmv()));
         this.JDBC_URL = String.format("jdbc:sqlserver://%s;databaseName=%s;user=%s;password=%s;", settings.getAddr_rmv(),
                 settings.getName_rmv(), settings.getUser_rmv(), settings.getPass_rmv());
     }
@@ -53,9 +60,21 @@ public class RmvUtils {
     }
 
     public List<HashMap<String, Object>> getMeasuresById(Object object)
-            throws SQLException, ClassNotFoundException {
+            throws CobhamRunningException {
         List<HashMap<String, Object>> rows = new ArrayList<HashMap<String, Object>>();
         String q = String.format("select * from RMV.dbo.tbl_RMV_MeasureData where HeaderID = %s", object);
+        List<HashMap<String, Object>> res = sendQuery(q);
+        for (HashMap<String, Object> measResult : res) {
+            rows.add(measResult);
+        }
+        return rows;
+    }
+
+    public List<HashMap<String, Object>> getMeasuresByHeaderList(List<Long> headerList)
+            throws CobhamRunningException {
+        List<HashMap<String, Object>> rows = new ArrayList<HashMap<String, Object>>();
+        String q = String.format("select * from RMV.dbo.tbl_RMV_MeasureData where HeaderID in (%s) order by MeasureDate",
+                headerList.stream().map(Object::toString).collect(Collectors.joining(",")));
         List<HashMap<String, Object>> res = sendQuery(q);
         for (HashMap<String, Object> measResult : res) {
             rows.add(measResult);
@@ -113,19 +132,18 @@ public class RmvUtils {
                 }
             }
             return new DeviceInfo(systemVer, commonVer, targetVer);
-        } catch (SQLException | ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } catch (CobhamRunningException e) {
+            MsgBox.msgException(e);
             return null;
         }
     }
 
     /**
-    *********************************************************************************************************
-    */
+     * ********************************************************************************************************
+     */
 
     public List<HashMap<String, Object>> getTestsByInnerAsis(Object object)
-            throws SQLException, ClassNotFoundException {
+            throws CobhamRunningException {
         List<HashMap<String, Object>> rows = new ArrayList<HashMap<String, Object>>();
         String q = String.format("select * from RMV.dbo.tbl_RMV_Header where HeaderID in " +
                 "(select HeaderID from RMV.dbo.tbl_RMV_MeasureData where Result = '%s') " +
@@ -147,52 +165,54 @@ public class RmvUtils {
         return res.get(0).get("TestDate").toString();
     }
 
-    public int getTestStatusByDateTest(Date date) throws SQLException, ClassNotFoundException {
+    public int getTestStatusByDateTest(Date date) throws CobhamRunningException {
         String q = String.format("select * from RMV.dbo.tbl_RMV_Header where TestDate = '%s'", date);
         List<HashMap<String, Object>> res = sendQuery(q);
         try {
             return (int) res.get(0).get("TestStatus");
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
         return -1;
     }
 
-    public Integer getTestTimeByDateTest(Date date) throws SQLException, ClassNotFoundException  {
+    public Integer getTestTimeByDateTest(Date date) throws CobhamRunningException {
         String q = String.format("select * from RMV.dbo.tbl_RMV_Header where TestDate = '%s'", date);
         List<HashMap<String, Object>> res = sendQuery(q);
         try {
             return (Integer) res.get(0).get("TestTime");
-        } catch (Exception e) {}
+        } catch (Exception e) {
+        }
         return -1;
     }
 
-    private HashMap<Date, HashMap<String, Object>> getTestsResultWithDate(String asis) throws SQLException, ClassNotFoundException, ParseException {
+    private HashMap<Date, HashMap<String, Object>> getTestsResultWithDate(String asis) throws CobhamRunningException, ParseException {
         String q = String
                 .format("select * from RMV.dbo.tbl_RMV_Header where Serial = '%s'", asis);
         List<HashMap<String, Object>> tmp = sendQuery(q);
         HashMap<Date, HashMap<String, Object>> res = new HashMap<>();
-        for (HashMap<String, Object> obj: tmp){
+        for (HashMap<String, Object> obj : tmp) {
             res.put(strToDate(obj.get("TestDate")), obj);
         }
         return res;
     }
 
-    public HashMap<Date, Object> getAllTestsStatusWithDate(String asis) throws SQLException, ClassNotFoundException, ParseException {
+    public HashMap<Date, Object> getAllTestsStatusWithDate(String asis) throws CobhamRunningException, ParseException {
         HashMap<Date, Object> res = new HashMap<>();
         HashMap<Date, HashMap<String, Object>> dateMap = getTestsResultWithDate(asis);
         List<Date> dateList = new ArrayList<Date>(dateMap.keySet());
         Collections.sort(dateList);
-        for (Date d: dateList){
+        for (Date d : dateList) {
             res.put(d, dateMap.get(d));
         }
         return res;
     }
 
-    public HashMap<String, Object> getLastTestsStatusWithDate(String asis) throws SQLException, ClassNotFoundException, ParseException {
+    public HashMap<String, Object> getLastTestsStatusWithDate(String asis) throws CobhamRunningException, ParseException {
         HashMap<String, Object> res = new HashMap<>();
         HashMap<Date, HashMap<String, Object>> dateMap = getTestsResultWithDate(asis);
         List<Date> dateList = new ArrayList<Date>(dateMap.keySet());
         Collections.sort(dateList);
-        for (Date d: dateList){
+        for (Date d : dateList) {
             res.put(dateMap.get(d).get("Configuration").toString(), dateMap.get(d));
         }
         return res;
@@ -211,9 +231,8 @@ public class RmvUtils {
     }
 
 
-
     private Collection<Object> getHeaderTest(String asis)
-            throws ClassNotFoundException, SQLException, ParseException {
+            throws CobhamRunningException, ParseException {
         String q = String
                 .format("select * from RMV.dbo.tbl_RMV_Header where Serial = '%s'", asis);
         HashMap<String, Object> headerTest = new HashMap<>();
@@ -239,7 +258,7 @@ public class RmvUtils {
         return headerTest.values();
     }
 
-    private HashMap<Integer, Object> getLastMeasureByNameAndAsis(String name, String asis) throws SQLException, ClassNotFoundException {
+    private HashMap<Integer, Object> getLastMeasureByNameAndAsis(String name, String asis) throws CobhamRunningException {
         String q = String.format("select * from RMV.dbo.tbl_RMV_MeasureData where HeaderID = (" +
                 "select HeaderID from RMV.dbo.tbl_RMV_Header where Serial = '%s' " +
                 "and Configuration = '%s' and TestDate = (" +
@@ -276,17 +295,13 @@ public class RmvUtils {
                     measList.add(new Measurements());
                 }
             }
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (ParseException e) {
+        } catch (CobhamRunningException | ParseException e) {
             e.printStackTrace();
         }
 
     }
 
-    private List getMeasuresById(int measId) throws SQLException, ClassNotFoundException {
+    private List getMeasuresById(int measId) throws CobhamRunningException {
         String q = String.format("select * from RMV.dbo.tbl_RMV_MeasureData where HeaderID = %s", measId);
         List<HashMap<String, Object>> measures = new ArrayList<>();
         for (HashMap<String, Object> measure : sendQuery(q)) {
@@ -326,7 +341,7 @@ public class RmvUtils {
         this.connection = connection;
     }
 
-    public boolean isServerAvailable(String address){
+    public boolean isServerAvailable(String address) {
         try {
             InetAddress srvAddr = InetAddress.getByName(address);
             return srvAddr.isReachable(5000);
@@ -336,22 +351,53 @@ public class RmvUtils {
         return false;
     }
 
-    private List<HashMap<String, Object>> sendQuery(String q) throws ClassNotFoundException, SQLException {
-        System.out.println(q);
-        HashMap<String, Object> row;
+    private List<HashMap<String, Object>> sendQuery(String q) throws CobhamRunningException {
+        List<HashMap<String, Object>> result;
         List<HashMap<String, Object>> rows = new ArrayList<HashMap<String, Object>>();
-
-        Statement statement = getStatment();
-        ResultSet rs = statement.executeQuery(q);
-        ResultSetMetaData rsmd = rs.getMetaData();
-        while (rs.next()) {
-            row = new HashMap<String, Object>();
-            int numColumns = rsmd.getColumnCount();
-            for (int i = 1; i <= numColumns; i++) {
-                String column_name = rsmd.getColumnName(i);
-                row.put(column_name, rs.getObject(column_name));
+        Task<List<HashMap<String, Object>>> task = new Task<List<HashMap<String, Object>>>() {
+            @Override protected List<HashMap<String, Object>> call() throws Exception {
+                HashMap<String, Object> row;
+                writeConsole(q);
+                try {
+                    Statement statement = getStatment();
+                    ResultSet rs = statement.executeQuery(q);
+                    ResultSetMetaData rsmd = rs.getMetaData();
+                    while (rs.next()) {
+                        row = new HashMap<String, Object>();
+                        int numColumns = rsmd.getColumnCount();
+                        for (int i = 1; i <= numColumns; i++) {
+                            String column_name = rsmd.getColumnName(i);
+                            row.put(column_name, rs.getObject(column_name));
+                        }
+                        rows.add(row);
+                        this.updateProgress(0, 0);
+                    }
+                } catch (SQLException | ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+                return rows;
             }
-            rows.add(row);
+
+            void writeConsole(String s){
+                Platform.runLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        mainApp.getController().writeConsole(s);
+                    }
+                });
+            }
+
+            @Override protected void succeeded() {
+                super.succeeded();
+                writeConsole("Done!");
+            }
+        };
+        Thread thread = new Thread(task);
+        thread.start();
+        Date startDate = new Date();
+        DeviceJournalController deviceJournalController = mainApp.getDeviceJournalController();
+        while (thread.isAlive()){
+            System.out.println(Utils.getDateDiff(startDate, new Date(), TimeUnit.MILLISECONDS));
         }
         return rows;
     }

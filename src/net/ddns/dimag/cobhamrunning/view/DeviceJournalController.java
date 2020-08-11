@@ -10,10 +10,7 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import net.ddns.dimag.cobhamrunning.MainApp;
-import net.ddns.dimag.cobhamrunning.models.ArticleHeaders;
-import net.ddns.dimag.cobhamrunning.models.Asis;
-import net.ddns.dimag.cobhamrunning.models.Device;
-import net.ddns.dimag.cobhamrunning.models.Tests;
+import net.ddns.dimag.cobhamrunning.models.*;
 import net.ddns.dimag.cobhamrunning.services.ArticleHeadersService;
 import net.ddns.dimag.cobhamrunning.services.DeviceService;
 import net.ddns.dimag.cobhamrunning.services.TestsService;
@@ -21,7 +18,6 @@ import net.ddns.dimag.cobhamrunning.utils.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.SQLException;
 import java.text.ParseException;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -77,6 +73,7 @@ public class DeviceJournalController {
     @FXML
     private void initialize() {
         initDate();
+        initItemMenu();
         useDevDate.setToggleGroup(datesRadioGroup);
         useTestDate.setToggleGroup(datesRadioGroup);
         useDevDate.setSelected(true);
@@ -107,19 +104,19 @@ public class DeviceJournalController {
             return row;
         });
 
-        tDevices.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
-            @Override
-            public void changed(ObservableValue observableValue, Object oldValue, Object newValue) {
-                if (newValue != null){
-                    fillTestsTable((Device) newValue);
-                }
-            }
-        });
+//        tDevices.getSelectionModel().selectedItemProperty().addListener(new ChangeListener() {
+//            @Override
+//            public void changed(ObservableValue observableValue, Object oldValue, Object newValue) {
+//                if (newValue != null){
+//                    fillTestsTable((Device) newValue);
+//                }
+//            }
+//        });
 
         tTests.setRowFactory(tv -> {
             TableRow<Tests> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
-                if (event.getClickCount() == 2 && (!row.isEmpty())){
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
                     Device device = row.getItem().getDevice();
                     Tests tests = row.getItem();
                     Set<Tests> testSet = new HashSet<>();
@@ -147,10 +144,10 @@ public class DeviceJournalController {
                 String tmp = newValue.toString().toUpperCase();
                 if (!tmp.isEmpty()) {
                     ObservableList<Device> devicesAfter = FXCollections.observableArrayList();
-                    for (Device device: devices){
+                    for (Device device : devices) {
                         if (device.getAsis().getAsis().contains(tmp.toUpperCase()) ||
-                            device.getSn().contains(tmp.toUpperCase()) ||
-                            device.getAsis().getArticleHeaders().getArticle().contains(tmp.toUpperCase())){
+                                device.getSn().contains(tmp.toUpperCase()) ||
+                                device.getAsis().getArticleHeaders().getArticle().contains(tmp.toUpperCase())) {
                             devicesAfter.add(device);
                         }
                     }
@@ -169,12 +166,12 @@ public class DeviceJournalController {
         try {
             tTests.getItems().clear();
             devices.clear();
-            if (useDevDate.isSelected()){
+            if (useDevDate.isSelected()) {
                 devices = FXCollections.observableArrayList(
                         deviceService.findDeviceByDateCreate(
                                 java.sql.Date.valueOf(dateFrom.getValue()),
                                 java.sql.Date.valueOf(dateTo.getValue())));
-            } else if (useTestDate.isSelected()){
+            } else if (useTestDate.isSelected()) {
                 devices = FXCollections.observableArrayList(
                         deviceService.findDeviceByTestDate(
                                 java.sql.Date.valueOf(dateFrom.getValue()),
@@ -187,13 +184,13 @@ public class DeviceJournalController {
         }
     }
 
-    private void fillTestsTable(Device device){
+    private void fillTestsTable(Device device) {
         allTests = new HashMap<Date, Object>();
         if (device == null) {
             tTests.getItems().clear();
             return;
         }
-        if (!rmvSearch){
+        if (!rmvSearch) {
             try {
                 tests = FXCollections.observableArrayList(testsService.getTestsByDevice(device));
                 tTests.setItems(tests);
@@ -205,8 +202,13 @@ public class DeviceJournalController {
             try {
                 allTests = rmvUtils.getAllTestsStatusWithDate(device.getAsis().getAsis());
                 List<Tests> testList = new ArrayList<>();
-                System.out.println(allTests);
-                for (Date d: allTests.keySet()){
+                List<Long> headerList = new ArrayList<>();
+                for (Object obj : allTests.values()) {
+                    HashMap<String, Object> test = (HashMap<String, Object>) obj;
+                    headerList.add((Long) test.get("HeaderID"));
+                }
+                HashMap<Long, Set<Measurements>> meases = Utils.getMeasListByHeaderList(rmvUtils, headerList);
+                for (Date d : allTests.keySet()) {
                     HashMap<String, Object> testObj = (HashMap<String, Object>) allTests.get(d);
                     Tests test = new Tests();
                     test.setName(testObj.get("Configuration").toString());
@@ -216,16 +218,16 @@ public class DeviceJournalController {
                     test.setTestTime((Integer) testObj.get("TestTime"));
                     try {
                         test.setTestStatus((Integer) testObj.get("TestStatus"));
-                    } catch (NullPointerException e){
+                    } catch (NullPointerException e) {
                         test.setTestStatus(-1);
                     }
-                    test.setMeas(Utils.getMeasListByTest(rmvUtils, test));
+                    test.setMeas(meases.get(test.getHeaderID()));
                     testList.add(test);
                 }
 
                 tests = FXCollections.observableArrayList(Utils.asSortedList(testList, Utils.COMPARE_BY_TESTDATE));
                 tTests.setItems(tests);
-            } catch (SQLException | ClassNotFoundException | ParseException e) {
+            } catch (CobhamRunningException | ParseException e) {
                 e.printStackTrace();
             }
         }
@@ -251,7 +253,7 @@ public class DeviceJournalController {
     }
 
     @FXML
-    private void mouseMoveEvent(final MouseEvent mouseEvent){
+    private void mouseMoveEvent(final MouseEvent mouseEvent) {
         System.out.println(mouseEvent);
     }
 
@@ -288,6 +290,7 @@ public class DeviceJournalController {
         dateTo.setConverter(new StringConverter<LocalDate>() {
             String pattern = "yyyy-MM-dd";
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern(pattern);
+
             {
                 dateTo.setPromptText(pattern.toLowerCase());
             }
@@ -321,26 +324,18 @@ public class DeviceJournalController {
         dateTo.setValue(stop);
     }
 
-    @FXML
-    private void searchByAsis(){
+    void searchByAsis(String asisForSearch) {
         try {
-            String asisForSearch = MsgBox.msgInputString("Enter ASIS for search").toUpperCase();
-            Pattern pattern = Pattern.compile("[A-Z0-9]{4}");
-            Matcher matcher = pattern.matcher(asisForSearch);
-            if (!matcher.matches()){
-                MsgBox.msgWarning("Search by ASIS", "Incorrect ASIS");
-                searchByAsis();
-            }
             List<HashMap<String, Object>> res = rmvUtils.getTestsByInnerAsis(asisForSearch);
             System.out.println(res);
             tTests.getItems().clear();
             devices.clear();
             rmvSearch = true;
             ArticleHeadersService articleHeadersService = new ArticleHeadersService();
-            for (HashMap<String, Object> item: res){
+            for (HashMap<String, Object> item : res) {
                 String articleName = String.format("%s%s", item.get("Article"), item.get("Revision"));
                 ArticleHeaders articleHeaders = articleHeadersService.findArticleByName(articleName);
-                if (articleHeaders == null){
+                if (articleHeaders == null) {
                     articleHeaders = new ArticleHeaders();
                     articleHeaders.setName(item.get("Article").toString());
                     articleHeaders.setRevision(item.get("Revision").toString());
@@ -351,25 +346,50 @@ public class DeviceJournalController {
                 String sn = "";
                 try {
                     sn = deviceService.findDeviceByAsis(asis.getAsis()).getSn();
-                } catch (NullPointerException e){
+                } catch (NullPointerException e) {
 
                 }
                 Device device = new Device(asis, sn);
                 if (!devices.contains(device))
-                devices.add(device);
+                    devices.add(device);
             }
-        } catch (NullPointerException e){
-            return;
         } catch (CobhamRunningException e) {
             MsgBox.msgWarning("Search by ASIS", e.getMessage());
-        } catch (SQLException | ClassNotFoundException e) {
-            MsgBox.msgException(e);
         }
+    }
 
+    @FXML
+    private void searchByAsis() {
+        try {
+            String asisForSearch = MsgBox.msgInputString("Enter ASIS for search").toUpperCase();
+            Pattern pattern = Pattern.compile("[A-Z0-9]{4}");
+            Matcher matcher = pattern.matcher(asisForSearch);
+            if (!matcher.matches()) {
+                MsgBox.msgWarning("Search by ASIS", "Incorrect ASIS");
+                searchByAsis();
+            } else {
+                searchByAsis(asisForSearch);
+            }
+        } catch (NullPointerException ignored){}
 
     }
 
-    private Settings getSettings(){
+    private void initItemMenu() {
+        ContextMenu menu = new ContextMenu();
+        MenuItem mRmvSearch = new MenuItem("Search in RMV");
+
+        menu.getItems().add(mRmvSearch);
+        tDevices.setContextMenu(menu);
+
+        mRmvSearch.setOnAction(event -> {
+            Device tmp = tDevices.getSelectionModel().getSelectedItem();
+            if (tmp != null){
+                searchByAsis(tmp.getAsis().getAsis());
+            }
+        });
+    }
+
+    private Settings getSettings() {
         return mainApp.getCurrentSettings();
     }
 

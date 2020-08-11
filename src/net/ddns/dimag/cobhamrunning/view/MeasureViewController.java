@@ -1,15 +1,17 @@
 package net.ddns.dimag.cobhamrunning.view;
 
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
+import javafx.scene.control.*;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.Measurements;
@@ -18,8 +20,11 @@ import net.ddns.dimag.cobhamrunning.services.MeasurementsService;
 import net.ddns.dimag.cobhamrunning.services.TestsService;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.Utils;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.persistence.PersistenceException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,21 +34,14 @@ public class MeasureViewController {
     private MainApp mainApp;
     private Device device;
     private ObservableList<String> testsNameList = FXCollections.observableArrayList();
+    private ObservableList<Measurements> staticList = FXCollections.observableArrayList();
     private ObservableList<Measurements> measList;
     private List<Tests> testsList;
+    private Method method;
+    private boolean hidePass = false;
 
     @FXML
     private TableView<Measurements> tMeasure;
-    @FXML
-    private TableColumn<Measurements, String> measNameColumn;
-    @FXML
-    private TableColumn<Measurements, String> measMinColumn;
-    @FXML
-    private TableColumn<Measurements, String> measValColumn;
-    @FXML
-    private TableColumn<Measurements, String> measMaxColumn;
-    @FXML
-    private TableColumn<Measurements, String> measStatusColumn;
 
     @FXML
     private ChoiceBox<String> testsChoiceBox;
@@ -62,35 +60,135 @@ public class MeasureViewController {
 
     @FXML
     private void initialize() {
-        measNameColumn.prefWidthProperty().bind(tMeasure.widthProperty().divide(5));
-        measMinColumn.prefWidthProperty().bind(tMeasure.widthProperty().divide(5));
-        measValColumn.prefWidthProperty().bind(tMeasure.widthProperty().divide(5));
-        measMaxColumn.prefWidthProperty().bind(tMeasure.widthProperty().divide(5));
-        measStatusColumn.prefWidthProperty().bind(tMeasure.widthProperty().divide(5));
+        tMeasure.setRowFactory(this::rowFactory);
 
-        measNameColumn.setCellValueFactory(cellData -> cellData.getValue().measNameProperty());
-        measMinColumn.setCellValueFactory(cellData -> cellData.getValue().measMinProperty());
-        measValColumn.setCellValueFactory(cellData -> cellData.getValue().measValProperty());
-        measMaxColumn.setCellValueFactory(cellData -> cellData.getValue().measMaxProperty());
-        measStatusColumn.setCellValueFactory(cellData -> cellData.getValue().measStatusProperty());
+        addColumn("Name", "getMeasName");
+        addColumn("Min", "getMeasMin");
+        addColumn("Measure", "getMeasVal");
+        addColumn("Max", "getMeasMax");
+        addColumn("Status", "getStringMeasStatus");
 
         testsChoiceBox.getSelectionModel().selectedIndexProperty().addListener(new ChangeListener() {
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                Tests test = null;
                 try {
-                    measList = getMeasureList(testsList.get(testsChoiceBox.getSelectionModel().getSelectedIndex()));
+                    test = testsList.get(testsChoiceBox.getSelectionModel().getSelectedIndex());
+                    measList = getMeasureList(test);
                 } catch (PersistenceException e) {
                     measList = FXCollections.observableArrayList(
                             Utils.asSortedList(device.getTests().iterator().next().getMeas(),
                                     Utils.COMPARE_BY_MEASNUM));
                 }
-                testTime_lbl.setText(Utils.formatHMSM(measList.get(0).getTest().getTestTime()));
+                testTime_lbl.setText(Utils.formatHMSM(test.getTestTime()));
+                staticList.addAll(measList);
                 tMeasure.setItems(measList);
             }
         });
     }
 
-    private void setTableMeasure(Device device){
+    private TableRow<Measurements> rowFactory(TableView<Measurements> view) {
+        TableRow<Measurements> row = new TableRow<>();
+        return row;
+    }
+
+    private void addColumn(String label, String dataIndex) {
+        TableColumn<Measurements, String> column = new TableColumn<>(label);
+        column.prefWidthProperty().bind(tMeasure.widthProperty().divide(5));
+        column.setCellValueFactory(
+                (TableColumn.CellDataFeatures<Measurements, String> param) -> {
+                    ObservableValue<String> result = new ReadOnlyStringWrapper("");
+                    if (param.getValue() != null) {
+                        try {
+                            method = param.getValue().getClass().getMethod(dataIndex);
+                            result = new ReadOnlyStringWrapper("" + method.invoke(param.getValue()));
+                        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                            return result;
+                        }
+                    }
+                    return result;
+                }
+        );
+
+        column.setCellFactory(new Callback<TableColumn<Measurements, String>, TableCell<Measurements, String>>() {
+            @Override
+            public TableCell<Measurements, String> call(TableColumn<Measurements, String> param) {
+                return new TableCell<Measurements, String>() {
+                    @Override
+                    public void updateItem(String item, boolean empty) {
+                        super.updateItem(item, empty);
+                        Measurements rowDataItem = (Measurements) getTableRow().getItem();
+                        if (!isEmpty() && rowDataItem != null) {
+                            if (column.getText().equalsIgnoreCase("Measure") && (Utils.isItAsis(item))
+                                && StringUtils.containsIgnoreCase(rowDataItem.getMeasName(), "serial")) {
+                                final ContextMenu menu = new ContextMenu();
+                                MenuItem mSearchItem = new MenuItem("Search in RMV");
+                                mSearchItem.setOnAction(new EventHandler<ActionEvent>() {
+                                    @Override
+                                    public void handle(ActionEvent event) {
+                                        dialogStage.close();
+                                        DeviceJournalController controller = mainApp.getDeviceJournalController();
+                                        if (controller == null) {
+                                            mainApp.showDevicesJournalView();
+                                            controller = mainApp.getDeviceJournalController();
+                                        }
+                                        controller.searchByAsis(item);
+                                    }
+                                });
+                                menu.getItems().addAll(mSearchItem);
+                                setTextFill(Color.BLUE);
+                                setContextMenu(menu);
+                                getContextMenu().setAutoHide(true);
+                            } else {
+                                setContextMenu(null);
+                                setTextFill(Color.BLACK);
+                            }
+
+                            if (column.getText().equalsIgnoreCase("Status")) {
+                                if (rowDataItem.getMeasStatus() == 1) {
+                                    setTextFill(Color.BLACK);
+                                    setContextMenu(null);
+                                } else {
+                                    setTextFill(Color.RED);
+                                    final ContextMenu fMenu = new ContextMenu();
+                                    MenuItem mHidePass = hidePass ? new MenuItem("Show all results"):
+                                            new MenuItem("Hide pass results");
+                                    mHidePass.setOnAction(new EventHandler<ActionEvent>() {
+                                        @Override
+                                        public void handle(ActionEvent event) {
+                                            hidePass = !hidePass;
+                                            ObservableList<Measurements> measListNew = FXCollections.observableArrayList();
+                                            if (hidePass){
+                                                for (Measurements m: measList){
+                                                    if (m.getMeasStatus() == 0){
+                                                        measListNew.add(m);
+                                                    }
+                                                }
+                                                tMeasure.getItems().clear();
+                                                tMeasure.setItems(measListNew);
+                                            } else {
+                                                tMeasure.getItems().clear();
+                                                measList.addAll(staticList);
+                                                tMeasure.setItems(measList);
+                                            }
+                                        }
+                                    });
+                                    fMenu.getItems().addAll(mHidePass);
+                                    setContextMenu(fMenu);
+                                    getContextMenu().setAutoHide(true);
+                                }
+                            }
+
+                            setText(item);
+                        }
+                    }
+                };
+            }
+        });
+        tMeasure.getColumns().add(column);
+    }
+
+    private void setTableMeasure(Device device) {
         this.device = device;
         testsNameList.clear();
         TestsService testsService = new TestsService();
@@ -100,17 +198,14 @@ public class MeasureViewController {
             testsChoiceBox.setDisable(true);
             testsList = new ArrayList<>();
             testsList.addAll(device.getTests());
-            System.out.println(device.getTests());
-
         } catch (CobhamRunningException e) {
             e.printStackTrace();
         }
         testsList.forEach((c) -> testsNameList.add(c.getName()));
         testsChoiceBox.setItems(FXCollections.observableArrayList(testsNameList));
-        if (testsNameList.size() != 0){
+        if (testsNameList.size() != 0) {
             testsChoiceBox.getSelectionModel().selectFirst();
         }
-
         article_lbl.setText(device.getAsis().getArticleHeaders().getArticle());
         asis_lbl.setText(device.getAsis().getAsis());
         sn_lbl.setText(device.getSn());

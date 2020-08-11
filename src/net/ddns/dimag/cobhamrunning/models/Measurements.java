@@ -139,6 +139,10 @@ public class Measurements {
 		return measStatus;
 	}
 
+	public String getStringMeasStatus(){
+		return getMeasStatus() == 1 ? "PASS" : "FAIL";
+	}
+
 	public void setMeasStatus(int status){
 		this.measStatus = status;
 	}

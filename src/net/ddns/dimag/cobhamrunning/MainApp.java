@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
-    private final String VERSION = "0.1.2.6";
+    private final String VERSION = "0.1.3.0";
     private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
@@ -42,6 +42,7 @@ public class MainApp extends Application implements MsgBox {
     private ArticlesViewController articlesViewController;
     private AsisCreatorController asisCreatorController;
     private RootLayoutController rootLayoutController;
+    private DeviceJournalController deviceJournalController;
     private Thread telebotServer;
     private static final Logger LOGGER = LogManager.getLogger(MainApp.class.getName());
 
@@ -156,9 +157,9 @@ public class MainApp extends Application implements MsgBox {
             devicesJournalStage.initOwner(primaryStage);
             Scene scene = new Scene(page);
             devicesJournalStage.setScene(scene);
-            DeviceJournalController controller = loader.getController();
-            controller.setMainApp(this);
-            controller.setDialogStage(devicesJournalStage);
+            deviceJournalController = loader.getController();
+            deviceJournalController.setMainApp(this);
+            deviceJournalController.setDialogStage(devicesJournalStage);
             devicesJournalStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -616,6 +617,10 @@ public class MainApp extends Application implements MsgBox {
     public void setDbNameLbl(String lbl){
         System.out.println(lbl);
         rootLayoutController.setDbNameLbl(lbl);
+    }
+
+    public DeviceJournalController getDeviceJournalController(){
+        return deviceJournalController;
     }
 
     public static void main(String[] args) {

@@ -3,7 +3,6 @@
 <?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ChoiceBox?>
 <?import javafx.scene.control.Label?>
-<?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
@@ -13,15 +12,7 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.231" xmlns:fx="http://javafx.com/fxml/1" fx:controller="net.ddns.dimag.cobhamrunning.view.MeasureViewController">
    <children>
-      <TableView fx:id="tMeasure" layoutX="14.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="75.0">
-        <columns>
-          <TableColumn fx:id="measNameColumn" prefWidth="75.0" text="Name" />
-          <TableColumn fx:id="measMinColumn" prefWidth="75.0" text="Min" />
-            <TableColumn fx:id="measValColumn" prefWidth="75.0" text="Measure" />
-            <TableColumn fx:id="measMaxColumn" prefWidth="75.0" text="Max" />
-            <TableColumn fx:id="measStatusColumn" prefWidth="75.0" text="Status" />
-        </columns>
-      </TableView>
+      <TableView fx:id="tMeasure" layoutX="14.0" layoutY="100.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="20.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="75.0" />
       <ChoiceBox fx:id="testsChoiceBox" layoutX="86.0" layoutY="14.0" prefHeight="25.0" prefWidth="150.0" AnchorPane.leftAnchor="45.0" />
       <Label layoutX="21.0" layoutY="18.0" text="Tests: " AnchorPane.leftAnchor="10.0" AnchorPane.topAnchor="20.0" />
       <GridPane layoutX="10.0" layoutY="49.0" prefHeight="19.0" prefWidth="584.0">
