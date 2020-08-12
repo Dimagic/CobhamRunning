@@ -28,7 +28,7 @@ public interface SystemCommands {
 			"^FO5,5^A0N,30,30^FDSystem:^FS\n" +
 			"^FO135,5^A0N,30,30^FD%s^FS\n" +
 			"^FO5,40^A0N,30,30^FDTest:^FS\n" +
-			"^FO135,40^A0N,30,30^FD%s PASS^FS\n" +
+			"^FO135,40^A0N,30,30^FD%s %s^FS\n" +
 			"^FO5,75^A0N,30,30^FDRMV date:^FS\n" +
 			"^FO135,75^A0N,30,30^FD%s^FS\n" +
 			"^XZ";

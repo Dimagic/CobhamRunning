@@ -62,7 +62,7 @@ public class LabelTemplateDao implements UniversalDao{
 	
 	public List findAll() throws CobhamRunningException{
 		Session session = HibernateSessionFactoryUtil.getSessionFactory().openSession();
-		List labelTemplates = session.createQuery("From LabelTemplate").list();
+		List labelTemplates = session.createQuery("FROM LabelTemplate f ORDER BY f.name").list();
 		session.close();
 		return labelTemplates;
 	}

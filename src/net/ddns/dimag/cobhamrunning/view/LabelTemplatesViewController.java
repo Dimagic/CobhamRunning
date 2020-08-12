@@ -18,6 +18,9 @@ import net.ddns.dimag.cobhamrunning.services.LabelTemplateService;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 
+import java.util.Collections;
+import java.util.List;
+
 public class LabelTemplatesViewController implements MsgBox {
     private Stage dialogStage;
     private MainApp mainApp;
@@ -46,7 +49,6 @@ public class LabelTemplatesViewController implements MsgBox {
     private void initialize() {
         initItemMenu();
         nameColumn.prefWidthProperty().bind(tTemplates.widthProperty().divide(1));
-
         nameColumn.setCellValueFactory(cellData -> cellData.getValue().nameProperty());
 
         saveBtn.setDisable(true);
@@ -119,7 +121,8 @@ public class LabelTemplatesViewController implements MsgBox {
 
     private void fillTable() {
         try {
-            templateList = FXCollections.observableArrayList(labelTemplateService.findAllLabelTemplate());
+            List<LabelTemplate> templateNameList = labelTemplateService.findAllLabelTemplate();
+            templateList = FXCollections.observableArrayList(templateNameList);
             tTemplates.setItems(templateList);
         } catch (CobhamRunningException e) {
             e.printStackTrace();

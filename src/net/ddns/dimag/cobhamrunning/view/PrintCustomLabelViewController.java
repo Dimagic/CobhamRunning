@@ -1,7 +1,6 @@
 package net.ddns.dimag.cobhamrunning.view;
 
 
-import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ChangeListener;
@@ -20,7 +19,6 @@ import net.ddns.dimag.cobhamrunning.utils.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -64,7 +62,6 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
         dataColumn.setCellValueFactory(cellData -> cellData.getValue().fieldValueProperty());
         dataColumn.setCellFactory(TextFieldTableCell.forTableColumn());
 
-
         dataColumn.setOnEditCommit(
                 new EventHandler<TableColumn.CellEditEvent<RowData, String>>() {
                     @Override
@@ -74,8 +71,9 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
                         ).setFieldValue(t.getNewValue());
                         boolean isNotAllFill = false;
                         for (RowData row : rowDataList) {
-                            if (row.fieldValue.equals("")) {
+                            if (row.fieldValue.getValue().trim().isEmpty()) {
                                 isNotAllFill = true;
+                                break;
                             }
                         }
                         printBtn.setDisable(isNotAllFill);
@@ -90,7 +88,7 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
             templatesBox.getSelectionModel().clearSelection();
             templatesBox.setDisable(newValue);
             printBtn.setDisable(!newValue);
-            if (newValue){
+            if (newValue) {
                 printLabel();
             }
         });
@@ -105,7 +103,7 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
         });
 
         templatesBox.getSelectionModel().selectedIndexProperty().addListener((ChangeListener) (observable, oldValue, newValue) -> {
-            if ((int) newValue > 0){
+            if ((int) newValue >= 0) {
                 rowDataList.clear();
                 printBtn.setDisable(true);
                 fillTable(labelList.get((int) newValue).toString());
@@ -115,22 +113,22 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
         tPrintJob.setItems(rowDataList);
     }
 
-    private void printSwv(){
+    private void printSwv() {
         controller = mainApp.getController();
         Settings settings = mainApp.getCurrentSettings();
         String user = settings.getLogin_ssh();
         String pass = settings.getPass_ssh();
-        if (user == null || pass == null){
+        if (user == null || pass == null) {
             MsgBox.msgInfo("SSH connection", "Not all settings are filling");
             return;
         }
         String host = MsgBox.msgInputIP();
-        if (host == null){
+        if (host == null) {
             return;
         }
         JSSHClient jsshClient = new JSSHClient(host, user, pass, mainApp);
         try {
-            if (jsshClient.isSshConected()){
+            if (jsshClient.isSshConected()) {
                 String asis = jsshClient.cobhamGetAsis();
                 Map<String, String> swv = jsshClient.cobhamGetSwv();
                 String swvTemplate = String.format(swvTemplateCmd, asis, swv.get("target"),
@@ -149,13 +147,13 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
     private void printLabel() {
         String articleString;
         String asisString;
-        if (useRmvData.isSelected()){
+        if (useRmvData.isSelected()) {
             HashMap<String, Object> rmvRes = new HashMap<>();
             List<String> currSys = MsgBox.msgScanSystemBarcode();
             try {
                 articleString = currSys.get(0);
                 asisString = currSys.get(1);
-            } catch (NullPointerException | IndexOutOfBoundsException e){
+            } catch (NullPointerException | IndexOutOfBoundsException e) {
                 return;
             }
             try {
@@ -166,45 +164,44 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
                 MsgBox.msgWarning("Print label", e.getLocalizedMessage());
                 return;
             }
-            if (rmvRes.keySet().isEmpty()){
+            if (rmvRes.keySet().isEmpty()) {
                 MsgBox.msgInfo("Print label", String.format("Tests result for system with ASIS: %s not found", asisString));
                 return;
             }
             String status;
             String date;
             HashMap<String, Object> test;
-            for (String k: rmvRes.keySet()){
+            for (String k : rmvRes.keySet()) {
                 test = (HashMap<String, Object>) rmvRes.get(k);
-                if (test.get("TestStatus") != null && (int) test.get("TestStatus") == 0){
-                    status = "PASS";
-                } else {
-                    status = "FAIL";
-                }
+                status = getStringTestStatus(test);
                 date = dateFormat.format(test.get("TestDate"));
                 writeConsole(String.format("Found test: %s Date: %s Status: %s", test.get("Configuration"),
                         date, status));
             }
             String testName = MsgBox.msgChoice(String.format("Select test for system with ASIS: %s", asisString),
                     "Tests:", new ArrayList<String>(rmvRes.keySet()));
-            if (testName != null){
-                for (String k: rmvRes.keySet()) {
+            if (testName != null) {
+                for (String k : rmvRes.keySet()) {
                     test = (HashMap<String, Object>) rmvRes.get(k);
-                    if (test.get("Configuration").equals(testName)){
-                        if (test.get("TestStatus") == null || Integer.parseInt(String.valueOf(test.get("TestStatus"))) != 0){
-                            MsgBox.msgInfo("Print label", String.format("Test: %s has status FAIL", testName));
-                            return;
+                    if (test.get("Configuration").equals(testName)) {
+                        if (test.get("TestStatus") == null || Integer.parseInt(String.valueOf(test.get("TestStatus"))) != 0) {
+                            boolean q = MsgBox.msgConfirm2("Print label", String.format("Test: %s has status FAIL.\n" +
+                                    "Do you want print this label?", testName));
+                            if (!q)
+                                return;
                         }
                     }
                 }
                 HashMap<String, Object> currTest = (HashMap<String, Object>) rmvRes.get(testName);
                 String rmvTemplate = String.format(rmvTemplateCmd, String.format("%s/%s", articleString, asisString), currTest.get("Configuration"),
-                        dateToString((Date) currTest.get("TestDate")));
+                        getStringTestStatus(currTest), dateToString((Date) currTest.get("TestDate")));
+                System.out.println(rmvTemplate);
                 ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
                 zebraPrint.printTemplate(rmvTemplate);
             }
         } else if (svwViaIp.isSelected()) {
             printSwv();
-        }else {
+        } else {
             LabelTemplate labelTemplate = null;
             try {
                 labelTemplate = labelTemplateService.findByName(templatesBox.getValue());
@@ -221,8 +218,8 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
     }
 
     @FXML
-    private void openEditLabelTemplateView(){
-        if (mainApp.showLabelTemplatesView(this.dialogStage)){
+    private void openEditLabelTemplateView() {
+        if (mainApp.showLabelTemplatesView(this.dialogStage)) {
             fillLabelBox();
             rowDataList.clear();
         }
@@ -255,16 +252,12 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
     private void fillTable(String template) {
         Matcher m = Pattern.compile("(?<=\\<:)(.*?)(?=\\:>)").matcher(template);
         System.out.println(template);
+        HashSet<String> valSet = new HashSet<>();
         while (m.find()) {
-            String val = m.group();
-            boolean isPresent = false;
-            for (RowData s: rowDataList){
-                if (s.getFieldName().equals(val))
-                    isPresent = true;
-                    break;
-            }
-            if (!isPresent || rowDataList.size() == 0)
-                rowDataList.add(new RowData(val));
+            valSet.add(m.group());
+        }
+        for (String s : valSet) {
+            rowDataList.add(new RowData(s));
         }
         tPrintJob.setItems(rowDataList);
     }
@@ -277,13 +270,17 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
         this.dialogStage = dialogStage;
     }
 
-    private String dateToString(Date date){
+    private String dateToString(Date date) {
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return dateFormat.format(date);
     }
 
     private void writeConsole(String val) {
         mainApp.getController().writeConsole(val);
+    }
+
+    private String getStringTestStatus(HashMap<String, Object> test){
+        return (int) test.get("TestStatus") == 0 ? "PASS": "FAIL";
     }
 
     public static class RowData {

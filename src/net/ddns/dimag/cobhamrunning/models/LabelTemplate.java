@@ -1,9 +1,6 @@
 package net.ddns.dimag.cobhamrunning.models;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -118,5 +115,4 @@ public class LabelTemplate {
 		builder.append("]");
 		return builder.toString();
 	}
-
 }

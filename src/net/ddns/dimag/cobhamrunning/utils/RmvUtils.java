@@ -2,6 +2,8 @@ package net.ddns.dimag.cobhamrunning.utils;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import javafx.scene.Cursor;
+import javafx.scene.Scene;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.DeviceInfo;
@@ -357,7 +359,6 @@ public class RmvUtils {
         Task<List<HashMap<String, Object>>> task = new Task<List<HashMap<String, Object>>>() {
             @Override protected List<HashMap<String, Object>> call() throws Exception {
                 HashMap<String, Object> row;
-                writeConsole(q);
                 try {
                     Statement statement = getStatment();
                     ResultSet rs = statement.executeQuery(q);
@@ -373,7 +374,7 @@ public class RmvUtils {
                         this.updateProgress(0, 0);
                     }
                 } catch (SQLException | ClassNotFoundException e) {
-                    e.printStackTrace();
+                    MsgBox.msgException(e);
                 }
                 return rows;
             }
@@ -387,17 +388,18 @@ public class RmvUtils {
                 });
             }
 
-            @Override protected void succeeded() {
+            @Override
+            protected void succeeded() {
                 super.succeeded();
                 writeConsole("Done!");
             }
         };
         Thread thread = new Thread(task);
         thread.start();
-        Date startDate = new Date();
-        DeviceJournalController deviceJournalController = mainApp.getDeviceJournalController();
-        while (thread.isAlive()){
-            System.out.println(Utils.getDateDiff(startDate, new Date(), TimeUnit.MILLISECONDS));
+        try {
+            thread.join();
+        } catch (InterruptedException e) {
+            MsgBox.msgException(e);
         }
         return rows;
     }

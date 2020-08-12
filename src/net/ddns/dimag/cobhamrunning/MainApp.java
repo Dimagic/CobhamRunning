@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
-    private final String VERSION = "0.1.3.0";
+    private final String VERSION = "0.1.3.1";
     private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
@@ -447,12 +447,11 @@ public class MainApp extends Application implements MsgBox {
             controller.setMainApp(this);
             controller.setDialogStage(labelTemplatesStage);
             labelTemplatesStage.showAndWait();
-            return controller.isSaveClicked();
         } catch (IOException e) {
             e.printStackTrace();
             MsgBox.msgException(e);
         }
-        return false;
+        return true;
     }
 
     public void showRunningTestView() {
