@@ -397,6 +397,10 @@ public class DeviceJournalController {
         this.dialogStage = dialogStage;
     }
 
+    public Stage getDialogStage() {
+        return this.dialogStage;
+    }
+
     public void setMainApp(MainApp mainApp) {
         this.mainApp = mainApp;
         try {

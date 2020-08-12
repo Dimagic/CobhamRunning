@@ -100,6 +100,9 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
             templatesBox.getSelectionModel().clearSelection();
             templatesBox.setDisable(newValue);
             printBtn.setDisable(!newValue);
+            if (newValue) {
+                printLabel();
+            }
         });
 
         templatesBox.getSelectionModel().selectedIndexProperty().addListener((ChangeListener) (observable, oldValue, newValue) -> {
@@ -195,7 +198,6 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
                 HashMap<String, Object> currTest = (HashMap<String, Object>) rmvRes.get(testName);
                 String rmvTemplate = String.format(rmvTemplateCmd, String.format("%s/%s", articleString, asisString), currTest.get("Configuration"),
                         getStringTestStatus(currTest), dateToString((Date) currTest.get("TestDate")));
-                System.out.println(rmvTemplate);
                 ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
                 zebraPrint.printTemplate(rmvTemplate);
             }
@@ -251,7 +253,6 @@ public class PrintCustomLabelViewController implements MsgBox, SystemCommands {
 
     private void fillTable(String template) {
         Matcher m = Pattern.compile("(?<=\\<:)(.*?)(?=\\:>)").matcher(template);
-        System.out.println(template);
         HashSet<String> valSet = new HashSet<>();
         while (m.find()) {
             valSet.add(m.group());
