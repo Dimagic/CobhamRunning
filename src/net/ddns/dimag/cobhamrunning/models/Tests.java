@@ -54,6 +54,14 @@ public class Tests {
 		return testDate;
 	}
 
+	public Long getDateTestMilliseconds(){
+		return testDate.getTime();
+	}
+
+	public String getFormattedDateTest(){
+		return Utils.getFormattedDate(getDateTest());
+	}
+
 	public void setDateTest(Date testDate) {
 		this.testDate = testDate;
 	}
@@ -65,6 +73,10 @@ public class Tests {
 		return testStatus;
 	}
 
+	public String getStringTestStatus(){
+		return getTestStatus() == 0 ? "PASS" : "FAIL";
+	}
+
 	public void setTestStatus(int testStatus) {
 		this.testStatus = testStatus;
 	}
@@ -74,6 +86,10 @@ public class Tests {
 
 	public Integer getTestTime() {
 		return testTime;
+	}
+
+	public String getTestTimeHMSM(){
+		return Utils.formatHMSM(getTestTime());
 	}
 
 	public void setTestTime(Integer testTime) {
@@ -96,7 +112,10 @@ public class Tests {
 	}
 
 	public void setDevice(Device device) {
-		setDateTest(new Date());
+		// ToDo: if test loaded from rmv, temp. fix
+		if (getDateTest() == null){
+			setDateTest(new Date());
+		}
 		this.device = device;
 	}
 
@@ -161,6 +180,34 @@ public class Tests {
 			return getTestStatus() == 0 ? new SimpleStringProperty("PASS") :
 					new SimpleStringProperty("FAIL");
 		}
+	}
+
+	public String getArticle(){
+		return device.getAsis().getArticleHeaders().getArticle();
+	}
+
+	public String getAsis(){
+		return device.getAsis().getAsis();
+	}
+
+	private String userName;
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	private String computerName;
+
+	public String getComputerName() {
+		return computerName;
+	}
+
+	public void setComputerName(String computerName) {
+		this.computerName = computerName;
 	}
 
 	@Override

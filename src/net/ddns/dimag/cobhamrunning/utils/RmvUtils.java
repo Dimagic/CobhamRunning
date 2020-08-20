@@ -1,14 +1,9 @@
 package net.ddns.dimag.cobhamrunning.utils;
 
-import javafx.application.Platform;
-import javafx.concurrent.Task;
-import javafx.scene.Cursor;
-import javafx.scene.Scene;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.Device;
 import net.ddns.dimag.cobhamrunning.models.DeviceInfo;
 import net.ddns.dimag.cobhamrunning.models.Measurements;
-import net.ddns.dimag.cobhamrunning.view.DeviceJournalController;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -18,7 +13,6 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -115,7 +109,6 @@ public class RmvUtils {
         try {
             List<HashMap<String, Object>> testList = new ArrayList(getHeaderTest(dev.getAsis().getAsis()));
             for (HashMap<String, Object> test : testList) {
-                System.out.println(String.format("Test: %s Date: %s", test.get("Configuration"), test.get("TestDate")));
                 List<HashMap<String, Object>> testRes = getMeasuresById(test.get("HeaderID"));
                 for (HashMap<String, Object> meas : testRes) {
                     String descript = (String) meas.get("Description");
@@ -144,8 +137,7 @@ public class RmvUtils {
      * ********************************************************************************************************
      */
 
-    public List<HashMap<String, Object>> getTestsByInnerAsis(Object object)
-            throws CobhamRunningException {
+    public List<HashMap<String, Object>> getTestsByInnerAsis(Object object) {
         List<HashMap<String, Object>> rows = new ArrayList<HashMap<String, Object>>();
         String q = String.format("select * from RMV.dbo.tbl_RMV_Header where HeaderID in " +
                 "(select HeaderID from RMV.dbo.tbl_RMV_MeasureData where Result = '%s') " +
@@ -220,7 +212,7 @@ public class RmvUtils {
         return res;
     }
 
-    private List getTestNamesByAsis(String asis) throws SQLException, ClassNotFoundException, CobhamRunningException {
+    private List getTestNamesByAsis(String asis) throws CobhamRunningException {
         String q = String
                 .format("select DISTINCT Configuration from RMV.dbo.tbl_RMV_Header where Serial = '%s'", asis);
         List<HashMap<String, Object>> res = sendQuery(q);
@@ -232,6 +224,71 @@ public class RmvUtils {
         return resList;
     }
 
+    public HashMap<HashMap<String, Object>, List<HashMap<String, Object>>>
+    getTestsWithMeasureByArticleBetweenDate(String art, Date start, Date stop)
+            throws CobhamRunningException {
+        List<HashMap<String, Object>> testList = getTestsByArticleBetweenDate(art, start, stop);
+        Set<String> headSet = new HashSet<>();
+        testList.forEach(item -> headSet.add(Long.toString((Long) item.get("HeaderID"))));
+        List<HashMap<String, Object>> measList = getMeasuresByHeaderId(headSet);
+        HashMap<HashMap<String, Object>, List<HashMap<String, Object>>> resMap = new HashMap<>();
+        for (HashMap<String, Object> test: testList){
+            List<HashMap<String, Object>> resMeas = measList.stream().filter(c ->
+                    c.get("HeaderID").equals(test.get("HeaderID"))).collect(Collectors.toList());
+            resMap.put(test, resMeas);
+        }
+        return resMap;
+    }
+
+    public List<HashMap<String, Object>> getTestsByArticleBetweenDate(String art, Date start, Date stop)
+            throws CobhamRunningException {
+        String a = "%" + art + "%";
+        String q = String.format("select * from RMV.dbo.tbl_RMV_Header where Article like '%s' " +
+                "and TestDate between '%s' and '%s' order by TestDate DESC", a, start, stop);
+        List<HashMap<String, Object>> res = sendQuery(q);
+        if (res.size() == 0) {
+            MsgBox.msgInfo("RMV utils", String.format("Tests for system with article\nlike %s not found", art));
+        }
+        return res;
+    }
+
+    public List<HashMap<String, Object>> getTestsByAsisBetweenDate(String asis, Date start, Date stop) {
+        String q = String.format("select * from RMV.dbo.tbl_RMV_Header where Serial = '%s' " +
+                "and TestDate between '%s' and '%s' order by TestDate DESC", asis.toUpperCase(), start, stop);
+        List<HashMap<String, Object>> res = sendQuery(q);
+        if (res.size() == 0) {
+            boolean qRes = MsgBox.msgConfirm("RMV utils", String.format("Tests for system with ASIS: %s\n" +
+                    "not found in period from %s to %s.\n" +
+                    "Do you want search in all DB?", asis.toUpperCase(), start, stop));
+            if (qRes){
+                return getTestsByAsis(asis);
+            }
+        }
+        return res;
+    }
+
+    public List<HashMap<String, Object>> getTestsByAsis(String asis){
+        String q = String.format("select * from RMV.dbo.tbl_RMV_Header " +
+                "where Serial = '%s' order by TestDate DESC", asis.toUpperCase());
+        List<HashMap<String, Object>> res = sendQuery(q);
+        if (res.size() == 0) {
+             MsgBox.msgInfo("RMV utils", String.format("Tests for system with ASIS: %s not found.",
+                     asis.toUpperCase()));
+        }
+        return res;
+    }
+
+    public List<HashMap<String, Object>> getTestsWithLimit(int limit){
+        String q = String.format("select * from RMV.dbo.tbl_RMV_Header limit %s order by TestDate DESC", limit);
+        List<HashMap<String, Object>> res = sendQuery(q);
+        return res;
+    }
+
+    private List<HashMap<String, Object>> getMeasuresByHeaderId(Set headList) throws CobhamRunningException {
+        String s = String.join(",", headList);
+        String q = String.format("select * from RMV.dbo.tbl_RMV_MeasureData where HeaderID in (%s) order by HeaderID, MeasureID", s);
+        return sendQuery(q);
+    }
 
     private Collection<Object> getHeaderTest(String asis)
             throws CobhamRunningException, ParseException {
@@ -256,7 +313,7 @@ public class RmvUtils {
                 headerTest.put(currTest.get("Configuration").toString(), currTest);
             }
         }
-        System.out.println(headerTest);
+
         return headerTest.values();
     }
 
@@ -274,7 +331,7 @@ public class RmvUtils {
     }
 
     private void appendToPath() {
-        String dir = "e:\\Work\\JProject\\CobhamRunning\\lib\\";
+        String dir = "Y:\\Projects\\Java\\Intellij\\CobhamRunning\\lib\\";
         String path = System.getProperty("java.library.path");
         path = dir + ";" + path;
         System.setProperty("java.library.path", path);
@@ -353,53 +410,33 @@ public class RmvUtils {
         return false;
     }
 
-    private List<HashMap<String, Object>> sendQuery(String q) throws CobhamRunningException {
-        List<HashMap<String, Object>> result;
-        List<HashMap<String, Object>> rows = new ArrayList<HashMap<String, Object>>();
-        Task<List<HashMap<String, Object>>> task = new Task<List<HashMap<String, Object>>>() {
-            @Override protected List<HashMap<String, Object>> call() throws Exception {
-                HashMap<String, Object> row;
-                try {
-                    Statement statement = getStatment();
-                    ResultSet rs = statement.executeQuery(q);
-                    ResultSetMetaData rsmd = rs.getMetaData();
-                    while (rs.next()) {
-                        row = new HashMap<String, Object>();
-                        int numColumns = rsmd.getColumnCount();
-                        for (int i = 1; i <= numColumns; i++) {
-                            String column_name = rsmd.getColumnName(i);
-                            row.put(column_name, rs.getObject(column_name));
-                        }
-                        rows.add(row);
-                        this.updateProgress(0, 0);
-                    }
-                } catch (SQLException | ClassNotFoundException e) {
-                    MsgBox.msgException(e);
-                }
-                return rows;
-            }
-
-            void writeConsole(String s){
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        mainApp.getController().writeConsole(s);
-                    }
-                });
-            }
-
-            @Override
-            protected void succeeded() {
-                super.succeeded();
-                writeConsole("Done!");
-            }
-        };
-        Thread thread = new Thread(task);
-        thread.start();
+    private List<HashMap<String, Object>> sendQuery(String q) {
+        System.out.println(q);
+        List<HashMap<String, Object>> rows = new ArrayList<>();
         try {
-            thread.join();
-        } catch (InterruptedException e) {
+            HashMap<String, Object> row;
+            Statement statement = getStatment();
+            ResultSet rs = statement.executeQuery(q);
+            ResultSetMetaData rsmd = rs.getMetaData();
+            while (rs.next()) {
+                row = new HashMap<>();
+                int numColumns = rsmd.getColumnCount();
+                for (int i = 1; i <= numColumns; i++) {
+                    String column_name = rsmd.getColumnName(i);
+                    row.put(column_name, rs.getObject(column_name));
+                }
+                rows.add(row);
+            }
+        } catch (ClassNotFoundException | SQLException e){
             MsgBox.msgException(e);
+        } finally {
+            try {
+                if (!statment.isClosed()){
+                    statment.close();
+                }
+            } catch (SQLException e) {
+                MsgBox.msgException(e);
+            }
         }
         return rows;
     }

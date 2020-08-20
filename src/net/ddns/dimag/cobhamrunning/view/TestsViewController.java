@@ -108,6 +108,11 @@ public class TestsViewController implements MsgBox {
 	}
 
 	@FXML
+	private void handleRmvJournal(){
+		mainApp.showRmvJournalView();
+	}
+
+	@FXML
 	private void handleEnvJournal(){
 		mainApp.showEnvJournalView();
 	}

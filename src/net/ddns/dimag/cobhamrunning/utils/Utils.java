@@ -6,6 +6,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
@@ -102,6 +103,11 @@ public class Utils {
         return res;
     }
 
+    public static String getFormattedDate(Date date){
+        SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        return dt.format(date);
+    }
+
     public static Set<Measurements> getMeasListByTest(RmvUtils rmvUtils, Tests test) throws CobhamRunningException {
         Set <Measurements> measList = new HashSet<>();
         for(HashMap<String, Object> measObj: rmvUtils.getMeasuresById(test.getHeaderID())){
@@ -165,7 +171,7 @@ public class Utils {
 
     public static boolean isItAsis(String s){
         Pattern pattern = Pattern.compile("^[A-Z0-9]{4}$");
-        Matcher matcher = pattern.matcher(s);
+        Matcher matcher = pattern.matcher(s.toUpperCase());
         return matcher.matches();
     }
 

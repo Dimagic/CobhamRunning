@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
-    private final String VERSION = "0.1.3.1";
+    private final String VERSION = "0.1.3.5";
     private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
@@ -95,9 +95,10 @@ public class MainApp extends Application implements MsgBox {
             testsViewController = loader.getController();
             testsViewController.setMainApp(this);
 
+            loadSettings();
+
 //            telebotServer = new Thread(new TelebotListenerServer(this));
 //            telebotServer.start();
-            loadSettings();
 
             if (!new File(currentSettings.getUpdate_path()).exists()) {
                 MsgBox.msgInfo("Update", String.format("Path: %s not available", currentSettings.getUpdate_path()));
@@ -106,14 +107,6 @@ public class MainApp extends Application implements MsgBox {
                 Thread update = new Thread(new Updater(this, testsViewController));
                 update.start();
             }
-
-//            if (updater.hasNewVersion()) {
-//                String title = "Program update";
-//                String msg = String.format("Found new version: %s\nPress Ok for update", updater.getRemoteVersion());
-//                if (MsgBox.msgConfirm2(title, msg)) {
-//                    updater.isNeedUpdate();
-//                }
-//            }
         } catch (CobhamRunningException e){
             MsgBox.msgWarning("CobhamRunning", e.getLocalizedMessage());
         } catch (Exception e) {
@@ -161,6 +154,30 @@ public class MainApp extends Application implements MsgBox {
             deviceJournalController.setMainApp(this);
             deviceJournalController.setDialogStage(devicesJournalStage);
             devicesJournalStage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
+            LOGGER.error(e.toString());
+            MsgBox.msgException(e);
+        }
+    }
+
+    public void showRmvJournalView() {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            loader.setLocation(getClass().getClassLoader().getResource("RmvJournal.fxml"));
+            AnchorPane page = loader.load();
+            Stage rmvJournalStage = new Stage();
+            rmvJournalStage.setTitle("RMV journal");
+            rmvJournalStage.getIcons().add(favicon);
+            rmvJournalStage.initModality(Modality.WINDOW_MODAL);
+            rmvJournalStage.initOwner(primaryStage);
+            Scene scene = new Scene(page);
+            rmvJournalStage.setScene(scene);
+            RmvJournalController rmvJournalController;
+            rmvJournalController = loader.getController();
+            rmvJournalController.setMainApp(this);
+            rmvJournalController.setDialogStage(rmvJournalStage);
+            rmvJournalStage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
             LOGGER.error(e.toString());

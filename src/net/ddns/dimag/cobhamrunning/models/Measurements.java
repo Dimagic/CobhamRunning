@@ -69,7 +69,10 @@ public class Measurements {
 	}
 
 	public void setMeasName(String measName) {
-		setMeasDate(new Date());
+		// ToDo: if meas loaded from rmv, temp. fix
+		if (getMeasDate() == null){
+			setMeasDate(new Date());
+		}
 		this.measName = measName;
 	}
 
@@ -140,7 +143,7 @@ public class Measurements {
 	}
 
 	public String getStringMeasStatus(){
-		return getMeasStatus() == 1 ? "PASS" : "FAIL";
+		return getMeasStatus() == 0 ? "PASS" : "FAIL";
 	}
 
 	public void setMeasStatus(int status){
