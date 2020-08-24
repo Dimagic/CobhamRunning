@@ -9,6 +9,7 @@ import javafx.concurrent.WorkerStateEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.input.KeyCode;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -32,6 +33,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
+import java.util.stream.Collectors;
 
 
 public class RmvJournalController {
@@ -64,18 +66,43 @@ public class RmvJournalController {
     @FXML
     private RadioButton articleSearch;
     @FXML
-    private CheckBox getAssemblyChek;
+    private CheckBox includeMeasCheck;
     @FXML
     private Button rmvSearchBtn;
+
+    /*
+    Statistic
+    */
+   @FXML
+    private CheckBox showPassCheck;
+    @FXML
+    private CheckBox showFailCheck;
+    @FXML
+    private CheckBox showIncomplCheck;
+    @FXML
+    private Label totalCount;
+    @FXML
+    private Label passCount;
+    @FXML
+    private Label failCount;
+    @FXML
+    private Label incomplCount;
+    @FXML
+    private Label passPercent;
+    @FXML
+    private Label failPercent;
+    @FXML
+    private Label incomplPercent;
 
     @FXML
     private ProgressIndicator rmvPI;
 
     @FXML
     private void initialize() {
-        getAssemblyChek.setDisable(true);
+        showPassCheck.setSelected(true);
+        showFailCheck.setSelected(true);
+        showIncomplCheck.setSelected(true);
         initDate();
-        initItemMenu();
         asisSearch.setToggleGroup(rmvSearchRadioGroup);
         articleSearch.setToggleGroup(rmvSearchRadioGroup);
         rmvSearchBtn.setDisable(true);
@@ -111,7 +138,18 @@ public class RmvJournalController {
 
         rmvSearchField.textProperty().addListener((observable, oldValue, newValue) -> {
             rmvSearchField.setText(newValue.replaceAll("\\s+", ""));
-            rmvSearchBtn.setDisable(newValue.isEmpty());
+            if (newValue.isEmpty()) {
+                rmvSearchBtn.setText("Get today's tests");
+            } else {
+                rmvSearchBtn.setText("Run search");
+            }
+        });
+
+        rmvSearchField.setOnKeyPressed(ke -> {
+            if (ke.getCode().equals(KeyCode.ENTER) && !rmvSearchField.getText().trim().isEmpty())
+            {
+                runSearch();
+            }
         });
 
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
@@ -119,24 +157,14 @@ public class RmvJournalController {
             tTests.setItems(tt);
         });
 
-
-    }
-
-    private ObservableList<Tests> filterTests(String val) {
-        ObservableList<Tests> forReturn = FXCollections.observableArrayList();
-        String currVal;
-        for (Tests t : allTests) {
-            currVal = val.toLowerCase();
-            boolean isArticle = t.getArticle().toLowerCase().contains(currVal);
-            boolean isName = t.getName().toLowerCase().contains(currVal);
-            boolean isAsis = t.getAsis().toLowerCase().contains(currVal);
-            boolean isUser = t.getUserName().toLowerCase().contains(currVal);
-            boolean isStation = t.getComputerName().toLowerCase().contains(currVal);
-            if (isArticle || isName || isAsis || isUser || isStation) {
-                forReturn.add(t);
+        rmvSearchRadioGroup.selectedToggleProperty().addListener((ov, old_toggle, new_toggle) -> {
+            if (new_toggle.equals(asisSearch)){
+                includeMeasCheck.setDisable(false);
+            } else {
+                includeMeasCheck.setDisable(true);
+                includeMeasCheck.setSelected(false);
             }
-        }
-        return forReturn;
+        });
     }
 
     private TableRow<Tests> rowTestsFactoryTab(TableView<Tests> view) {
@@ -169,10 +197,14 @@ public class RmvJournalController {
             public void updateItem(String item, boolean empty) {
                 Tests rowDataItem = (Tests) getTableRow().getItem();
                 if (column.getText().equalsIgnoreCase("Status")) {
-                    if (rowDataItem != null && rowDataItem.getTestStatus() == 0) {
-                        setTextFill(Color.GREEN);
-                    } else {
-                        setTextFill(Color.RED);
+                    if (rowDataItem != null) {
+                        if (rowDataItem.getTestStatus() == 0) {
+                            setTextFill(Color.GREEN);
+                        } else if (rowDataItem.getTestStatus() == 1){
+                            setTextFill(Color.RED);
+                        } else {
+                            setTextFill(Color.DARKORANGE);
+                        }
                     }
                 }
                 setText(item);
@@ -210,7 +242,8 @@ public class RmvJournalController {
                     mSearchItem.setOnAction(event -> {
                         rmvSearchField.setText(item);
                         asisSearch.setSelected(true);
-                        runSearch();
+                        includeMeasCheck.setSelected(true);
+                        fillTestTable();
                     });
                     menu.getItems().addAll(mSearchItem);
                     setTextFill(Color.BLUE);
@@ -236,15 +269,10 @@ public class RmvJournalController {
 
     @FXML
     private void runSearch() {
-        if (getAssemblyChek.isSelected()){
-            getAssembly();
-        } else {
-            fillTestTable();
-        }
-
+        fillTestTable();
     }
 
-    private void fillTestTable(boolean isStart) {
+    private void fillTestTable() {
         rmvSearchBtn.setDisable(true);
         filterField.clear();
         rmvPI.setVisible(true);
@@ -252,8 +280,8 @@ public class RmvJournalController {
             rmvPI.progressProperty().unbind();
         }
         rmvPI.setProgress(0);
-        if (isStart) {
-            rmvSearchTestsTask = new RmvSearchTestsTask(rmvSearchRadioGroup, isStart);
+        if (rmvSearchField.getText().isEmpty()){
+            rmvSearchTestsTask = new RmvSearchTestsTask(rmvSearchRadioGroup, true);
         } else {
             rmvSearchTestsTask = new RmvSearchTestsTask(rmvSearchRadioGroup);
         }
@@ -269,15 +297,12 @@ public class RmvJournalController {
                     }
                     ObservableList<Tests> res = rmvSearchTestsTask.getValue();
                     tTests.setItems(res);
+                    setStatistic(res);
                 });
 
         tTests.getItems().clear();
         tMeasures.getItems().clear();
         new Thread(rmvSearchTestsTask).start();
-    }
-
-    private void fillTestTable() {
-        fillTestTable(false);
     }
 
     private void fillMeasTable(Tests currTest) {
@@ -408,19 +433,70 @@ public class RmvJournalController {
         dateTo.setValue(stop);
     }
 
-    private void initItemMenu() {
-//        ContextMenu menu = new ContextMenu();
-//        MenuItem mRmvSearch = new MenuItem("Search in RMV");
-//
-//        menu.getItems().add(mRmvSearch);
-//        tDevices.setContextMenu(menu);
-//
-//        mRmvSearch.setOnAction(event -> {
-//            Device tmp = tDevices.getSelectionModel().getSelectedItem();
-//            if (tmp != null){
-////                searchByAsis(tmp.getAsis().getAsis());
-//            }
-//        });
+    private ObservableList<Tests> filterTests(String val) {
+        showPassCheck.setSelected(true);
+        showFailCheck.setSelected(true);
+        showIncomplCheck.setSelected(true);
+
+        ObservableList<Tests> forReturn = FXCollections.observableArrayList();
+        String currVal;
+        for (Tests t : allTests) {
+            currVal = val.toLowerCase();
+            boolean isArticle = t.getArticle().toLowerCase().contains(currVal);
+            boolean isName = t.getName().toLowerCase().contains(currVal);
+            boolean isAsis = t.getAsis().toLowerCase().contains(currVal);
+            boolean isUser = t.getUserName().toLowerCase().contains(currVal);
+            boolean isStation = t.getComputerName().toLowerCase().contains(currVal);
+            if (isArticle || isName || isAsis || isUser || isStation) {
+                forReturn.add(t);
+            }
+        }
+        setStatistic(forReturn);
+        return forReturn;
+    }
+
+    @FXML
+    private void statisticFilter(){
+        ObservableList<Tests> tmp = FXCollections.observableArrayList();
+        if (showPassCheck.isSelected())
+            tmp.addAll(allTests.stream().filter(c -> c.getTestStatus() == 0).collect(Collectors.toList()));
+        if (showFailCheck.isSelected())
+            tmp.addAll(allTests.stream().filter(c -> c.getTestStatus() == 1).collect(Collectors.toList()));
+        if (showIncomplCheck.isSelected())
+            tmp.addAll(allTests.stream().filter(c -> c.getTestStatus() != 1 && c.getTestStatus() != 0).collect(Collectors.toList()));
+        FXCollections.sort(tmp, Comparator.comparingLong(Tests::getDateTestMilliseconds).reversed());
+        setStatistic(tmp);
+        tTests.setItems(tmp);
+    }
+
+    private void setStatistic(ObservableList<Tests> testList){
+        int testCount = testList.size();
+        int testPass = 0;
+        int testFail = 0;
+        int testIncompl = 0;
+        double pass = 0;
+        double fail = 0;
+        double incompl = 0;
+        for (Tests test: testList){
+            if (test.getTestStatus() == 0){
+                testPass += 1;
+            } else if (test.getTestStatus() == 1){
+                testFail += 1;
+            } else {
+                testIncompl += 1;
+            }
+        }
+        pass = (double) (testPass * 100)/testCount;
+        fail = (double) (testFail * 100)/testCount;
+        incompl = (double) (testIncompl * 100)/testCount;
+        totalCount.setText(Integer.toString(testCount));
+        passCount.setText(Integer.toString(testPass));
+        failCount.setText(Integer.toString(testFail));
+        incomplCount.setText(Integer.toString(testIncompl));
+        passPercent.setText(String.format("%.2f %%", pass));
+        failPercent.setText(String.format("%.2f %%", fail));
+        incomplPercent.setText(String.format("%.2f %%", incompl));
+
     }
 
     public void setDialogStage(Stage dialogStage) {
@@ -435,24 +511,27 @@ public class RmvJournalController {
         this.mainApp = mainApp;
         try {
             rmvUtils = new RmvUtils(mainApp);
+            fillTestTable();
         } catch (CobhamRunningException e) {
             MsgBox.msgException(e);
+            dialogStage.close();
         }
         refreshJournal();
     }
 
     private class RmvSearchTestsTask extends Task<ObservableList<Tests>> {
         private ToggleGroup tGroup;
-        private boolean isStart = false;
+        private boolean isStart;
         List<HashMap<String, Object>> res;
-
-        RmvSearchTestsTask(ToggleGroup tGroup) {
-            this.tGroup = tGroup;
-        }
 
         RmvSearchTestsTask(ToggleGroup tGroup, boolean isStart) {
             this.tGroup = tGroup;
-            this.isStart = this.isStart;
+            this.isStart = isStart;
+        }
+
+        RmvSearchTestsTask(ToggleGroup tGroup) {
+            this.tGroup = tGroup;
+            this.isStart = false;
         }
 
         @Override
@@ -460,9 +539,9 @@ public class RmvJournalController {
             this.updateMessage("Getting data from RMV");
 
             if (isStart) {
-                res = rmvUtils.getTestsWithLimit(50);
+                res = rmvUtils.getAllTestsToday();
             } else if (tGroup.getSelectedToggle().equals(asisSearch)) {
-                if (getAssemblyChek.isSelected()) {
+                if (includeMeasCheck.isSelected()) {
                     res = rmvUtils.getTestsByInnerAsis(rmvSearchField.getText());
                 } else {
                     res = rmvUtils.getTestsByAsisBetweenDate(rmvSearchField.getText(),

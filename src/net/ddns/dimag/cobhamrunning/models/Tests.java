@@ -74,7 +74,13 @@ public class Tests {
 	}
 
 	public String getStringTestStatus(){
-		return getTestStatus() == 0 ? "PASS" : "FAIL";
+		if (getTestStatus() == 0){
+			return "PASS";
+		} else if (getTestStatus() == 1){
+			return "FAIL";
+		} else {
+			return "INCPL";
+		}
 	}
 
 	public void setTestStatus(int testStatus) {

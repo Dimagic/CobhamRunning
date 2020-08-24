@@ -104,7 +104,7 @@ public class Utils {
     }
 
     public static String getFormattedDate(Date date){
-        SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+        SimpleDateFormat dt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         return dt.format(date);
     }
 

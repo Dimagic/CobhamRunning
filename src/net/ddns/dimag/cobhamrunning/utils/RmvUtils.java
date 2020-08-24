@@ -267,6 +267,13 @@ public class RmvUtils {
         return res;
     }
 
+    public List<HashMap<String, Object>> getAllTestsToday(){
+        String q = "select * from RMV.dbo.tbl_RMV_Header " +
+                "where CAST(TestDate as Date) = CAST(GETDATE() as Date) order by TestDate DESC ";
+        List<HashMap<String, Object>> res = sendQuery(q);
+        return res;
+    }
+
     public List<HashMap<String, Object>> getTestsByAsis(String asis){
         String q = String.format("select * from RMV.dbo.tbl_RMV_Header " +
                 "where Serial = '%s' order by TestDate DESC", asis.toUpperCase());
