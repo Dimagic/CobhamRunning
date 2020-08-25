@@ -367,7 +367,7 @@ public interface MsgBox  {
 		String sn = msgInputString("Enter serial number");
 		try {
 			sn = sn.toUpperCase();
-			if (!Pattern.matches("^[\\d]{8,8}$", sn)) {
+			if (!Pattern.matches("^(?=[0-9]*$)(?:.{8}|.{12})$", sn)) {
 				msgError("Input error", "Incorrect serial number");
 				return msgInputSN();
 			}

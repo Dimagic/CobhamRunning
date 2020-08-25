@@ -31,7 +31,7 @@ public class Device {
         this.id = id;
     }
 
-    @Column(name = "sn", length = 8, nullable = false, unique = true)
+    @Column(name = "sn", length = 20, nullable = false, unique = true)
     private String sn;
 
     public Device() {
