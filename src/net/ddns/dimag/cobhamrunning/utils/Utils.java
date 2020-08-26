@@ -119,7 +119,7 @@ public class Utils {
             meas.setMeasMin((String) measObj.get("MinLim"));
             meas.setMeasVal(((String) measObj.get("Result")));
             meas.setMeasDate((Date) measObj.get("MeasureDate"));
-            meas.setMeasStatus();
+            meas.setMeasStatus((Integer) measObj.get("TestStatus"));
             measList.add(meas);
         }
         return measList;
@@ -147,7 +147,7 @@ public class Utils {
             meas.setMeasMin((String) measObj.get("MinLim"));
             meas.setMeasVal(((String) measObj.get("Result")));
             meas.setMeasDate((Date) measObj.get("MeasureDate"));
-            meas.setMeasStatus();
+            meas.setMeasStatus((Integer) measObj.get("TestStatus"));
             measList.add(meas);
         }
         measMap.put(oldHeaderId, measList);

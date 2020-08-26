@@ -6,16 +6,15 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.concurrent.WorkerStateEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.input.KeyCode;
+import javafx.scene.input.MouseButton;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.*;
-import net.ddns.dimag.cobhamrunning.services.ArticleHeadersService;
 import net.ddns.dimag.cobhamrunning.services.DeviceService;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
 import net.ddns.dimag.cobhamrunning.utils.MsgBox;
@@ -82,6 +81,8 @@ public class RmvJournalController {
     @FXML
     private Label totalCount;
     @FXML
+    private Label uniqueCount;
+    @FXML
     private Label passCount;
     @FXML
     private Label failCount;
@@ -130,7 +131,7 @@ public class RmvJournalController {
         tTests.setRowFactory(tv -> {
             TableRow<Tests> row = new TableRow<>();
             row.setOnMouseClicked(event -> {
-                if (row.getItem() != null)
+                if (event.getButton() == MouseButton.PRIMARY && row.getItem() != null)
                     fillMeasTable(row.getItem());
             });
             return row;
@@ -153,8 +154,7 @@ public class RmvJournalController {
         });
 
         filterField.textProperty().addListener((observable, oldValue, newValue) -> {
-            ObservableList<Tests> tt = filterTests(newValue);
-            tTests.setItems(tt);
+            filterTests();
         });
 
         rmvSearchRadioGroup.selectedToggleProperty().addListener((ov, old_toggle, new_toggle) -> {
@@ -196,6 +196,14 @@ public class RmvJournalController {
             @Override
             public void updateItem(String item, boolean empty) {
                 Tests rowDataItem = (Tests) getTableRow().getItem();
+                if (column.getText().equalsIgnoreCase("ASIS") && rowDataItem != null) {
+                    final ContextMenu menu = new ContextMenu();
+                    MenuItem mFilterItem = new MenuItem("Apply to filter");
+                    mFilterItem.setOnAction(event -> filterField.setText(rowDataItem.getAsis()));
+                    menu.getItems().addAll(mFilterItem);
+                    setContextMenu(menu);
+                    getContextMenu().setAutoHide(true);
+                }
                 if (column.getText().equalsIgnoreCase("Status")) {
                     if (rowDataItem != null) {
                         if (rowDataItem.getTestStatus() == 0) {
@@ -273,6 +281,7 @@ public class RmvJournalController {
     }
 
     private void fillTestTable() {
+        allTests = FXCollections.observableArrayList();
         rmvSearchBtn.setDisable(true);
         filterField.clear();
         rmvPI.setVisible(true);
@@ -299,10 +308,15 @@ public class RmvJournalController {
                     tTests.setItems(res);
                     setStatistic(res);
                 });
+        rmvSearchTestsTask.addEventHandler(WorkerStateEvent.WORKER_STATE_FAILED, t -> {
+            MsgBox.msgWarning("Getting RMV data", "Something went wrong.\nPlease try again.");
+            rmvSearchBtn.setDisable(false);
+        });
 
         tTests.getItems().clear();
         tMeasures.getItems().clear();
-        new Thread(rmvSearchTestsTask).start();
+        Thread t = new Thread(rmvSearchTestsTask);
+        t.start();
     }
 
     private void fillMeasTable(Tests currTest) {
@@ -327,26 +341,14 @@ public class RmvJournalController {
                     FXCollections.sort(res, Comparator.comparingLong(Measurements::getMeasureNumber));
                     tMeasures.setItems(res);
                 });
+        rmvSearchMeasTask.addEventFilter(WorkerStateEvent.WORKER_STATE_FAILED,
+                t -> {
+                    rmvSearchBtn.setDisable(false);
+                    tTests.setDisable(false);
+                    MsgBox.msgWarning("Getting RMV data", "Something went wrong.\nPlease try again.");
+                });
         tMeasures.getItems().clear();
         new Thread(rmvSearchMeasTask).start();
-    }
-
-    private void getAssembly(){
-        Set<String> asisSet = new HashSet<>();
-        Set<String> newAsisSet = new HashSet<>();
-        List<HashMap<String, Object>> tmpTests = rmvUtils.getTestsByInnerAsis(rmvSearchField.getText());
-        tmpTests.forEach(c -> asisSet.add((String) c.get("Serial")));
-        System.out.println(asisSet);
-        while (asisSet.size() != newAsisSet.size()){
-            asisSet.addAll(newAsisSet);
-            for (String s: asisSet){
-                tmpTests = rmvUtils.getTestsByInnerAsis(s);
-                tmpTests.forEach(c -> newAsisSet.add((String) c.get("Serial")));
-            }
-            System.out.println(newAsisSet);
-        }
-
-
     }
 
     @FXML
@@ -433,40 +435,30 @@ public class RmvJournalController {
         dateTo.setValue(stop);
     }
 
-    private ObservableList<Tests> filterTests(String val) {
-        showPassCheck.setSelected(true);
-        showFailCheck.setSelected(true);
-        showIncomplCheck.setSelected(true);
-
-        ObservableList<Tests> forReturn = FXCollections.observableArrayList();
-        String currVal;
+    @FXML
+    private void filterTests() {
+        ObservableList<Tests> tt = FXCollections.observableArrayList();
+        String filter = filterField.getText().toLowerCase();
+        if (showPassCheck.isSelected())
+            tt.addAll(allTests.stream().filter(c -> c.getTestStatus() == 0).collect(Collectors.toList()));
+        if (showFailCheck.isSelected())
+            tt.addAll(allTests.stream().filter(c -> c.getTestStatus() == 1).collect(Collectors.toList()));
+        if (showIncomplCheck.isSelected())
+            tt.addAll(allTests.stream().filter(c -> c.getTestStatus() != 1 && c.getTestStatus() != 0).collect(Collectors.toList()));
         for (Tests t : allTests) {
-            currVal = val.toLowerCase();
-            boolean isArticle = t.getArticle().toLowerCase().contains(currVal);
-            boolean isName = t.getName().toLowerCase().contains(currVal);
-            boolean isAsis = t.getAsis().toLowerCase().contains(currVal);
-            boolean isUser = t.getUserName().toLowerCase().contains(currVal);
-            boolean isStation = t.getComputerName().toLowerCase().contains(currVal);
-            if (isArticle || isName || isAsis || isUser || isStation) {
-                forReturn.add(t);
+            boolean isArticle = t.getArticle().toLowerCase().contains(filter);
+            boolean isName = t.getName().toLowerCase().contains(filter);
+            boolean isAsis = t.getAsis().toLowerCase().contains(filter);
+            boolean isUser = t.getUserName().toLowerCase().contains(filter);
+            boolean isStation = t.getComputerName().toLowerCase().contains(filter);
+            boolean res = isArticle || isName || isAsis || isUser || isStation;
+            if (!res) {
+                tt.remove(t);
             }
         }
-        setStatistic(forReturn);
-        return forReturn;
-    }
-
-    @FXML
-    private void statisticFilter(){
-        ObservableList<Tests> tmp = FXCollections.observableArrayList();
-        if (showPassCheck.isSelected())
-            tmp.addAll(allTests.stream().filter(c -> c.getTestStatus() == 0).collect(Collectors.toList()));
-        if (showFailCheck.isSelected())
-            tmp.addAll(allTests.stream().filter(c -> c.getTestStatus() == 1).collect(Collectors.toList()));
-        if (showIncomplCheck.isSelected())
-            tmp.addAll(allTests.stream().filter(c -> c.getTestStatus() != 1 && c.getTestStatus() != 0).collect(Collectors.toList()));
-        FXCollections.sort(tmp, Comparator.comparingLong(Tests::getDateTestMilliseconds).reversed());
-        setStatistic(tmp);
-        tTests.setItems(tmp);
+        setStatistic(tt);
+        FXCollections.sort(tt, Comparator.comparingLong(Tests::getDateTestMilliseconds).reversed());
+        tTests.setItems(tt);
     }
 
     private void setStatistic(ObservableList<Tests> testList){
@@ -474,10 +466,9 @@ public class RmvJournalController {
         int testPass = 0;
         int testFail = 0;
         int testIncompl = 0;
-        double pass = 0;
-        double fail = 0;
-        double incompl = 0;
+        Set<String> asisSet = new HashSet<>();
         for (Tests test: testList){
+            asisSet.add(test.getAsis());
             if (test.getTestStatus() == 0){
                 testPass += 1;
             } else if (test.getTestStatus() == 1){
@@ -486,10 +477,11 @@ public class RmvJournalController {
                 testIncompl += 1;
             }
         }
-        pass = (double) (testPass * 100)/testCount;
-        fail = (double) (testFail * 100)/testCount;
-        incompl = (double) (testIncompl * 100)/testCount;
+        double pass = (double) (testPass * 100)/testCount;
+        double fail = (double) (testFail * 100)/testCount;
+        double incompl = (double) (testIncompl * 100)/testCount;
         totalCount.setText(Integer.toString(testCount));
+        uniqueCount.setText(Integer.toString(asisSet.size()));
         passCount.setText(Integer.toString(testPass));
         failCount.setText(Integer.toString(testFail));
         incomplCount.setText(Integer.toString(testIncompl));
@@ -557,21 +549,16 @@ public class RmvJournalController {
                 rmvPI.progressProperty().unbind();
             }
 
-
-            ArticleHeadersService articleHeadersService = new ArticleHeadersService();
             int count = res.size();
             ObservableList<Tests> forReturn = FXCollections.observableArrayList();
             this.updateMessage("Creating output table");
-            ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
+            ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(20);
+            List<Task<Tests>> notComplited = new ArrayList<>();
             for (HashMap<String, Object> item : res) {
                 try {
-                    TestCreator task = new TestCreator(tGroup, articleHeadersService, item);
-                    task.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-                        @Override
-                        public void handle(WorkerStateEvent t) {
-                            forReturn.add(task.getValue());
-                        }
-                    });
+                    TestCreator task = new TestCreator(tGroup, item);
+                    task.setOnSucceeded(t -> forReturn.add(task.getValue()));
+                    task.setOnFailed(t -> notComplited.add(task));
                     executor.execute(task);
                 } catch (Exception e) {
                     LOGGER.error("Create test table error", e);
@@ -579,15 +566,55 @@ public class RmvJournalController {
                     return null;
                 }
             }
-            while (executor.getActiveCount() > 0){
+            executor.shutdown();
+            while (!executor.isTerminated()) {
                 this.updateProgress(executor.getCompletedTaskCount(), count);
             }
+            if (!notComplited.isEmpty()){
+                MsgBox.msgWarning("Tests creator", "Not all tests created complete.");
+            }
             this.updateProgress(1, 1);
-            executor.shutdown();
             this.updateMessage("Found records: " + count);
             FXCollections.sort(forReturn, Comparator.comparingLong(Tests::getDateTestMilliseconds).reversed());
             allTests = forReturn;
             return forReturn;
+        }
+    }
+
+    private class TestCreator extends Task<Tests> {
+        private ToggleGroup tGroup;
+        private HashMap<String, Object> item;
+
+        TestCreator(ToggleGroup tGroup, HashMap<String, Object> item) {
+            this.tGroup = tGroup;
+            this.item = item;
+        }
+
+        @Override
+        protected Tests call() {
+            ArticleHeaders articleHeaders = new ArticleHeaders();
+            articleHeaders.setName(item.get("Article").toString());
+            articleHeaders.setRevision(item.get("Revision").toString());
+            articleHeaders.setLongDescript("HeadDescription");
+            articleHeaders.setShortDescript("HeadDescription");
+
+            Asis asis = new Asis(item.get("Serial").toString(), articleHeaders);
+            String sn = "";
+            Device device = new Device(asis, sn);
+            Tests test = new Tests();
+            test.setDateTest((Date) item.get("TestDate"));
+            test.setTestTime((Integer) item.get("TestTime"));
+            if (item.get("TestStatus") != null) {
+                test.setTestStatus((Integer) item.get("TestStatus"));
+            } else {
+                test.setTestStatus(-1);
+            }
+            test.setName((String) item.get("Configuration"));
+            test.setHeaderID((Long) item.get("HeaderID"));
+            test.setUserName((String) item.get("UserName"));
+            test.setComputerName((String) item.get("ComputerName"));
+            test.setDevice(device);
+            return test;
         }
     }
 
@@ -604,25 +631,18 @@ public class RmvJournalController {
         protected ObservableList<Measurements> call() throws Exception {
             List<HashMap<String, Object>> res = rmvUtils.getMeasuresByHeaderList(Collections.singletonList(headerID));
             int count = res.size();
-            int i = 0;
             ObservableList<Measurements> forReturn = FXCollections.observableArrayList();
             ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(10);
             for (HashMap<String, Object> item : res) {
                 MeasureCreator task = new MeasureCreator(test, item);
-                task.setOnSucceeded(new EventHandler<WorkerStateEvent>() {
-                    @Override
-                    public void handle(WorkerStateEvent t) {
-                        forReturn.add(task.getValue());
-
-                    }
-                });
+                task.setOnSucceeded(t -> forReturn.add(task.getValue()));
                 executor.execute(task);
             }
-            while (executor.getActiveCount() > 0){
+            executor.shutdown();
+            while (!executor.isTerminated()){
                 this.updateProgress(executor.getCompletedTaskCount(), count);
             }
             this.updateProgress(1, 1);
-            executor.shutdown();
             FXCollections.sort(forReturn, Comparator.comparingInt(Measurements::getMeasureNumber));
             return forReturn;
         }
@@ -633,7 +653,7 @@ public class RmvJournalController {
         Tests test;
         HashMap<String, Object> item;
 
-        public MeasureCreator(Tests test, HashMap<String, Object> item) {
+        MeasureCreator(Tests test, HashMap<String, Object> item) {
             this.test = test;
             this.item = item;
         }
@@ -650,54 +670,6 @@ public class RmvJournalController {
             meas.setMeasureNumber((Integer) item.get("MeasureNumber"));
             meas.setMeasStatus(((Short) item.get("TestStatus")).intValue());
             return meas;
-        }
-    }
-
-    private class TestCreator extends Task<Tests> {
-        private ToggleGroup tGroup;
-        private HashMap<String, Object> item;
-        private ArticleHeadersService articleHeadersService;
-
-        public TestCreator(ToggleGroup tGroup, ArticleHeadersService articleHeadersService, HashMap<String, Object> item) {
-            this.tGroup = tGroup;
-            this.articleHeadersService = articleHeadersService;
-            this.item = item;
-        }
-
-        @Override
-        protected Tests call() throws Exception {
-            String articleName = String.format("%s%s", item.get("Article"), item.get("Revision"));
-            ArticleHeaders articleHeaders = articleHeadersService.findArticleByName(articleName);
-            if (articleHeaders == null) {
-                articleHeaders = new ArticleHeaders();
-                articleHeaders.setName(item.get("Article").toString());
-                articleHeaders.setRevision(item.get("Revision").toString());
-                articleHeaders.setLongDescript("HeadDescription");
-                articleHeaders.setShortDescript("HeadDescription");
-            }
-            Asis asis = new Asis(item.get("Serial").toString(), articleHeaders);
-            String sn = "";
-            try {
-                sn = deviceService.findDeviceByAsis(asis.getAsis()).getSn();
-            } catch (NullPointerException ignored) {
-            }
-            Device device = new Device(asis, sn);
-            if (!devices.contains(device))
-                devices.add(device);
-            Tests test = new Tests();
-            test.setDateTest((Date) item.get("TestDate"));
-            test.setTestTime((Integer) item.get("TestTime"));
-            if (item.get("TestStatus") != null) {
-                test.setTestStatus((Integer) item.get("TestStatus"));
-            } else {
-                test.setTestStatus(-1);
-            }
-            test.setName((String) item.get("Configuration"));
-            test.setHeaderID((Long) item.get("HeaderID"));
-            test.setUserName((String) item.get("UserName"));
-            test.setComputerName((String) item.get("ComputerName"));
-            test.setDevice(device);
-            return test;
         }
     }
 }

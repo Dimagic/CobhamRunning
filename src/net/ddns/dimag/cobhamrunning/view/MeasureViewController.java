@@ -27,6 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class MeasureViewController {
@@ -72,6 +73,7 @@ public class MeasureViewController {
             @Override
             public void changed(ObservableValue observable, Object oldValue, Object newValue) {
                 Tests test = null;
+                tMeasure.getItems().clear();
                 try {
                     test = testsList.get(testsChoiceBox.getSelectionModel().getSelectedIndex());
                     measList = getMeasureList(test);
@@ -81,8 +83,10 @@ public class MeasureViewController {
                                     Utils.COMPARE_BY_MEASNUM));
                 } catch (NullPointerException ignore){}
                 testTime_lbl.setText(Utils.formatHMSM(test.getTestTime()));
+                FXCollections.sort(measList, Comparator.comparingLong(Measurements::getMeasureNumber));
                 staticList.addAll(measList);
                 tMeasure.setItems(measList);
+                tMeasure.refresh();
             }
         });
     }
@@ -145,8 +149,8 @@ public class MeasureViewController {
                             }
 
                             if (column.getText().equalsIgnoreCase("Status")) {
-                                if (rowDataItem.getMeasStatus() == 1) {
-                                    setTextFill(Color.BLACK);
+                                if (rowDataItem.getMeasStatus() == 0) {
+                                    setTextFill(Color.GREEN);
                                     setContextMenu(null);
                                 } else {
                                     setTextFill(Color.RED);
@@ -179,7 +183,6 @@ public class MeasureViewController {
                                     getContextMenu().setAutoHide(true);
                                 }
                             }
-
                             setText(item);
                         }
                     }
@@ -203,6 +206,7 @@ public class MeasureViewController {
             e.printStackTrace();
         }
         testsList.forEach((c) -> testsNameList.add(c.getName()));
+        testsNameList.sorted();
         testsChoiceBox.setItems(FXCollections.observableArrayList(testsNameList));
         if (testsNameList.size() != 0) {
             testsChoiceBox.getSelectionModel().selectFirst();

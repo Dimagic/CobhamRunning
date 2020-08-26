@@ -1,14 +1,17 @@
 package net.ddns.dimag.cobhamrunning;
 
 import com.sun.javafx.application.LauncherImpl;
+import com.sun.javafx.stage.StageHelper;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
+import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import net.ddns.dimag.cobhamrunning.models.ArticleHeaders;
@@ -28,7 +31,7 @@ import java.util.List;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
-    private final String VERSION = "0.1.3.7";
+    private final String VERSION = "0.1.3.10";
     private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
@@ -36,6 +39,7 @@ public class MainApp extends Application implements MsgBox {
     private Stage articlesStage;
     private Stage shippingStage;
     private Stage envJournalStage;
+    private Stage rmvJournalStage;
     private BorderPane rootLayout;
     private Settings currentSettings;
     private TestsViewController testsViewController;
@@ -62,8 +66,12 @@ public class MainApp extends Application implements MsgBox {
     }
 
     @Override
-    public void stop() throws Exception {
-        System.out.println("stop");
+    public void stop() {
+//        for (Stage stage: StageHelper.getStages()){
+//            if (stage.isShowing()){
+//                stage.close();
+//            }
+//        }
     }
 
     @Override
@@ -99,6 +107,7 @@ public class MainApp extends Application implements MsgBox {
 
 //            telebotServer = new Thread(new TelebotListenerServer(this));
 //            telebotServer.start();
+
 
             if (!new File(currentSettings.getUpdate_path()).exists()) {
                 MsgBox.msgInfo("Update", String.format("Path: %s not available", currentSettings.getUpdate_path()));
@@ -163,21 +172,30 @@ public class MainApp extends Application implements MsgBox {
 
     public void showRmvJournalView() {
         try {
-            FXMLLoader loader = new FXMLLoader();
-            loader.setLocation(getClass().getClassLoader().getResource("RmvJournal.fxml"));
-            AnchorPane page = loader.load();
-            Stage rmvJournalStage = new Stage();
-            rmvJournalStage.setTitle("RMV journal");
-            rmvJournalStage.getIcons().add(favicon);
-            rmvJournalStage.initModality(Modality.WINDOW_MODAL);
-            rmvJournalStage.initOwner(primaryStage);
-            Scene scene = new Scene(page);
-            rmvJournalStage.setScene(scene);
-            RmvJournalController rmvJournalController;
-            rmvJournalController = loader.getController();
-            rmvJournalController.setMainApp(this);
-            rmvJournalController.setDialogStage(rmvJournalStage);
-            rmvJournalStage.showAndWait();
+            if (rmvJournalStage == null){
+                FXMLLoader loader = new FXMLLoader();
+                loader.setLocation(getClass().getClassLoader().getResource("RmvJournal.fxml"));
+                AnchorPane page = loader.load();
+                rmvJournalStage = new Stage();
+                rmvJournalStage.setTitle("RMV journal");
+                rmvJournalStage.getIcons().add(favicon);
+                rmvJournalStage.initModality(Modality.WINDOW_MODAL);
+//            rmvJournalStage.initOwner(primaryStage);
+                Scene scene = new Scene(page);
+                rmvJournalStage.setScene(scene);
+                RmvJournalController rmvJournalController;
+                rmvJournalController = loader.getController();
+                rmvJournalController.setMainApp(this);
+                rmvJournalController.setDialogStage(rmvJournalStage);
+                rmvJournalStage.setOnCloseRequest(we -> rmvJournalStage = null);
+                rmvJournalStage.showAndWait();
+            } else {
+                if (!rmvJournalStage.isFocused()){
+                    rmvJournalStage.setMaximized(true);
+                }
+                rmvJournalStage.requestFocus();
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
             LOGGER.error(e.toString());

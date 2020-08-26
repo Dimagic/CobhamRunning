@@ -103,9 +103,9 @@ public class RmvUtils {
         Matcher mCommonVer;
         Matcher mSystemVer;
         Matcher mTargetVer;
-        Pattern pSystemVer = Pattern.compile("(system([a-zA-Z ])+version)");
-        Pattern pCommonVer = Pattern.compile("(common([a-zA-Z ])+version)");
-        Pattern pTargetVer = Pattern.compile("(target([a-zA-Z ])+version)");
+        Pattern pSystemVer = Pattern.compile("(system([a-zA-Z\\s])+version)");
+        Pattern pCommonVer = Pattern.compile("(common([a-zA-Z\\s])+version)");
+        Pattern pTargetVer = Pattern.compile("(target([a-zA-Z\\s])+version)");
         try {
             List<HashMap<String, Object>> testList = new ArrayList(getHeaderTest(dev.getAsis().getAsis()));
             for (HashMap<String, Object> test : testList) {
@@ -115,13 +115,13 @@ public class RmvUtils {
                     mCommonVer = pCommonVer.matcher(descript.toLowerCase());
                     mSystemVer = pSystemVer.matcher(descript.toLowerCase());
                     mTargetVer = pTargetVer.matcher(descript.toLowerCase());
-                    if (mCommonVer.matches()) {
+                    if (mCommonVer.find()) {
                         commonVer = (String) meas.get("Result");
                     }
-                    if (mSystemVer.matches()) {
+                    if (mSystemVer.find()) {
                         systemVer = (String) meas.get("Result");
                     }
-                    if (mTargetVer.matches()) {
+                    if (mTargetVer.find()) {
                         targetVer = (String) meas.get("Result");
                     }
                 }

@@ -69,25 +69,28 @@
         </columnConstraints>
         <rowConstraints>
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
             <Label text="Tested:" />
-            <Label text="Passed:" GridPane.rowIndex="1" />
-            <Label text="Failed:" GridPane.rowIndex="2" />
-            <Label text="Incompleted:" GridPane.rowIndex="3" />
-            <CheckBox fx:id="showPassCheck" mnemonicParsing="false" onAction="#statisticFilter" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-            <CheckBox fx:id="showFailCheck" mnemonicParsing="false" onAction="#statisticFilter" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <CheckBox fx:id="showIncomplCheck" mnemonicParsing="false" onAction="#statisticFilter" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+            <Label text="Passed:" GridPane.rowIndex="2" />
+            <Label text="Failed:" GridPane.rowIndex="3" />
+            <Label text="Incompleted:" GridPane.rowIndex="4" />
+            <CheckBox fx:id="showPassCheck" mnemonicParsing="false" onAction="#filterTests" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <CheckBox fx:id="showFailCheck" mnemonicParsing="false" onAction="#filterTests" GridPane.columnIndex="3" GridPane.rowIndex="3" />
+            <CheckBox fx:id="showIncomplCheck" mnemonicParsing="false" onAction="#filterTests" GridPane.columnIndex="3" GridPane.rowIndex="4" />
             <Label fx:id="totalCount" GridPane.columnIndex="1" />
-            <Label fx:id="passCount" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <Label fx:id="failCount" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-            <Label fx:id="incomplCount" GridPane.columnIndex="1" GridPane.rowIndex="3" />
-            <Label fx:id="passPercent" GridPane.columnIndex="2" GridPane.rowIndex="1" />
-            <Label fx:id="failPercent" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-            <Label fx:id="incomplPercent" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+            <Label fx:id="passCount" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <Label fx:id="failCount" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+            <Label fx:id="incomplCount" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <Label fx:id="passPercent" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <Label fx:id="failPercent" GridPane.columnIndex="2" GridPane.rowIndex="3" />
+            <Label fx:id="incomplPercent" GridPane.columnIndex="2" GridPane.rowIndex="4" />
+            <Label text="Unique ASIS:" GridPane.rowIndex="1" />
+            <Label fx:id="uniqueCount" GridPane.columnIndex="1" GridPane.rowIndex="1" />
          </children>
       </GridPane>
    </children>

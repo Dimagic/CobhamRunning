@@ -52,8 +52,13 @@ public ShippingJournalData(ShippingViewController controller, Device device) {
             for (String testName: testMap.keySet()){
                 HashMap<String, Object> testHeader = rmvUtils.getLastTestResult(asis.getAsis(), testName);
                 try {
-                    if ((int) testHeader.get("TestStatus") != 0){
-                        MsgBox.msgWarning("Warning", "Not all tests in RMV DB is PASS");
+                    if (testHeader.get("TestStatus") == null){
+                        if (!MsgBox.msgConfirm("Warning", String.format("Test %s in RMV DB is not finished.\n" +
+                                "Are you sure want to continue?", testName)))
+                            return;
+                    }else if ((int) testHeader.get("TestStatus") != 0){
+                        if (!MsgBox.msgConfirm("Warning", String.format("Test %s in RMV DB is FAIL.\n" +
+                                    "Are you sure want to continue?", testName)))
                         return;
                     }
                 } catch (NullPointerException e){

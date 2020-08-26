@@ -31,7 +31,7 @@ public class MeasurementsService {
         Transaction tx = session.beginTransaction();
         try {
             for (Measurements meas: measSet){
-                meas.setMeasStatus();
+//                meas.setMeasStatus();
                 session.save(meas);
             }
             tx.commit();

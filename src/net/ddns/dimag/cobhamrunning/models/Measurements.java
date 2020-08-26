@@ -150,34 +150,34 @@ public class Measurements {
 		this.measStatus = status;
 	}
 
-	public void setMeasStatus() {
-		int status = 0;
-		try{
-			if (measVal.equals(measMin) || measVal.equals(measMax)) {
-				status = 1;
-			} else if (measMin.equals("\"\"") &&  measMax.equals("\"\"")) {
-				status = 1;
-			} else if((measMin.isEmpty() &&  measMax.isEmpty())){
-				status = 1;
-			} else {
-				try {
-					double measValTmp = Double.parseDouble(measVal);
-					double measMinTmp = Double.parseDouble(measMin);
-					double measMaxTmp = Double.parseDouble(measMax);
-					if (measMinTmp <= measValTmp && measValTmp <= measMaxTmp){
-						status = 1;
-					}
-				} catch (Exception e){
-					if (measMin.equals(measMax) &&  measMin.equals(measVal)){
-						status = 1;
-					}
-				}
-			}
-		} catch (NullPointerException ignored){
-
-		}
-		this.measStatus = status;
-	}
+//	public void setMeasStatus() {
+//		int status = 0;
+//		try{
+//			if (measVal.equals(measMin) || measVal.equals(measMax)) {
+//				status = 1;
+//			} else if (measMin.equals("\"\"") &&  measMax.equals("\"\"")) {
+//				status = 1;
+//			} else if((measMin.isEmpty() &&  measMax.isEmpty())){
+//				status = 1;
+//			} else {
+//				try {
+//					double measValTmp = Double.parseDouble(measVal);
+//					double measMinTmp = Double.parseDouble(measMin);
+//					double measMaxTmp = Double.parseDouble(measMax);
+//					if (measMinTmp <= measValTmp && measValTmp <= measMaxTmp){
+//						status = 1;
+//					}
+//				} catch (Exception e){
+//					if (measMin.equals(measMax) &&  measMin.equals(measVal)){
+//						status = 1;
+//					}
+//				}
+//			}
+//		} catch (NullPointerException ignored){
+//
+//		}
+//		this.measStatus = status;
+//	}
 
 	public SimpleStringProperty measNameProperty(){
 		return new SimpleStringProperty(getMeasName());
