@@ -315,8 +315,7 @@ public class RmvJournalController {
 
         tTests.getItems().clear();
         tMeasures.getItems().clear();
-        Thread t = new Thread(rmvSearchTestsTask);
-        t.start();
+        new Thread(rmvSearchTestsTask).start();
     }
 
     private void fillMeasTable(Tests currTest) {

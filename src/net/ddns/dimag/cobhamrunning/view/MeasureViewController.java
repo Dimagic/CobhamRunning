@@ -19,6 +19,7 @@ import net.ddns.dimag.cobhamrunning.models.Tests;
 import net.ddns.dimag.cobhamrunning.services.MeasurementsService;
 import net.ddns.dimag.cobhamrunning.services.TestsService;
 import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
+import net.ddns.dimag.cobhamrunning.utils.MsgBox;
 import net.ddns.dimag.cobhamrunning.utils.Utils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -130,13 +131,8 @@ public class MeasureViewController {
                                 mSearchItem.setOnAction(new EventHandler<ActionEvent>() {
                                     @Override
                                     public void handle(ActionEvent event) {
-                                        dialogStage.close();
-                                        DeviceJournalController controller = mainApp.getDeviceJournalController();
-                                        if (controller == null) {
-                                            mainApp.showDevicesJournalView();
-                                            controller = mainApp.getDeviceJournalController();
-                                        }
-                                        controller.searchByAsis(item);
+                                        MsgBox.msgInfo("CobhamRunning", "This function is disabled.\n" +
+                                                "Use RMV journal please.");
                                     }
                                 });
                                 menu.getItems().addAll(mSearchItem);

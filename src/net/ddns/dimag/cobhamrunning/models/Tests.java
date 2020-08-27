@@ -166,26 +166,7 @@ public class Tests {
 	}
 
 	public SimpleStringProperty testStatusProperty(){
-		if (getId() != null) {
-			try {
-				MeasurementsService measurementsService = new MeasurementsService();
-				List<Measurements> measList = measurementsService.getMeasureSetByTest(this);
-				if (measList.size() == 0) {
-					return null;
-				}
-				for (Measurements meas : measList) {
-					if (meas.getMeasStatus() == 0){
-						return new SimpleStringProperty("FAIL");
-					}
-				}
-			} catch (CobhamRunningException e) {
-				return null;
-			}
-			return new SimpleStringProperty("PASS");
-		} else {
-			return getTestStatus() == 0 ? new SimpleStringProperty("PASS") :
-					new SimpleStringProperty("FAIL");
-		}
+		return new SimpleStringProperty(getStringTestStatus());
 	}
 
 	public String getArticle(){

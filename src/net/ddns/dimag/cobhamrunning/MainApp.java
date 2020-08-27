@@ -1,17 +1,14 @@
 package net.ddns.dimag.cobhamrunning;
 
 import com.sun.javafx.application.LauncherImpl;
-import com.sun.javafx.stage.StageHelper;
 import javafx.application.Application;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
-import javafx.geometry.Rectangle2D;
 import javafx.scene.Scene;
 import javafx.scene.image.Image;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Modality;
-import javafx.stage.Screen;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import net.ddns.dimag.cobhamrunning.models.ArticleHeaders;
@@ -31,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
-    private final String VERSION = "0.1.3.10";
+    private final String VERSION = "0.1.3.11";
     private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
@@ -47,6 +44,7 @@ public class MainApp extends Application implements MsgBox {
     private AsisCreatorController asisCreatorController;
     private RootLayoutController rootLayoutController;
     private DeviceJournalController deviceJournalController;
+    private RmvJournalController rmvJournalController;
     private Thread telebotServer;
     private static final Logger LOGGER = LogManager.getLogger(MainApp.class.getName());
 
@@ -67,11 +65,6 @@ public class MainApp extends Application implements MsgBox {
 
     @Override
     public void stop() {
-//        for (Stage stage: StageHelper.getStages()){
-//            if (stage.isShowing()){
-//                stage.close();
-//            }
-//        }
     }
 
     @Override
@@ -180,10 +173,8 @@ public class MainApp extends Application implements MsgBox {
                 rmvJournalStage.setTitle("RMV journal");
                 rmvJournalStage.getIcons().add(favicon);
                 rmvJournalStage.initModality(Modality.WINDOW_MODAL);
-//            rmvJournalStage.initOwner(primaryStage);
                 Scene scene = new Scene(page);
                 rmvJournalStage.setScene(scene);
-                RmvJournalController rmvJournalController;
                 rmvJournalController = loader.getController();
                 rmvJournalController.setMainApp(this);
                 rmvJournalController.setDialogStage(rmvJournalStage);
@@ -655,6 +646,10 @@ public class MainApp extends Application implements MsgBox {
 
     public DeviceJournalController getDeviceJournalController(){
         return deviceJournalController;
+    }
+
+    public RmvJournalController getRmvJournalController() {
+        return rmvJournalController;
     }
 
     public static void main(String[] args) {
