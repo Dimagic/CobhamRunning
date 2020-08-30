@@ -305,6 +305,7 @@ public class RmvJournalController {
                         rmvPI.setVisible(false);
                     }
                     ObservableList<Tests> res = rmvSearchTestsTask.getValue();
+                    FXCollections.sort(res, Comparator.comparingLong(Tests::getDateTestMilliseconds).reversed());
                     tTests.setItems(res);
                     setStatistic(res);
                 });
@@ -574,7 +575,6 @@ public class RmvJournalController {
             }
             this.updateProgress(1, 1);
             this.updateMessage("Found records: " + count);
-            FXCollections.sort(forReturn, Comparator.comparingLong(Tests::getDateTestMilliseconds).reversed());
             allTests = forReturn;
             return forReturn;
         }
