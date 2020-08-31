@@ -254,7 +254,7 @@ public class RmvUtils {
 
     public List<HashMap<String, Object>> getTestsByAsisBetweenDate(String asis, Date start, Date stop) {
         String q = String.format("select * from RMV.dbo.tbl_RMV_Header where Serial = '%s' " +
-                "and TestDate between '%s' and '%s' order by TestDate DESC", asis.toUpperCase(), start, stop);
+                "and TestDate between '%s 00:00:00' and '%s 23:59:59' order by TestDate DESC", asis.toUpperCase(), start, stop);
         List<HashMap<String, Object>> res = sendQuery(q);
         if (res.size() == 0) {
             boolean qRes = MsgBox.msgConfirm("RMV utils", String.format("Tests for system with ASIS: %s\n" +

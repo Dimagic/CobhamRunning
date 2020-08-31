@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
-    private final String VERSION = "0.1.3.12";
+    private final String VERSION = "0.1.3.13";
     private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
