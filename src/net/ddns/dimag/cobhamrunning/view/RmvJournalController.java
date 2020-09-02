@@ -196,11 +196,25 @@ public class RmvJournalController {
             @Override
             public void updateItem(String item, boolean empty) {
                 Tests rowDataItem = (Tests) getTableRow().getItem();
-                if (column.getText().equalsIgnoreCase("ASIS") && rowDataItem != null) {
+                String colName = column.getText();
+                if (colName.equalsIgnoreCase("ASIS") || colName.equalsIgnoreCase("Article")
+                        && rowDataItem != null) {
                     final ContextMenu menu = new ContextMenu();
+                    MenuItem mSearchItem = new MenuItem("Apply to search");
                     MenuItem mFilterItem = new MenuItem("Apply to filter");
-                    mFilterItem.setOnAction(event -> filterField.setText(rowDataItem.getAsis()));
-                    menu.getItems().addAll(mFilterItem);
+                    mSearchItem.setOnAction(event -> {
+                        filterField.clear();
+                        rmvSearchField.setText(colName.equalsIgnoreCase("ASIS") ?
+                                rowDataItem.getAsis(): rowDataItem.getArticle());
+                        rmvSearchRadioGroup.selectToggle(colName.equalsIgnoreCase("ASIS") ?
+                                asisSearch: articleSearch);
+                    });
+                    mFilterItem.setOnAction(event -> {
+                        rmvSearchField.clear();
+                        filterField.setText(rowDataItem.getAsis());
+                    });
+                    menu.getItems().add(mSearchItem);
+                    menu.getItems().add(mFilterItem);
                     setContextMenu(menu);
                     getContextMenu().setAutoHide(true);
                 }
@@ -316,7 +330,9 @@ public class RmvJournalController {
 
         tTests.getItems().clear();
         tMeasures.getItems().clear();
-        new Thread(rmvSearchTestsTask).start();
+        Thread t = new Thread(rmvSearchTestsTask);
+        t.start();
+
     }
 
     private void fillMeasTable(Tests currTest) {
@@ -489,6 +505,16 @@ public class RmvJournalController {
         failPercent.setText(String.format("%.2f %%", fail));
         incomplPercent.setText(String.format("%.2f %%", incompl));
 
+    }
+
+    @FXML
+    private void clearSearchField(){
+        rmvSearchField.clear();
+    }
+
+    @FXML
+    private void clearFilterField(){
+        filterField.clear();
     }
 
     public void setDialogStage(Stage dialogStage) {

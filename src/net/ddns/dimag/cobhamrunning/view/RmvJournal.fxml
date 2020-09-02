@@ -45,7 +45,7 @@
          </children>
       </GridPane>
       <Button fx:id="rmvSearchBtn" layoutX="380.0" layoutY="71.0" mnemonicParsing="false" onAction="#runSearch" prefHeight="25.0" prefWidth="110.0" text="Get today's tests" AnchorPane.leftAnchor="380.0" AnchorPane.topAnchor="70.0" />
-      <TextField fx:id="rmvSearchField" layoutX="251.0" layoutY="41.0" prefHeight="25.0" prefWidth="170.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="40.0">
+      <TextField fx:id="rmvSearchField" layoutX="251.0" layoutY="41.0" prefHeight="25.0" prefWidth="140.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="40.0">
          <tooltip>
             <Tooltip text="Enter value for search" />
          </tooltip></TextField>
@@ -53,7 +53,7 @@
       <RadioButton fx:id="articleSearch" layoutX="304.0" layoutY="45.0" mnemonicParsing="false" text="Article" AnchorPane.leftAnchor="304.0" AnchorPane.topAnchor="45.0" />
       <ProgressIndicator fx:id="rmvPI" layoutX="380.0" layoutY="15.0" prefHeight="40.0" prefWidth="40.0" progress="0.0" AnchorPane.leftAnchor="380.0" AnchorPane.topAnchor="15.0" />
       <Label layoutX="15.0" layoutY="45.0" text="Filter:" AnchorPane.leftAnchor="15.0" AnchorPane.topAnchor="75.0" />
-      <TextField fx:id="filterField" layoutX="50.0" layoutY="41.0" prefHeight="25.0" prefWidth="170.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="70.0">
+      <TextField fx:id="filterField" layoutX="50.0" layoutY="41.0" prefHeight="25.0" prefWidth="140.0" AnchorPane.leftAnchor="50.0" AnchorPane.topAnchor="70.0">
          <tooltip>
             <Tooltip text="Enter value for filter" />
          </tooltip>
@@ -93,5 +93,15 @@
             <Label fx:id="uniqueCount" GridPane.columnIndex="1" GridPane.rowIndex="1" />
          </children>
       </GridPane>
+      <Button alignment="CENTER" ellipsisString="" layoutX="195.0" layoutY="41.0" mnemonicParsing="false" onAction="#clearSearchField" prefHeight="25.0" prefWidth="25.0" text="X" AnchorPane.leftAnchor="195.0" AnchorPane.topAnchor="40.0">
+         <font>
+            <Font name="System Bold" size="8.0" />
+         </font>
+      </Button>
+      <Button alignment="CENTER" ellipsisString="" layoutX="195.0" layoutY="70.0" mnemonicParsing="false" onAction="#clearFilterField" prefHeight="25.0" prefWidth="25.0" text="X" AnchorPane.leftAnchor="195.0" AnchorPane.topAnchor="70.0">
+         <font>
+            <Font name="System Bold" size="8.0" />
+         </font>
+      </Button>
    </children>
 </AnchorPane>
