@@ -2,10 +2,15 @@ package net.ddns.dimag.cobhamrunning.utils;
 
 import net.ddns.dimag.cobhamrunning.models.Measurements;
 import net.ddns.dimag.cobhamrunning.models.Tests;
+import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -173,6 +178,35 @@ public class Utils {
         Pattern pattern = Pattern.compile("^[A-Z0-9]{4}$");
         Matcher matcher = pattern.matcher(s.toUpperCase());
         return matcher.matches();
+    }
+
+    public static void getPrinterStatus(String printerName){
+        ProcessBuilder builder = new ProcessBuilder("powershell.exe", "get-wmiobject -class win32_printer | Select-Object Name, PrinterState, PrinterStatus | where {$_.Name -eq '"+printerName+"'}");
+
+        String fullStatus = null;
+        Process reg;
+        builder.redirectErrorStream(true);
+        try {
+            reg = builder.start();
+            fullStatus = getStringFromInputStream(reg.getInputStream());
+            reg.destroy();
+        } catch (IOException e1) {
+            // TODO Auto-generated catch block
+            e1.printStackTrace();
+        }
+        System.out.print(fullStatus);
+    }
+
+    private static String getStringFromInputStream(InputStream inputStream) {
+        String foReturn = null;
+        try {
+            StringWriter writer = new StringWriter();
+            IOUtils.copy(inputStream, writer, StandardCharsets.UTF_8);
+            foReturn = writer.toString();
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+        return foReturn;
     }
 
 }

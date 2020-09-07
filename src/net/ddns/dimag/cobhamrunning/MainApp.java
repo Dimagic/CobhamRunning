@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.Set;
 
 public class MainApp extends Application implements MsgBox {
-    private final String VERSION = "0.1.3.13";
+    private final String VERSION = "0.1.3.15";
     private String currUrl;
     private Stage primaryStage;
     private Stage runningTestStage;
@@ -102,9 +102,10 @@ public class MainApp extends Application implements MsgBox {
 //            telebotServer.start();
 
 
-            if (!new File(currentSettings.getUpdate_path()).exists()) {
+            if (currentSettings.getUpdate_path().isEmpty()){
+                MsgBox.msgInfo("Update", "The path to the updates folder not set in the settings.");
+            } else if (!new File(currentSettings.getUpdate_path()).exists()) {
                 MsgBox.msgInfo("Update", String.format("Path: %s not available", currentSettings.getUpdate_path()));
-                return;
             } else {
                 Thread update = new Thread(new Updater(this, testsViewController));
                 update.start();

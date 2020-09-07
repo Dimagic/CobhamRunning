@@ -16,10 +16,8 @@ import javafx.util.StringConverter;
 import net.ddns.dimag.cobhamrunning.MainApp;
 import net.ddns.dimag.cobhamrunning.models.*;
 import net.ddns.dimag.cobhamrunning.services.DeviceService;
-import net.ddns.dimag.cobhamrunning.utils.CobhamRunningException;
-import net.ddns.dimag.cobhamrunning.utils.MsgBox;
-import net.ddns.dimag.cobhamrunning.utils.RmvUtils;
-import net.ddns.dimag.cobhamrunning.utils.Utils;
+import net.ddns.dimag.cobhamrunning.services.LabelTemplateService;
+import net.ddns.dimag.cobhamrunning.utils.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -202,6 +200,7 @@ public class RmvJournalController {
                     final ContextMenu menu = new ContextMenu();
                     MenuItem mSearchItem = new MenuItem("Apply to search");
                     MenuItem mFilterItem = new MenuItem("Apply to filter");
+                    MenuItem mPrintItem = new MenuItem("Print label");
                     mSearchItem.setOnAction(event -> {
                         filterField.clear();
                         rmvSearchField.setText(colName.equalsIgnoreCase("ASIS") ?
@@ -213,8 +212,18 @@ public class RmvJournalController {
                         rmvSearchField.clear();
                         filterField.setText(rowDataItem.getAsis());
                     });
+                    mPrintItem.setOnAction((e -> {
+//                        Utils.getPrinterStatus(mainApp.getCurrentSettings().getPrnt_combo());
+                        String templ = String.format(SystemCommands.rmvTemplateCmd,
+                                String.format("%s/%s", rowDataItem.getArticle(), rowDataItem.getAsis()),
+                                rowDataItem.getName(), rowDataItem.getTestStatus() == 0 ? "PASS": "FAIL",
+                                rowDataItem.getDateTest());
+                        ZebraPrint zebraPrint = new ZebraPrint(mainApp.getCurrentSettings().getPrnt_combo());
+                        zebraPrint.printTemplate(templ);
+                    }));
                     menu.getItems().add(mSearchItem);
                     menu.getItems().add(mFilterItem);
+                    menu.getItems().add(mPrintItem);
                     setContextMenu(menu);
                     getContextMenu().setAutoHide(true);
                 }
